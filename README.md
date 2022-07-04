@@ -39,7 +39,11 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
   ("longestSustainedActivity" : {}) // is this arbitrary? highest "1 min period" do we keep track of highest 1,5,10 min periods?
   
   
-  
+  (
+  use statistics in a 2-pass fashion to rule out outliers? or at least recognize and report outliers i.e:
+  maxIncludingOutliers: ...
+  maxOutliersEliminated: ...
+  )
   
   
 
