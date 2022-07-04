@@ -4,9 +4,20 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
 ```
 // Mockup JSON Data
 {
-  "platform" : "youtube",  // youtube & twitch are currently supported (inform how the JSON is structured
-  "videoLength" : 153,     // In seconds 
+  "platform" : "youtube",  // youtube & twitch are currently supported (inform what data/fields the JSON contains)
+  
+   "rawData" : [           // Array where each element represents a time interval     
+    {"timeStamp" : 0, "intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .}, // if interval==5, this is 0:00 - 0:05
+    {"timeStamp" : 5, "intervalActivity" : 8, "chatMessages" : 8, "superChats" : 0, "newMembers" : 0, . . .},  // if interval==5, this is 0:05 - 0:10
+    . . .                                                                                                      // etc...
+    {"timeStamp" : 1650, "intervalActivity" : 50, "chatMessages" : 48, "superChats" : 1, "newMembers" : 1, . . .}, 
+    {"timeStamp" : 1655, "intervalActivity" : 46, "chatMessages" : 46, "superChats" : 0, "newMembers" : 0, . . .},
+    . . .
+    {"timeStamp" : 2700, "intervalActivity" : 45, "chatMessages" : 41, "superChats" : 0, "newMembers" : 4, . . .},
+  ],
+  
   "timeInterval" : 5,      // Time interval in seconds (how granular the analytics are)
+  "videoLength" : 2702,    // In seconds 
   
   "totalActivity" : 2304,  // Total # of any type of message
   "averageActivity" : 15,  // Average intervalActivity
@@ -14,20 +25,24 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
   "totalChatMessages" : 2112,
   "averageChatActivity" : 15,
   
+  . . . (total/Avg superchats, newMembers, etc... (need to check YT/Twitch/Xenova docs to see what possible message types we can track are))
+  . . . (total/Average of each datapoint)
   
-  // The below fields are platform dependent... youtube might look like:
+  "maxIntervalActivity" : {"timeStamp" : 1650, "intervalActivity" : 50, "chatMessages" : 48, "superChats" : 1, "newMembers" : 1, . . .}, 
+  // Note: I imagine this will usually be toward the start of a video but I could be wrong
+  "minIntervalActivity" : {"timeStamp" : 5, "intervalActivity" : 8, "chatMessages" : 8, "superChats" : 0, "newMembers" : 0, . . .},
   
-  // total/Avg superchats, newMembers, etc... (need to check YT/Twitch/Xenova docs to see what possible message types we can track are)
+  
+  // Need to report/distinguish long sustained activity levels as well as peak activity
+  ("listOfMaxIntervals : [..., ..., ...]")
+  ("listOfMinIntervals : [..., ..., ...]")
+  ("longestSustainedActivity" : {}) // is this arbitrary? highest "1 min period" do we keep track of highest 1,5,10 min periods?
   
   
-  "rawData" : [            // Array where each element represents a time interval
-    {"intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .}, // if interval==5, this is 0:00 - 0:05
-    {"intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .}, // if interval==5, this is 0:05 - 0:10
-    {"intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .}, // etc...
-    {"intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .},
-    . . .
-    {"intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .},
-  ]
+  
+  
+  
+
 }
 
 
