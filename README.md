@@ -5,6 +5,7 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
 // Mockup JSON Data
 {
   "platform" : "youtube",  // youtube & twitch are currently supported (inform what data/fields the JSON contains)
+  "timeInterval" : 5,      // Time interval in seconds (how granular the analytics are)
   
    "rawData" : [           // Array where each element represents a time interval     
     {"timeStamp" : 0, "intervalActivity" : 10, "chatMessages" : 8, "superChats" : 0, "newMembers" : 2, . . .}, // if interval==5, this is 0:00 - 0:05
@@ -16,7 +17,6 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
     {"timeStamp" : 2700, "intervalActivity" : 45, "chatMessages" : 41, "superChats" : 0, "newMembers" : 4, . . .},
   ],
   
-  "timeInterval" : 5,      // Time interval in seconds (how granular the analytics are)
   "videoLength" : 2702,    // In seconds 
   
   "totalActivity" : 2304,  // Total # of any type of message
