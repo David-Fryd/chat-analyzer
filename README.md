@@ -46,6 +46,17 @@ JSON from Xenova's chat-downloader to JSON analytic data to be used for visualiz
   )
   
   
+  // User specific data too
+  
+  "uniqueChatters" : 1460
+  
+  // Tracks the [specified number] chatters with the most messages
+  "mostChatted" : [
+    {"numChats" : 120, "author" : {. . .(verbatim author info from the chat-downloader) }}
+  
+  ]
+  
+  
 
 }
 
