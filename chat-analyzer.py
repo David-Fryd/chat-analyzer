@@ -101,7 +101,6 @@ def run(url: str, interval: int):
     chatlog: Chat = download_chatlog(url)
     check_chatlog_supported(chatlog, url)
 
-
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
     duration = chatlog.duration
@@ -121,9 +120,29 @@ def run(url: str, interval: int):
 
     # For each message of all types in the chatlog:
     for idx, msg in enumerate(chatlog):
-        print (msg['message'])
+        # For debug/tracking
+        if(idx%1000==0 and idx!=0):
+            print("Processed %d messages" % (idx))
+            chatAnalytics.samples.append(msg)
 
+        # TODO: Do we keep track of current sample here or in chatAnalytics?
+        chatAnalytics.process_message(msg)
 
+        
+        # TODO: We have to add in appropriate amount of empty samples between two messages that are more than a sample length apart
+
+        # print (msg['message'])
+
+    # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
+    # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
+    # 
+    # if there is a period with 0 chats in a normal stream, we want to explicitly record that period as 0
+
+    # We still take a sample so we 
+        
+
+    print(f"total activity: {chatAnalytics.totalActivity}")
+    print(chatAnalytics)
     # TODO: When returned, the method that gets it should decide how to output it based on CLI
     return chatAnalytics
 
@@ -134,10 +153,10 @@ def run(url: str, interval: int):
 
 # Some testing URLs
 # TODO: Replace url with argparse arg
-# url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample)
+url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample)
 # url = 'asdds.com/a/b/c/d' # (error) invalid URL
 # url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
-url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
+# url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
 # url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
 
 run(url=url, interval=10)

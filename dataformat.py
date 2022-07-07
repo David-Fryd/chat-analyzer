@@ -139,13 +139,51 @@ class ChatAnalytics(ABC):
     averageChatMessages: int = 0
    
     uniqueChatters: int = 0
+
+    # TODO: Need to keep track of current sample internally
+    # currSample
+    """
+    #TODO: THIS IS THE NEXT THING TO TACKLE!
+
+    Logic in process_message should be:
+
+    If the receieved message should be in the sample we are currently building, add it to that
+        # TODO: implement an addMsg() method to sample to easily add a sample object from a msg
+        #            ^ is NOT the same as a sample constructor b/c there should be multiple msgs in a single sample
+
+    If it doesnt belong in the current sample, build a new empty sample at the next appropriate timeframe
+
+        If the new message's timestamp STILL doesn't belong in the curr sample, increment again to a new empty sample.
+        We increment until it fits then add it to the appropriate sample
     
+
+
+    """
+
+
     def process_message(self, msg):
         """Given a msg object from chat, update appropriate variables based on the chat"""
-        print(f"parent specific fields process msg {msg}")
-        raise NotImplementedError
+        print(f"TODO: parent specific fields process msg {msg}")
         # TODO: Implement:
+
+        self.totalActivity += 1 # Every type of message contributes to total activity
     
+
+
+
+# print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
+
+# Track highest engagement, instead raw number of messages per interval, number of unique chatters 
+# per interval
+
+# Track average number of chats sent by a single user
+
+# chatLogJSONFile.close()
+
+# numberofchattersmakingtheirfirstchat of the stream
+# numberOfChattersThatSpokeJustNowThatHaventSpokenInPastXInterval . . .
+
+
 
 
     # def __init__(self):
@@ -203,6 +241,25 @@ class TwitchChatAnalytics(ChatAnalytics):
         print(f"this gets called to update the twitch specific fields {msg}")
         raise NotImplementedError
         # TODO: Implement:
+
+
+
+
+# highlights
+
+# ADVANCED TODO: Semantic analysis using DL
+
+#ad : for creators:
+#   dont forget to subscribe effective?
+
+# ad for editors:
+
+# potential creators:
+#        pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
+
+# researchers:
+#       
+
 
 
 
