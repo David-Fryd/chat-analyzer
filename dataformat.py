@@ -91,10 +91,10 @@ class Sample():
     avgChatMessagesPerSecond: float = 0
     avgUniqueUsersPerSecond: float = 0
 
-    def post_process(self):
+    def sample_post_process(self):
         """
         After we have finished adding messages to a particular sample (moving on to the next sample),
-        we call post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
+        we call sample_post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
         """
         self.avgActivityPerSecond = self.activity/self.sampleDuration
         self.avgChatMessagesPerSecond = self.chatMessages/self.sampleDuration
@@ -241,29 +241,6 @@ class ChatAnalytics(ABC):
 
     # TODO: Need to keep track of current sample internally
     # currSample
-    """
-    #TODO: THIS IS THE NEXT THING TO TACKLE!
-
-    Logic in process_message should be:
-
-    If the receieved message should be in the sample we are currently building, add it to that
-        # TODO: implement an addMsg() method to sample to easily add a sample object from a msg
-        #            ^ is NOT the same as a sample constructor b/c there should be multiple msgs in a single sample
-
-    If it doesnt belong in the current sample, build a new empty sample at the next appropriate timeframe
-
-        If the new message's timestamp STILL doesn't belong in the curr sample, increment again to a new empty sample.
-        We increment until it fits then add it to the appropriate sample
-
-    # TODO: Alternatively, find a way to replace a long string of empty samples with a start/end empty sample
-            think in the morning with more sleep
-    
-
-    Need to ensure that the last sample(s) gets added automatically when there are no more chats
-        Think of case where there is one chat very early on in stream and 0 chats for the rest
-        of stream
-
-    """
 
 
     def process_message(self, msg):
@@ -302,7 +279,42 @@ class ChatAnalytics(ABC):
         # We still take a sample so we 
 
         # option to enable run-length encoding
+            """
+        #TODO: THIS IS THE NEXT THING TO TACKLE!
 
+        Logic in process_message should be:
+
+        If the receieved message should be in the sample we are currently building, add it to that
+            # TODO: implement an addMsg() method to sample to easily add a sample object from a msg
+            #            ^ is NOT the same as a sample constructor b/c there should be multiple msgs in a single sample
+
+        If it doesnt belong in the current sample, build a new empty sample at the next appropriate timeframe
+
+            If the new message's timestamp STILL doesn't belong in the curr sample, increment again to a new empty sample.
+            We increment until it fits then add it to the appropriate sample
+
+        # TODO: Alternatively, find a way to replace a long string of empty samples with a start/end empty sample
+                think in the morning with more sleep
+        
+
+        Need to ensure that the last sample(s) gets added automatically when there are no more chats
+            Think of case where there is one chat very early on in stream and 0 chats for the rest
+            of stream
+
+        """
+
+
+    def chatlog_post_process(self):
+        """
+        After we have finished iterating through the chatlog and constructing all of the samples,
+        we call chatlog_post_process() to process the cumulative data points (so we don't have to do this every time we add a sample)
+        """
+        self.overallAvgActivityPerSecond = self.totalActivity/self.duration
+        self.overallAvgChatMessagesPerSecond = self.totalChatMessages/self.duration
+        self.overallAvgUniqueChattersPerSecond = self.totalUniqueChatters/self.duration
+        
+
+    # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
 
     def process_chatlog(self, chatlog: Chat):
         """
@@ -316,11 +328,11 @@ class ChatAnalytics(ABC):
         for idx, msg in enumerate(chatlog):
             # For debug/tracking
             if(idx%1000==0 and idx!=0):
-                print("Processed %d messages" % (idx))
-
+                print("Processed %d messages \t| (%s / %s)" % (idx, msg['time_text'], seconds_to_time(self.duration)))
             self.process_message(msg)
 
         # TODO: Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
+        self.chatlog_post_process()
 
 
 @dataclass
