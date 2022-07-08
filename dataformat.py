@@ -1,7 +1,11 @@
 from argparse import ArgumentTypeError
 from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
+from chat_downloader.sites.common import Chat
 from typing import List
+import logging
+
+from chat_downloader.utils.core import seconds_to_time
 
 # TODO:
 # The platforms we currently support downloading from.
@@ -10,23 +14,102 @@ YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
+# NOTE: Yes CamelCased fields are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
+
+"""
+Xenonva's chat-downloader stores each message (a 'chat item' in their vernacular)
+as a dictionary. (*almost) All messages contain certain fields in common, 
+
+See for more info: https://chat-downloader.readthedocs.io/en/latest/items.html#chat-item-fields
+
+All messages regardless of their type are considered activity.
+
+"""
+
+
 @dataclass
 class Sample():
     #TODO: Implement
     """
-    Class that contains...
+    Class that contains data of a specific time interval of the chat
     
     ---
 
     Attributes:
-    
-    """
-    duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
+        [Defined when class Initialized]
+        startTime: float
+            The start time (in seconds) corresponding to a sample.
+        endTime: float
+            The end time (in seconds) corresponding to a sample.
+        
+        [Automatically Defined on init]
+        startTime_text: str
+            The start time represented in text format (i.e. hh:mm:ss)
+        endTime_text: str
+            The end time represented in text format (i.e. hh:mm:ss)
+        sampleDuration: float
+            The duration (in seconds) of the sample (end-start)
+            NOTE: Should be == to the selected interval in all except the last sample if the total duration of the chat is not divisible by the interval
 
+        [Defined w/ default and modified DURING analysis of sample]
+        activity: int
+            The total number of messages/things (of any type!) that appeared in chat within the start/endTime of this sample.
+            Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
+        chatMessages: int
+            The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
+            NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
+            because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
+        uniqueUsers: int
+            The total number of unique users that sent a chat message
+
+        [Defined w/ default and modified AFTER analysis of sample]
+        avgActivityPerSecond: float
+            The average activity per second across this sample interval. (activity/sampleDuration)
+        avgChatMessagesPerSecond: float
+            The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)
+        avgUniqueUsersPerSecond: float
+            The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)
+
+    """
+
+    # Defined when class Initialized
+    startTime: float
+    endTime: float
+
+    # Automatically Defined on init
+    sampleDuration: float
+    startTime_text: str
+    endTime_text: str 
+
+    # Defined w/ default and modified DURING analysis of sample
+    activity: int = 0 
+    chatMessages: int = 0
+    uniqueUsers: int = 0
+
+    # Defined w/ default and modified AFTER analysis of sample
+    avgActivityPerSecond: float = 0
+    avgChatMessagesPerSecond: float = 0
+    avgUniqueUsersPerSecond: float = 0
+
+    def post_process(self):
+        """
+        After we have finished adding messages to a particular sample (moving on to the next sample),
+        we call post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
+        """
+        self.avgActivityPerSecond = self.activity/self.sampleDuration
+        self.avgChatMessagesPerSecond = self.chatMessages/self.sampleDuration
+        self.avgUniqueUsersPerSecond = self.uniqueUsers/self.sampleDuration
+        
+
+    # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
+
+
+    # TODO: activity per second reported on front end like:     activity per second (totalActivityInSample)
 
     def __post_init__(self):
-            # self.length = self.end.timeStamp? - self.start.timeStamp? 
-            raise NotImplementedError 
+            self.startTime_text = seconds_to_time(self.startTime)
+            self.endTime_text = seconds_to_time(self.endTime)
+            self.sampleDuration = self.endTime - self.startTime
 
 @dataclass
 class Highlight():
@@ -45,6 +128,10 @@ class Highlight():
     """
     start: Sample
     end: Sample
+
+    # TODO: Figure out best fields to store depending on how we decide to use highlights later
+
+
     length: int = field(init=False)
 
     def __post_init__(self):
@@ -72,11 +159,11 @@ class ChatAnalytics(ABC):
     ---
 
     Attributes:
-       [Defined when Initialized]
-        duration: str
-            The duration of the associated video in seconds. Message times correspond to the video times
+       [Defined when class Initialized]
+        duration: float
+            The total duration (in seconds) of the associated video. Message times correspond to the video times
         interval: int
-            The time interval (in seconds) that a single sample of data uses. (How granular the analytics are)
+            The time interval (in seconds) at which to compress datapoints into samples. (Duration of the samples/How granular the analytics are)
             i.e. at interval=10, each sample's fields contain data about 10 seconds of cumulative data.
             *Only exception is the last sample which may contain less than interval. #TODO: Word this line more clearly
             #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
@@ -86,27 +173,29 @@ class ChatAnalytics(ABC):
             Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
             While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
 
-        [Defined w/ default and modified during analysis]
+        [Defined w/ default and modified DURING analysis]
         samples: List[Sample]
             An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
-            Each sample has specific data corresponding to a time interval of the vid. See 'class Sample()'
+            Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
         totalActivity: int
             The total number of messages/things (of any type!) that appeared in chat. (Sum of intervalActivity from all samples) 
             Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
-        averageActivity: int
-            The average intervalActivity for all samples. (totalActivity/len(samples))
         totalChatMessages: int
             The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
             NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
             because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
+        totalUniqueUsers: int
+            The total number of unique users that sent a chat message (human users that sent at least one traditional chat)
 
+        [Defined w/ default and modified AFTER analysis]
+        overallAvgActivityPerSecond: float
+            The average activity per second across the whole chatlog. (totalActivity/totalDuration)
+        overallAvgChatMessagesPerSecond: float
+            The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
+        overallAvgUniqueUsersPerSecond: float
+            The average number of chat messages per second across the whole chatlog. (totalUniqueChatters/totalDuration)
 
-        # TODO: Implement
-        uniqueChatters: int
-            The total number of unique chatters that sent a 'chat message' during the stream.
-            (i.e. human users that sent a traditional chat)
-
-        # TODO: average chats per viewer
+        --- TODO: Below not yet implemented ---
 
         bestChatters:
             #TODO: Figure out how to type-define (or not) the author of a message, and how we want to store them in a list
@@ -119,26 +208,36 @@ class ChatAnalytics(ABC):
         # TODO: Add
             longest-1-min-sustained, 5 min, etc... and similar super-interval temporaily aware anlysis
 
-        # NOT YET IMPLEMENTED: [Determined after recalculation pass (2nd pass over the dataclass, not the raw data)]
+
+        # Fields only calculated if we want advanced statistics: TODO
+        # TODO: average chats per viewer
+
+        # TODO: Median chats per viewer
     """
-    # Defined when Initialized
-    duration: int
+    # Defined when class Initialized
+    duration: float
     interval: int
 
     # Automatically Defined on init
     # Because platform has default in the child class, must come after non-defaults above
     platform: str
 
-    # Defined w/ default and modified during analysis
+    # Defined w/ default and modified DURING analysis
     samples: List[Sample] = field(default_factory=list)
 
     totalActivity: int = 0
-    averageActivity: int = 0
-    
     totalChatMessages: int = 0
-    averageChatMessages: int = 0
-   
-    uniqueChatters: int = 0
+    totalUniqueChatters: int = 0
+
+    # Defined w/ default and modified AFTER analysis
+    overallAvgActivityPerSecond: float = 0
+    overallAvgChatMessagesPerSecond: float = 0
+    overallAvgUniqueChattersPerSecond: float = 0
+
+
+    # Internal Fields used for calculation but are #TODO: NOT EXPORTED during json dump
+    _userChats: dict = field(default_factory=dict) # author['id'] -> numChats
+    _currentSample: Sample = None # field(default_factory=None)
 
     # TODO: Need to keep track of current sample internally
     # currSample
@@ -155,20 +254,135 @@ class ChatAnalytics(ABC):
 
         If the new message's timestamp STILL doesn't belong in the curr sample, increment again to a new empty sample.
         We increment until it fits then add it to the appropriate sample
+
+    # TODO: Alternatively, find a way to replace a long string of empty samples with a start/end empty sample
+            think in the morning with more sleep
     
 
+    Need to ensure that the last sample(s) gets added automatically when there are no more chats
+        Think of case where there is one chat very early on in stream and 0 chats for the rest
+        of stream
 
     """
 
 
     def process_message(self, msg):
-        """Given a msg object from chat, update appropriate variables based on the chat"""
-        print(f"TODO: parent specific fields process msg {msg}")
+        """Given a msg object from chat, update appropriate statistics based on the chat"""
+        # print(f"TODO: parent specific fields process msg")
+        # print(msg)
         # TODO: Implement:
 
+        # also need to check that the sample we are about to create fits within the time of the vid, if not create a sample of smaller duration
+        # if(self._currentSample.endTime) # TODO NEXT
+
         self.totalActivity += 1 # Every type of message contributes to total activity
+
+        if(msg['message_type']=='text_message'): # text_message is a traditional chat
+            self.totalChatMessages += 1
+
+            if 'author' in msg:
+                author = msg['author']
+                authID = author['id']
+                self._userChats[authID] = self._userChats[authID] + 1 if authID in self._userChats else 1 # TODO: in this else, handle the logic for first user message
+
+
+        
+        
+        # If the sample is added, perform updated calculations to avg and stuff.
+                    
+        # TODO: We have to add in appropriate amount of empty samples between two messages that are more than a sample length apart
+        # print (msg['message'])
+
+
+        # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
+        # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
+        # 
+        # if there is a period with 0 chats in a normal stream, we want to explicitly record that period as 0
+
+        # We still take a sample so we 
+
+        # option to enable run-length encoding
+
+
+    def process_chatlog(self, chatlog: Chat):
+        """
+        Iterates through the whole chatlog and produces the analytical data
+
+        :param chatlog: The chatlog we have downloaded 
+        :type chatlog: chat_downloader.sites.common
+
+        """
+        # For each message of all types in the chatlog:
+        for idx, msg in enumerate(chatlog):
+            # For debug/tracking
+            if(idx%1000==0 and idx!=0):
+                print("Processed %d messages" % (idx))
+
+            self.process_message(msg)
+
+        # TODO: Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
+
+
+@dataclass
+class YoutubeChatAnalytics(ChatAnalytics):
+    """
+    Extension of the ChatAnalytics class, meant to contain data that all chats have
+    and data specific to YouTube chats.
+
+    ---
+
+    Attributes:
+        [See ChatAnalytics class for common fields]
+        # TODO: Add youtube specific fields. Superchats, etc...
+    """
+
+    platform: str = YOUTUBE_NETLOC
+    
+    def process_message(self, msg):
+        """Given a msg object from chat, update common fields and youtube-specific fields"""
+        super().process_message(msg)
+        # print(f"TODO: youtube specific fields process msg")
+        # print(f"this gets called to update the youtube specific fields ")
+        # print(msg)
+        # raise NotImplementedError
+        # TODO: Implement:
+
+@dataclass
+class TwitchChatAnalytics(ChatAnalytics):
+    """
+    Extension of the ChatAnalytics class, meant to contain data that all chats have
+    and data specific to Twitch chats.
+
+    ---
+
+    Attributes:
+        [See ChatAnalytics class for common fields]
+        # TODO: Add twitch specific fields. Superchats, etc...
+    """
+
+    platform: str = TWITCH_NETLOC
+
+    def process_message(self, msg):
+        """Given a msg object from chat, update common fields and twitch-specific fields"""
+        super().process_message(msg)
+        print(f"this gets called to update the twitch specific fields {msg}")
+        raise NotImplementedError
+        # TODO: Implement:
+
+        # TODO: Detect local maxima spikes (even if below average) (sharp & sustained changes from one sample to next)
     
 
+
+        # msg[NORMAL_MESSAGE[TWITCH_NETLOC]]
+        # msg["text_message"]
+
+
+        # # TODO: define mapping from:
+        # #   NORMAL_MESSAGE: {
+        # #       YOUTUBE_NETLOC : "text_message"  
+        # #       TWITCH_NETLOC : "text_message"                  
+        # # }
+        # #   
 
 
 # print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
@@ -197,50 +411,6 @@ class ChatAnalytics(ABC):
     # def toJSON():
     #     # TODO: Convert the snake case fields to camel case
     #     print("TODO: Implement")
-
-@dataclass
-class YoutubeChatAnalytics(ChatAnalytics):
-    """
-    Extension of the ChatAnalytics class, meant to contain data that all chats have
-    and data specific to YouTube chats.
-
-    ---
-
-    Attributes:
-        [See ChatAnalytics class for common fields]
-        # TODO: Add youtube specific fields. Superchats, etc...
-    """
-
-    platform: str = YOUTUBE_NETLOC
-    
-    def process_message(self, msg):
-        """Given a msg object from chat, update common fields and youtube-specific fields"""
-        super().process_message(msg)
-        print(f"this gets called to update the youtube specific fields {msg}")
-        raise NotImplementedError
-        # TODO: Implement:
-
-@dataclass
-class TwitchChatAnalytics(ChatAnalytics):
-    """
-    Extension of the ChatAnalytics class, meant to contain data that all chats have
-    and data specific to Twitch chats.
-
-    ---
-
-    Attributes:
-        [See ChatAnalytics class for common fields]
-        # TODO: Add twitch specific fields. Superchats, etc...
-    """
-
-    platform: str = TWITCH_NETLOC
-
-    def process_message(self, msg):
-        """Given a msg object from chat, update common fields and twitch-specific fields"""
-        super().process_message(msg)
-        print(f"this gets called to update the twitch specific fields {msg}")
-        raise NotImplementedError
-        # TODO: Implement:
 
 
 

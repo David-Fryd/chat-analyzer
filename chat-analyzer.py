@@ -14,6 +14,8 @@ def download_chatlog(url: str):
     """
     Downloads and returns the chat log using Xenonva's chat-downloader
     
+    :param url: The URL of the past stream/VOD to download the chat from
+    :param type: str
     :returns: The chatlog we have downloaded
     :rtype: chat_downloader.sites.common.Chat
     """
@@ -90,6 +92,8 @@ def run(url: str, interval: int):
     :type url: str
     :param interval: The size of each sample in seconds (granularity of the analytics)
     :type interval: int
+
+    #TODO: Define return(s) and rtype docs
     
     """
 
@@ -123,15 +127,20 @@ def run(url: str, interval: int):
         # For debug/tracking
         if(idx%1000==0 and idx!=0):
             print("Processed %d messages" % (idx))
-            chatAnalytics.samples.append(msg)
 
         # TODO: Do we keep track of current sample here or in chatAnalytics?
         chatAnalytics.process_message(msg)
-
+        
         
         # TODO: We have to add in appropriate amount of empty samples between two messages that are more than a sample length apart
 
         # print (msg['message'])
+
+    # TODO:
+    # After having processed the raw messages, process the samples/metadata we produced to define the rest of the data/metadata
+    # chatAnalytics.process_samples()
+
+    
 
     # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
     # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
@@ -142,6 +151,10 @@ def run(url: str, interval: int):
         
 
     print(f"total activity: {chatAnalytics.totalActivity}")
+
+    # Temporary null of the internal variables here so they arent printed, TODO: REMOVE
+    chatAnalytics._userChats = None
+
     print(chatAnalytics)
     # TODO: When returned, the method that gets it should decide how to output it based on CLI
     return chatAnalytics
