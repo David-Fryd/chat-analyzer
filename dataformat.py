@@ -65,7 +65,7 @@ class Sample():
 
         [Defined w/ default and modified AFTER analysis of sample]
         uniqueUsers: int
-            The total number of unique users that sent a chat message
+            The total number of unique users that sent a chat message (len(self._userChats))
         avgActivityPerSecond: float
             The average activity per second across this sample interval. (activity/sampleDuration)
         avgChatMessagesPerSecond: float
@@ -204,16 +204,16 @@ class ChatAnalytics(ABC):
             The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
             NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
             because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
-        totalUniqueUsers: int
-            The total number of unique users that sent a chat message (human users that sent at least one traditional chat)
 
         [Defined w/ default and modified AFTER analysis]
+        totalUniqueUsers: int
+            The total number of unique users that sent a chat message (human users that sent at least one traditional chat)
         overallAvgActivityPerSecond: float
             The average activity per second across the whole chatlog. (totalActivity/totalDuration)
         overallAvgChatMessagesPerSecond: float
             The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
         overallAvgUniqueUsersPerSecond: float
-            The average number of chat messages per second across the whole chatlog. (totalUniqueChatters/totalDuration)
+            The average number of chat messages per second across the whole chatlog. (totalUniqueUsers/totalDuration)
 
         --- TODO: Below not yet implemented ---
 
@@ -247,12 +247,12 @@ class ChatAnalytics(ABC):
 
     totalActivity: int = 0
     totalChatMessages: int = 0
-    totalUniqueChatters: int = 0
+    totalUniqueUsers: int = 0
 
     # Defined w/ default and modified AFTER analysis
     overallAvgActivityPerSecond: float = 0
     overallAvgChatMessagesPerSecond: float = 0
-    overallAvgUniqueChattersPerSecond: float = 0
+    overallAvgUniqueUsersPerSecond: float = 0
 
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -377,9 +377,12 @@ class ChatAnalytics(ABC):
 
         Also removes the internal fields that don't need to be output in the JSON object.
         """
+
+        self.totalUniqueUsers = len(self._overallUserChats)
+
         self.overallAvgActivityPerSecond = self.totalActivity/self.duration
         self.overallAvgChatMessagesPerSecond = self.totalChatMessages/self.duration
-        self.overallAvgUniqueChattersPerSecond = self.totalUniqueChatters/self.duration
+        self.overallAvgUniqueUsersPerSecond = self.totalUniqueUsers/self.duration
 
 
         # TODO: Calculate more advanced fields like "averageChatsPerUser"
@@ -459,8 +462,8 @@ class TwitchChatAnalytics(ChatAnalytics):
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
         super().process_message(msg)
-        print(f"this gets called to update the twitch specific fields {msg}")
-        raise NotImplementedError
+        # print(f"this gets called to update the twitch specific fields {msg}")
+        # raise NotImplementedError
         # TODO: Implement:
 
         # TODO: Detect local maxima spikes (even if below average) (sharp & sustained changes from one sample to next)
