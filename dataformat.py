@@ -31,16 +31,17 @@ All messages regardless of their type are considered activity.
 class Sample():
     #TODO: Implement
     """
-    Class that contains data of a specific time interval of the chat
+    Class that contains data of a specific time interval of the chat.
+    Messages will be included in a sample if they are contained within [startTime, endTime)
     
     ---
 
     Attributes:
         [Defined when class Initialized]
         startTime: float
-            The start time (in seconds) corresponding to a sample.
+            The start time (inclusive) (in seconds) corresponding to a sample.
         endTime: float
-            The end time (in seconds) corresponding to a sample.
+            The end time (exclusive) (in seconds) corresponding to a sample.
         
         [Automatically Defined on init]
         startTime_text: str
@@ -59,10 +60,12 @@ class Sample():
             The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
             NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
             because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
-        uniqueUsers: int
-            The total number of unique users that sent a chat message
+        firstTimeChatters: int
+            The total number of users who sent their first message of the whole stream during this sample interval
 
         [Defined w/ default and modified AFTER analysis of sample]
+        uniqueUsers: int
+            The total number of unique users that sent a chat message
         avgActivityPerSecond: float
             The average activity per second across this sample interval. (activity/sampleDuration)
         avgChatMessagesPerSecond: float
@@ -76,29 +79,46 @@ class Sample():
     startTime: float
     endTime: float
 
-    # Automatically Defined on init
-    sampleDuration: float
-    startTime_text: str
-    endTime_text: str 
+    # Automatically re-defined on post-init
+    sampleDuration: float = -1
+    startTime_text: str = ''
+    endTime_text: str = ''
 
     # Defined w/ default and modified DURING analysis of sample
     activity: int = 0 
     chatMessages: int = 0
-    uniqueUsers: int = 0
+    firstTimeChatters: int = 0
 
     # Defined w/ default and modified AFTER analysis of sample
+    uniqueUsers: int = 0
     avgActivityPerSecond: float = 0
     avgChatMessagesPerSecond: float = 0
     avgUniqueUsersPerSecond: float = 0
+
+    # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
+    _userChats: dict = field(default_factory=dict) # author['id'] -> numChats for current sample
 
     def sample_post_process(self):
         """
         After we have finished adding messages to a particular sample (moving on to the next sample),
         we call sample_post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
+
+        Also removes the internal fields that don't need to be output in the JSON object.
+
         """
-        self.avgActivityPerSecond = self.activity/self.sampleDuration
-        self.avgChatMessagesPerSecond = self.chatMessages/self.sampleDuration
-        self.avgUniqueUsersPerSecond = self.uniqueUsers/self.sampleDuration
+        self.uniqueUsers = len(self._userChats)
+
+        if self.sampleDuration > 0:
+            self.avgActivityPerSecond = self.activity/self.sampleDuration
+            self.avgChatMessagesPerSecond = self.chatMessages/self.sampleDuration
+            self.avgUniqueUsersPerSecond = self.uniqueUsers/self.sampleDuration
+        else:
+            # TODO: Look at the chat-analyzer log function and use that instead for consistency?
+            logging.warning(f"Sample was created with duration < 0 (duration: {self.sampleDuration}): {self}")
+
+        # TODO: Remove this temporary measure
+        # del self._userChats # TODO: Fix, it doesn't work!
+        self._userChats.clear()
         
 
     # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
@@ -161,7 +181,7 @@ class ChatAnalytics(ABC):
     Attributes:
        [Defined when class Initialized]
         duration: float
-            The total duration (in seconds) of the associated video. Message times correspond to the video times
+            The total duration (in seconds) of the associated video/media. Message times correspond to the video times
         interval: int
             The time interval (in seconds) at which to compress datapoints into samples. (Duration of the samples/How granular the analytics are)
             i.e. at interval=10, each sample's fields contain data about 10 seconds of cumulative data.
@@ -235,33 +255,79 @@ class ChatAnalytics(ABC):
     overallAvgUniqueChattersPerSecond: float = 0
 
 
-    # Internal Fields used for calculation but are #TODO: NOT EXPORTED during json dump
-    _userChats: dict = field(default_factory=dict) # author['id'] -> numChats
+    # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
+    _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
     _currentSample: Sample = None # field(default_factory=None)
 
-    # TODO: Need to keep track of current sample internally
-    # currSample
+    def create_new_sample(self):
+        """
+        Post-processes the previous sample , and appends+creates a new sample
+        following the previous sample sequentially. If a previous sample doesn't exist, 
+        creates the first sample.
+        
+        NOTE: In the current implementation, there could exist consecutive samples with 0 activity 
+        (or identical, but less likely), which are easily compressed. However, this uncompressed approach
+        makes naively graphing the points easier, which is a primary objective of the output of this program.
+
+        TODO: Implement an option to enable run-length encoding/compression:
+                A sequence of identical no-activity samples could eventually be compressed
+                into 1 or 3 samples. (3 sample approach helps preserve naive graphing):
+                    1 sample apprch: 1 sample consumes all of the consecutive identical samples and modifies
+                                        start/end/duration accordingly
+                    3 sample apprch: 3 sample approach preserves first and last sample, and combines
+                                        intermediate samples. That way the slope into/out of the silence
+                                        interval is preserved.
+                    Other potential options, but these are the ones we have considered that are not terribly complex
+        """
+
+        # We need a new sample, process the last one and create a new sample
+        new_sample_start_time = 0 # NOTE: Some chatlogs have chats that start at negative time samples. (Presumably chats right before the video starts). We ignore these for now
+        if(self._currentSample != None):
+            # process the last sample before creating new one (should have already been appended on creation)
+            self._currentSample.sample_post_process()
+            new_sample_start_time = self._currentSample.endTime
+        
+        # New sample end time will not extend past the length of the video
+        new_sample_end_time = min(new_sample_start_time + self.interval, self.duration)
+
+        self._currentSample = Sample(startTime=new_sample_start_time, endTime=new_sample_end_time)
+        self.samples.append(self._currentSample)
 
 
     def process_message(self, msg):
         """Given a msg object from chat, update appropriate statistics based on the chat"""
-        # print(f"TODO: parent specific fields process msg")
-        # print(msg)
-        # TODO: Implement:
 
-        # also need to check that the sample we are about to create fits within the time of the vid, if not create a sample of smaller duration
-        # if(self._currentSample.endTime) # TODO NEXT
+        msg_time_in_seconds = msg['time_in_seconds']
 
-        self.totalActivity += 1 # Every type of message contributes to total activity
+        if(msg_time_in_seconds < 0 or msg_time_in_seconds > self.duration):
+            return # If the message comes before or after the duration of associated media, ignore the msg and don't process it
+
+        # Before processing the msg, make sure that msg belongs with the current sample
+        if(self._currentSample == None or msg_time_in_seconds >= self._currentSample.endTime):
+            self.create_new_sample() #TODO Pass a NETLOC, so we can create the correct type of subsample
+
+        # TODO: replace totalActivity/totals/overall with incrementing samples, then add sample stuff
+        #       to the total once at the end to prevent unnecessary code duplication
+
+        # Every type of message contributes to total activity
+        self.totalActivity += 1
+        self._currentSample.activity += 1
 
         if(msg['message_type']=='text_message'): # text_message is a traditional chat
             self.totalChatMessages += 1
+            self._currentSample.chatMessages += 1
 
             if 'author' in msg:
                 author = msg['author']
                 authID = author['id']
-                self._userChats[authID] = self._userChats[authID] + 1 if authID in self._userChats else 1 # TODO: in this else, handle the logic for first user message
+                if authID in self._overallUserChats:
+                    self._overallUserChats[authID] = self._overallUserChats[authID] + 1
+                else:
+                    self._overallUserChats[authID] = 1
+                    self._currentSample.firstTimeChatters += 1
 
+                # keeps track of unique user per *sample*
+                self._currentSample._userChats[authID] = self._currentSample._userChats[authID] + 1 if authID in self._currentSample._userChats else 1
 
         
         
@@ -307,11 +373,26 @@ class ChatAnalytics(ABC):
     def chatlog_post_process(self):
         """
         After we have finished iterating through the chatlog and constructing all of the samples,
-        we call chatlog_post_process() to process the cumulative data points (so we don't have to do this every time we add a sample)
+        we call chatlog_post_process() to process the cumulative data points (so we don't have to do this every time we add a sample).
+
+        Also removes the internal fields that don't need to be output in the JSON object.
         """
         self.overallAvgActivityPerSecond = self.totalActivity/self.duration
         self.overallAvgChatMessagesPerSecond = self.totalChatMessages/self.duration
         self.overallAvgUniqueChattersPerSecond = self.totalUniqueChatters/self.duration
+
+
+        # TODO: Calculate more advanced fields like "averageChatsPerUser"
+
+        # Process and remove the final sample
+        self._currentSample.sample_post_process()
+        # TODO del doesnt work because it messes with the internal representation of the object which pisses off output for some reason, look into this...
+        # del self._currentSample
+        # NOTE: delattr didn't do what was required on first attempt but perhaps it was employed incorrectly
+
+        # Remove all other internal variables not suitable for output TODO fix del and do it
+        # del self._overallUserChats
+        # del self._currentSample
         
 
     # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
@@ -329,6 +410,7 @@ class ChatAnalytics(ABC):
             # For debug/tracking
             if(idx%1000==0 and idx!=0):
                 print("Processed %d messages \t| (%s / %s)" % (idx, msg['time_text'], seconds_to_time(self.duration)))
+
             self.process_message(msg)
 
         # TODO: Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
