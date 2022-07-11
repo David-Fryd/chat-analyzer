@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentTypeError
 from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
@@ -29,7 +30,8 @@ All messages regardless of their type are considered activity.
 
 @dataclass
 class Sample():
-    #TODO: Implement
+    # TODO: Implement subclasses
+    # TODO: Implement max-per-sample in addition to average for other fields
     """
     Class that contains data of a specific time interval of the chat.
     Messages will be included in a sample if they are contained within [startTime, endTime)
@@ -193,7 +195,17 @@ class ChatAnalytics(ABC):
             Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
             While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
 
+        [Automatically re-defined on post-init]
+        duration_text: str
+            String representation of the media duration time.
+        interval_text: str
+            String representation of the interval time.
+
         [Defined w/ default and modified DURING analysis]
+        mediaTitle: str
+            The title of the media associated with the chatlog.
+        mediaURL: str
+            The link to the media associated with the chatlog (url that it was origianlly downloaded from).
         samples: List[Sample]
             An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
             Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
@@ -213,7 +225,7 @@ class ChatAnalytics(ABC):
         overallAvgChatMessagesPerSecond: float
             The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
         overallAvgUniqueUsersPerSecond: float
-            The average number of chat messages per second across the whole chatlog. (totalUniqueUsers/totalDuration)
+            The average number of unique users chatting per second.
 
         --- TODO: Below not yet implemented ---
 
@@ -242,7 +254,14 @@ class ChatAnalytics(ABC):
     # Because platform has default in the child class, must come after non-defaults above
     platform: str
 
+    # Automatically re-defined on post-init
+    duration_text: str = ''
+    interval_text: str = ''
+
     # Defined w/ default and modified DURING analysis
+    mediaTitle: str = 'No Media Title'
+    mediaURL: str = 'No Media URL'
+
     samples: List[Sample] = field(default_factory=list)
 
     totalActivity: int = 0
@@ -258,6 +277,12 @@ class ChatAnalytics(ABC):
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
     _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
     _currentSample: Sample = None # field(default_factory=None)
+
+
+    def __post_init__(self):
+        self.duration_text = seconds_to_time(self.duration)
+        self.interval_text = seconds_to_time(self.interval)
+    
 
     def create_new_sample(self):
         """
@@ -368,7 +393,9 @@ class ChatAnalytics(ABC):
             of stream
 
         """
-
+        def to_JSON(self):
+            # TODO: Check this...
+            return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
     def chatlog_post_process(self):
         """
@@ -377,12 +404,21 @@ class ChatAnalytics(ABC):
 
         Also removes the internal fields that don't need to be output in the JSON object.
         """
+        print(f"\nProcessed {self.totalActivity} messages.")
+        print("Post processing...")
 
         self.totalUniqueUsers = len(self._overallUserChats)
 
-        self.overallAvgActivityPerSecond = self.totalActivity/self.duration
-        self.overallAvgChatMessagesPerSecond = self.totalChatMessages/self.duration
-        self.overallAvgUniqueUsersPerSecond = self.totalUniqueUsers/self.duration
+    
+        # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
+        # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility
+        actualDuration = (len(self.samples)-1)*self.interval
+        actualDuration += self.samples[-1].sampleDuration
+
+        self.overallAvgActivityPerSecond = self.totalActivity/actualDuration
+        self.overallAvgChatMessagesPerSecond = self.totalChatMessages/actualDuration
+        # Need to calculate unique users per second based on sample unique users, totalUniqueUsers/duration doesn't tell us anything meaningful 
+        self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
 
         # TODO: Calculate more advanced fields like "averageChatsPerUser"
@@ -395,7 +431,11 @@ class ChatAnalytics(ABC):
 
         # Remove all other internal variables not suitable for output TODO fix del and do it
         # del self._overallUserChats
+        self._overallUserChats.clear()# TODO: Remove this temporary measure
         # del self._currentSample
+        self._currentSample = None
+
+        print("Post-processing complete")
         
 
     # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
@@ -408,15 +448,30 @@ class ChatAnalytics(ABC):
         :type chatlog: chat_downloader.sites.common
 
         """
+
+        # For debug/tracking
+        print("Processing chat log:")
+        print("\tCompletion \t Processed Time / Total")
+
+        self.mediaTitle = chatlog.title
+        # Uses manually added url after the download (non-native field)
+        self.mediaURL = chatlog.url
+        
+
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
             # For debug/tracking
-            if(idx%1000==0 and idx!=0):
-                print("Processed %d messages \t| (%s / %s)" % (idx, msg['time_text'], seconds_to_time(self.duration)))
 
+            # float(msg['time_in_seconds'])
+            if(idx%1000==0 and idx!=0):
+                # print("\t (%d) %s / %s  | Processed %d messages" % (float(msg['time_in_seconds']) ,msg['time_text'], seconds_to_time(self.duration), idx), end='\r')
+                
+                print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
+                
             self.process_message(msg)
 
-        # TODO: Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
+        print(f"\t(100%) \t {seconds_to_time(self.duration)} / {seconds_to_time(self.duration)} \t Processed {self.totalActivity} messages", end='\r')
+        # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
         self.chatlog_post_process()
 
 
@@ -443,6 +498,10 @@ class YoutubeChatAnalytics(ChatAnalytics):
         # print(msg)
         # raise NotImplementedError
         # TODO: Implement:
+
+    def to_JSON(self):
+        # TODO: Check this...
+        return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 @dataclass
 class TwitchChatAnalytics(ChatAnalytics):
@@ -480,6 +539,10 @@ class TwitchChatAnalytics(ChatAnalytics):
         # #       TWITCH_NETLOC : "text_message"                  
         # # }
         # #   
+    
+    def to_JSON(self):
+            # TODO: Check this...
+            return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 
 # print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
