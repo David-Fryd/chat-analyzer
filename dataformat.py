@@ -8,7 +8,6 @@ import logging
 
 from chat_downloader.utils.core import seconds_to_time
 
-# TODO:
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics extension with site-specific behavior
 YOUTUBE_NETLOC = 'www.youtube.com'
@@ -16,17 +15,6 @@ TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
 # NOTE: Yes CamelCased fields are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
-
-"""
-Xenonva's chat-downloader stores each message (a 'chat item' in their vernacular)
-as a dictionary. (*almost) All messages contain certain fields in common, 
-
-See for more info: https://chat-downloader.readthedocs.io/en/latest/items.html#chat-item-fields
-
-All messages regardless of their type are considered activity.
-
-"""
-
 
 @dataclass
 class Sample():
@@ -473,8 +461,6 @@ class ChatAnalytics(ABC):
         print(f"\t(100%) \t {seconds_to_time(self.duration)} / {seconds_to_time(self.duration)} \t Processed {self.totalActivity} messages", end='\r')
         # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
         self.chatlog_post_process()
-
-
 @dataclass
 class YoutubeChatAnalytics(ChatAnalytics):
     """
@@ -502,7 +488,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
     def to_JSON(self):
         # TODO: Check this...
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
-
 @dataclass
 class TwitchChatAnalytics(ChatAnalytics):
     """
@@ -541,297 +526,35 @@ class TwitchChatAnalytics(ChatAnalytics):
         # #   
     
     def to_JSON(self):
-            # TODO: Check this...
-            return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
+        """ Returns a JSON string representation of the object
 
+        :return: JSON string representation of the object
+        :rtype: str
+        """
 
-# print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
-
-# Track highest engagement, instead raw number of messages per interval, number of unique chatters 
-# per interval
-
-# Track average number of chats sent by a single user
-
-# chatLogJSONFile.close()
-
-# numberofchattersmakingtheirfirstchat of the stream
-# numberOfChattersThatSpokeJustNowThatHaventSpokenInPastXInterval . . .
-
-
-
-
-    # def __init__(self):
-    #     """Instantiates the fields with default values"""
-    #     self.platform = None #Should be overriden by the subclass constructor
-    #     self.interval = 0 
-    #     self.samples = []
-    #     self.duration = 0
-        
-
-    # def toJSON():
-    #     # TODO: Convert the snake case fields to camel case
-    #     print("TODO: Implement")
-
-
-
-
-# highlights
-
-# ADVANCED TODO: Semantic analysis using DL
-
-#ad : for creators:
-#   dont forget to subscribe effective?
-
-# ad for editors:
-
-# potential creators:
-#        pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
-
-# researchers:
-#       
-
-
+        # TODO: Check this...
+        return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 
 # TODO: Go through messsage types to figure out what we should be tracking in the ChatAnalytics
+# TODO: # Track average number of chats sent by a single user
+# print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
 
-# _YT_MESSAGE_GROUPS = {
-#         'messages': [
-#             'text_message'  # normal message
-#         ],
-#         'superchat': [
-#             # superchat messages which appear in chat
-#             'membership_item',
-#             'paid_message',
-#             'paid_sticker',
-#         ],
-#         'tickers': [
-#             # superchat messages which appear ticker (at the top)
-#             'ticker_paid_sticker_item',
-#             'ticker_paid_message_item',
-#             'ticker_sponsor_item',
-#         ],
-#         'banners': [
-#             'banner',
-#             'banner_header'
-#         ],
+# TODO: Other potential fields:
+# numberOfChattersThatSpokeJustNowThatHaventSpokenInPastXInterval . . .
 
-#         'donations': [
-#             'donation_announcement'
-#         ],
-#         'engagement': [
-#             # message saying live chat replay is on
-#             'viewer_engagement_message',
-#         ],
-#         'purchases': [
-#             'purchased_product_message'  # product purchased
-#         ],
+# ADVANCED TODO: Semantic analysis using DL
 
-#         'mode_changes': [
-#             'mode_change_message'  # e.g. slow mode enabled
-#         ],
+# TODO: highlights
 
-#         'deleted': [
-#             'deleted_message'
-#         ],
-#         'bans': [
-#             'ban_user'
-#         ],
+# TODO: Front end advertising:
+        """
+        For creators: don't forget to subscribe effective? what is most engaging part of stream?
 
-#         'placeholder': [
-#             'placeholder_item'  # placeholder
-#         ]
-#     }
+        For editors: more quickyl find interesting parts
 
+        potential creators:
+            pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
 
-# _TWITCH_MESSAGE_GROUPS = {
-#     'messages': [
-#         'text_message'
-#     ],
-#     'bans': [
-#         'ban_user'
-#     ],
-#     'deleted_messages': [
-#         'delete_message'
-#     ],
-#     'hosts': [
-#         'host_target'
-#     ],
-#     'room_states': [
-#         'room_state'
-#     ],
-#     'user_states': [
-#         'user_state'
-#     ],
-#     'notices': [
-#         'user_notice',
-#         'notice',
-#         'successful_login'
-#     ],
-#     'chants': [
-#         'crowd_chant'
-#     ],
-#     'other': [
-#         'clear_chat',
-#         'reconnect'
-#     ]
-# }
-
-# _TWITCH_MESSAGE_GROUP_REMAPPINGS = {
-#         # TODO add rest of
-#         # https://dev.twitch.tv/docs/irc/msg-id
-
-#         'messages': {
-#             'highlighted-message': 'highlighted_message',
-#             'skip-subs-mode-message': 'send_message_in_subscriber_only_mode',
-#         },
-#         'bits': {
-#             'bitsbadgetier': 'bits_badge_tier',
-#         },
-#         'subscriptions': {
-#             'sub': 'subscription',
-#             'resub': 'resubscription',
-#             'subgift': 'subscription_gift',
-#             'anonsubgift': 'anonymous_subscription_gift',
-#             'anonsubmysterygift': 'anonymous_mystery_subscription_gift',
-#             'submysterygift': 'mystery_subscription_gift',
-#             'extendsub': 'extend_subscription',
-
-#             'standardpayforward': 'standard_pay_forward',
-#             'communitypayforward': 'community_pay_forward',
-#             'primecommunitygiftreceived': 'prime_community_gift_received',
-#         },
-#         'upgrades': {
-#             'primepaidupgrade': 'prime_paid_upgrade',
-#             'giftpaidupgrade': 'gift_paid_upgrade',
-#             'rewardgift': 'reward_gift',
-#             'anongiftpaidupgrade': 'anonymous_gift_paid_upgrade',
-#         },
-#         'raids': {
-#             'raid': 'raid',
-#             'unraid': 'unraid'
-#         },
-#         'hosts': {
-#             'host_on': 'start_host',
-#             'host_off': 'end_host',
-#             'bad_host_hosting': 'bad_host_hosting',
-#             'bad_host_rate_exceeded': 'bad_host_rate_exceeded',
-#             'bad_host_error': 'bad_host_error',
-#             'hosts_remaining': 'hosts_remaining',
-#             'not_hosting': 'not_hosting',
-
-#             'host_target_went_offline': 'host_target_went_offline',
-#         },
-#         'rituals': {
-#             'ritual': 'ritual',
-#         },
-#         'room_states': {
-#             # slow mode
-#             'slow_on': 'enable_slow_mode',
-#             'slow_off': 'disable_slow_mode',
-#             'already_slow_on': 'slow_mode_already_on',
-#             'already_slow_off': 'slow_mode_already_off',
-
-#             # sub only mode
-#             'subs_on': 'enable_subscriber_only_mode',
-#             'subs_off': 'disable_subscriber_only_mode',
-#             'already_subs_on': 'sub_mode_already_on',
-#             'already_subs_off': 'sub_mode_already_off',
-
-#             # emote only mode
-#             'emote_only_on': 'enable_emote_only_mode',
-#             'emote_only_off': 'disable_emote_only_mode',
-#             'already_emote_only_on': 'emote_only_already_on',
-#             'already_emote_only_off': 'emote_only_already_off',
-
-#             # r9k mode
-#             'r9k_on': 'enable_r9k_mode',
-#             'r9k_off': 'disable_r9k_mode',
-#             'already_r9k_on': 'r9k_mode_already_on',
-#             'already_r9k_off': 'r9k_mode_already_off',
-
-#             # follower only mode
-#             'followers_on': 'enable_follower_only_mode',
-#             'followers_on_zero': 'enable_follower_only_mode',  # same thing, handled in parse
-#             'followers_off': 'disable_follower_only_mode',
-#             'already_followers_on': 'follower_only_mode_already_on',
-#             'already_followers_on_zero': 'follower_only_mode_already_on',
-#             'already_followers_off': 'follower_only_mode_already_off',
-
-#         },
-#         'deleted_messages': {
-#             'msg_banned': 'banned_message',
-
-#             'bad_delete_message_error': 'bad_delete_message_error',
-#             'bad_delete_message_broadcaster': 'bad_delete_message_broadcaster',
-#             'bad_delete_message_mod': 'bad_delete_message_mod',
-#             'delete_message_success': 'delete_message_success',
-#         },
-#         'bans': {
-
-#             # ban
-#             'already_banned': 'already_banned',
-#             'bad_ban_self': 'bad_ban_self',
-#             'bad_ban_broadcaster': 'bad_ban_broadcaster',
-#             'bad_ban_admin': 'bad_ban_admin',
-#             'bad_ban_global_mod': 'bad_ban_global_mod',
-#             'bad_ban_staff': 'bad_ban_staff',
-#             'ban_success': 'ban_success',
-
-#             # unban
-#             'bad_unban_no_ban': 'bad_unban_no_ban',
-#             'unban_success': 'unban_success',
-
-#             'msg_channel_suspended': 'channel_suspended_message',
-
-#             # timeouts
-#             'timeout_success': 'timeout_success',
-
-#             # timeout errors
-#             'bad_timeout_self': 'bad_timeout_self',
-#             'bad_timeout_broadcaster': 'bad_timeout_broadcaster',
-#             'bad_timeout_mod': 'bad_timeout_mod',
-#             'bad_timeout_admin': 'bad_timeout_admin',
-#             'bad_timeout_global_mod': 'bad_timeout_global_mod',
-#             'bad_timeout_staff': 'bad_timeout_staff',
-#         },
-#         'mods': {
-#             'bad_mod_banned': 'bad_mod_banned',
-#             'bad_mod_mod': 'bad_mod_mod',
-#             'mod_success': 'mod_success',
-#             'bad_unmod_mod': 'bad_unmod_mod',
-#             'unmod_success': 'unmod_success',
-#             'no_mods': 'no_mods',
-#             'room_mods': 'room_mods',
-#         },
-#         'colours': {
-#             'turbo_only_color': 'turbo_only_colour',
-#             'color_changed': 'colour_changed',
-#         },
-#         'commercials': {
-#             'bad_commercial_error': 'bad_commercial_error',
-#             'commercial_success': 'commercial_success',
-#         },
-
-#         'vips': {
-#             'bad_vip_grantee_banned': 'bad_vip_grantee_banned',
-#             'bad_vip_grantee_already_vip': 'bad_vip_grantee_already_vip',
-#             'vip_success': 'vip_success',
-#             'bad_unvip_grantee_not_vip': 'bad_unvip_grantee_not_vip',
-#             'unvip_success': 'unvip_success',
-#             'no_vips': 'no_vips',
-#             'vips_success': 'vips_success',
-#         },
-#         'chants': {
-#             'crowd-chant': 'crowd_chant'
-#         },
-#         'charity': {
-#             'charity': 'charity'
-#         },
-#         'other': {
-#             'cmds_available': 'cmds_available',
-#             'unrecognized_cmd': 'unrecognized_cmd',
-#             'no_permission': 'no_permission',
-#             'msg_ratelimit': 'rate_limit_reached_message',
-#         }
-#     }
+        Researchers
+        """
