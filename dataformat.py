@@ -214,25 +214,6 @@ class ChatAnalytics(ABC):
             The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
         overallAvgUniqueUsersPerSecond: float
             The average number of unique users chatting per second.
-
-        --- TODO: Below not yet implemented ---
-
-        bestChatters:
-            #TODO: Figure out how to type-define (or not) the author of a message, and how we want to store them in a list
-            # NOTE: See https://death.andgravity.com/dataclasses about typeless dataclass stuff
-
-        # TODO: Add   
-        # . . . (total/Avg superchats, newMembers, etc... (need to check YT/Twitch/Xenova docs to see what possible message types we can track are))
-        # . . . (total/Average of each datapoint)
-
-        # TODO: Add
-            longest-1-min-sustained, 5 min, etc... and similar super-interval temporaily aware anlysis
-
-
-        # Fields only calculated if we want advanced statistics: TODO
-        # TODO: average chats per viewer
-
-        # TODO: Median chats per viewer
     """
     # Defined when class Initialized
     duration: float
@@ -274,7 +255,7 @@ class ChatAnalytics(ABC):
 
     def create_new_sample(self):
         """
-        Post-processes the previous sample , and appends+creates a new sample
+        Post-processes the previous sample, then appends & creates a new sample
         following the previous sample sequentially. If a previous sample doesn't exist, 
         creates the first sample.
         
@@ -319,9 +300,6 @@ class ChatAnalytics(ABC):
         if(self._currentSample == None or msg_time_in_seconds >= self._currentSample.endTime):
             self.create_new_sample() #TODO Pass a NETLOC, so we can create the correct type of subsample
 
-        # TODO: replace totalActivity/totals/overall with incrementing samples, then add sample stuff
-        #       to the total once at the end to prevent unnecessary code duplication
-
         # Every type of message contributes to total activity
         self.totalActivity += 1
         self._currentSample.activity += 1
@@ -342,45 +320,10 @@ class ChatAnalytics(ABC):
                 # keeps track of unique user per *sample*
                 self._currentSample._userChats[authID] = self._currentSample._userChats[authID] + 1 if authID in self._currentSample._userChats else 1
 
-        
-        
-        # If the sample is added, perform updated calculations to avg and stuff.
-                    
-        # TODO: We have to add in appropriate amount of empty samples between two messages that are more than a sample length apart
-        # print (msg['message'])
-
 
         # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
         # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
-        # 
-        # if there is a period with 0 chats in a normal stream, we want to explicitly record that period as 0
 
-        # We still take a sample so we 
-
-        # option to enable run-length encoding
-            """
-        #TODO: THIS IS THE NEXT THING TO TACKLE!
-
-        Logic in process_message should be:
-
-        If the receieved message should be in the sample we are currently building, add it to that
-            # TODO: implement an addMsg() method to sample to easily add a sample object from a msg
-            #            ^ is NOT the same as a sample constructor b/c there should be multiple msgs in a single sample
-
-        If it doesnt belong in the current sample, build a new empty sample at the next appropriate timeframe
-
-            If the new message's timestamp STILL doesn't belong in the curr sample, increment again to a new empty sample.
-            We increment until it fits then add it to the appropriate sample
-
-        # TODO: Alternatively, find a way to replace a long string of empty samples with a start/end empty sample
-                think in the morning with more sleep
-        
-
-        Need to ensure that the last sample(s) gets added automatically when there are no more chats
-            Think of case where there is one chat very early on in stream and 0 chats for the rest
-            of stream
-
-        """
         def to_JSON(self):
             # TODO: Check this...
             return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
@@ -405,7 +348,7 @@ class ChatAnalytics(ABC):
 
         self.overallAvgActivityPerSecond = self.totalActivity/actualDuration
         self.overallAvgChatMessagesPerSecond = self.totalChatMessages/actualDuration
-        # Need to calculate unique users per second based on sample unique users, totalUniqueUsers/duration doesn't tell us anything meaningful 
+        # Need to calculate unique users per second based on sample unique users, totalUniqueUsers/duration doesn't tell us what we want to know
         self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
 
@@ -439,7 +382,7 @@ class ChatAnalytics(ABC):
 
         # For debug/tracking
         print("Processing chat log:")
-        print("\tCompletion \t Processed Time / Total")
+        print("\tCompletion \t Processed Time / Total") # Header for progress stats
 
         self.mediaTitle = chatlog.title
         # Uses manually added url after the download (non-native field)
@@ -448,12 +391,8 @@ class ChatAnalytics(ABC):
 
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
-            # For debug/tracking
-
-            # float(msg['time_in_seconds'])
             if(idx%1000==0 and idx!=0):
-                # print("\t (%d) %s / %s  | Processed %d messages" % (float(msg['time_in_seconds']) ,msg['time_text'], seconds_to_time(self.duration), idx), end='\r')
-                
+                # Progress stats
                 print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
                 
             self.process_message(msg)
@@ -479,10 +418,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and youtube-specific fields"""
         super().process_message(msg)
-        # print(f"TODO: youtube specific fields process msg")
-        # print(f"this gets called to update the youtube specific fields ")
-        # print(msg)
-        # raise NotImplementedError
         # TODO: Implement:
 
     def to_JSON(self):
@@ -506,27 +441,12 @@ class TwitchChatAnalytics(ChatAnalytics):
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
         super().process_message(msg)
-        # print(f"this gets called to update the twitch specific fields {msg}")
-        # raise NotImplementedError
         # TODO: Implement:
-
-        # TODO: Detect local maxima spikes (even if below average) (sharp & sustained changes from one sample to next)
     
-
-
-        # msg[NORMAL_MESSAGE[TWITCH_NETLOC]]
-        # msg["text_message"]
-
-
-        # # TODO: define mapping from:
-        # #   NORMAL_MESSAGE: {
-        # #       YOUTUBE_NETLOC : "text_message"  
-        # #       TWITCH_NETLOC : "text_message"                  
-        # # }
-        # #   
     
     def to_JSON(self):
-        """ Returns a JSON string representation of the object
+        """
+        Returns a JSON string representation of the object
 
         :return: JSON string representation of the object
         :rtype: str
@@ -536,25 +456,39 @@ class TwitchChatAnalytics(ChatAnalytics):
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 
-# TODO: Go through messsage types to figure out what we should be tracking in the ChatAnalytics
-# TODO: # Track average number of chats sent by a single user
-# print(dict(sorted(userChatCount.items(), key=lambda item: item[1])))
 
-# TODO: Other potential fields:
-# numberOfChattersThatSpokeJustNowThatHaventSpokenInPastXInterval . . .
 
-# ADVANCED TODO: Semantic analysis using DL
+"""
+Main TODO list:
 
-# TODO: highlights
+    Stats to track/things to do (not yet implemented) ---
+    From most to least important/pressing:
+    # TODO: Highest 1,5,10 min periods of engangement (potentially more/different periods) (Highlights)
+    # TODO: Local maxima spikes of activity, spikes within certain time of eachother grouped into same highlight (Highlights)
+    # TODO: Average messages per chatter (not all users, just average among active chatters) (NOT avg chat per viewers because we don't know how many viewers there are)
+    # TODO: Best/(Top 5) chatters.
+    # TODO: Median messages per chatter
+
+
+    # TODO: Go through messsage types to figure out what we should be tracking in the ChatAnalytics
+
+    For Samples:
+    # TODO: How many chatters spoke that haven't spoken in the last X samples/minutes/interval? (Not critical)
+
+    # ADVANCED TODO: 
+    #   Semantic analysis using DL
+    # 
+"""
+
 
 # TODO: Front end advertising:
-        """
-        For creators: don't forget to subscribe effective? what is most engaging part of stream?
+"""
+For creators: don't forget to subscribe effective? what is most engaging part of stream?
 
-        For editors: more quickyl find interesting parts
+For editors: more quickyl find interesting parts
 
-        potential creators:
-            pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
+potential creators:
+    pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
 
-        Researchers
-        """
+Researchers
+"""
