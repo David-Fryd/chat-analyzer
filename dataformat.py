@@ -335,7 +335,7 @@ class ChatAnalytics(ABC):
 
         Also removes the internal fields that don't need to be output in the JSON object.
         """
-        print(f"\nProcessed {self.totalActivity} messages.")
+        print(f"\nDownloaded & Processed {self.totalActivity} messages.")
         print("Post processing...")
 
         self.totalUniqueUsers = len(self._overallUserChats)
