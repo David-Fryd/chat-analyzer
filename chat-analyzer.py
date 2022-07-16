@@ -138,7 +138,7 @@ def run(url: str, interval: int):
 
     jsonObj = chatAnalytics.to_JSON()
     # print(jsonObj)
-    with open('ludwig_60.json', 'w') as f:
+    with open('markiplier.json', 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4) 
 
     """
@@ -168,116 +168,14 @@ def run(url: str, interval: int):
 url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
 # url = 'asdds.com/a/b/c/d' # (error) invalid URL
 # url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
-url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
+# url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
 # url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
-url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
+# url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
 # url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
+url = 'https://www.twitch.tv/videos/1289325547'
+
 
 run(url=url, interval=5)
 
 
-
-
-    # with respect to netloc done on the url:
-    # # We must manually determine website because the chat-downloader provides no easy way of
-    # # dynamically determining the source of the chats (does not expose easily). In order
-    # # to maintain as much integrity of the original chat-downloader dependency codebase for
-    # # maintenance-purposes, we do a bit of extra easy work here.
-   
- 
-
-
-
-# print(str(chat.duration))
-    
-
-# for message in chat:                        # iterate over messages
-#     chat.print_formatted(message)           # print the formatted message
-
-# # Testing hardcoded file path
-# chatFilePath: str = 'localtestJSON/mixedData.json'
-
-# # Open JSON File
-# chatLogJSONFile = open(chatFilePath)
-
-# # returns JSON object as 
-# # a dictionary
-# data = json.load(chatLogJSONFile)
-
-
-
-# # Testing sets in python
-# seenMessageTypes = set()
-
-# # Testing dictionary map in python
-# userChatCount = {}
-# maxAuthorData = {}
-# maxAuthorChatNumber = 0
-
-
-
-
-# # Iterate through JSON list
-# for idx,msg in enumerate(chat):
-#     if(idx%1000==0 and idx!=0):
-#         print("Processed %d messages" % (idx))
-#         logging.debug("Processed %d messages" % (idx))
-
-#     # print(msg['message_type'])
-
-#     # print("FullMessage #%d: %s\n" % (idx,msg))
-
-#     # print("Action type: %s" % (msg['action_type'])) 
-
-#     msgType = msg['message_type']
-#     if(msgType not in seenMessageTypes):
-#         # print("%s added to seenMessageTypes" % (msgType))
-#         # Having the add under the check is redundant but we need it anyway for the print
-#         seenMessageTypes.add(msgType)
-
-#     if(msgType=='resubscription'):
-#         print("RESUB AT " + msg['time_text'])
-#         print()
-
-#     # TODO: Enable advanced/simple mode, advanced will not bother will user statistics
-#     # which will run faster
-
-#     # if 'author' in msg:
-#     #     author = msg['author']
-#     #     # print(author['name'])
-#     #     # print(author['id'])
-
-#     #     authID = author['id']
-
-#     #     if(msg['message_type']=="text_message"):
-#     #         if authID in userChatCount:
-#     #             userChatCount[authID] += 1
-#     #         else:
-#     #             userChatCount[authID] = 1
-
-#     #         # update max if necessary
-#     #         if(userChatCount[authID] > maxAuthorChatNumber):
-#     #             maxAuthorChatNumber = userChatCount[author['id']]
-#     #             maxAuthorData = author
-
-#     #     # # If you want to isolate out a user
-#     #     # if(authID=='UC9_dMgvP46Jbt5WF1dYvZPg'):
-#     #     #     print(msg['message'])
-
-
-
-#     # if(idx==500):
-#     #     break
-
-# print("Seen message types:")
-# print(seenMessageTypes)
-
-# print("")
-
-# print("Biggest chatter: %s" % (maxAuthorData['name']))
-# print(maxAuthorData)
-# print("Number of chats: %d" % (maxAuthorChatNumber))
-# print("Number of unique chatters: %d" % (len(userChatCount)))
-
-# # random stuff:
 
