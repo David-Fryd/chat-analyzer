@@ -14,7 +14,18 @@ YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
-# NOTE: Yes CamelCased fields are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
+# How many times larger a data point must be from its average to be considered a "spike"
+# Lower sensitivities mean more data points are considered "spikes", resulting in more false positives
+# SHOULD BE > 1, Values <=1 result in undesireable behavior (stuff that is below average is considered a spike)
+SPIKE_SENSITIVITY: float = 2.0
+# TODO: Control SPIKE_SENSITIVITY with options argparse
+
+# How many samples must the activity exceed avg*SPIKE_SENSITIVITY to be considered a "spike"
+# The smaller the sample size, the larger this number should probably be.
+SPIKE_SUSTAIN_REQUIREMENT: int = 2
+# TODO: Control SPIKE_SUSTAIN_REQUIREMENT with options argparse
+
+# NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
 
 @dataclass
 class Sample():
@@ -328,6 +339,22 @@ class ChatAnalytics(ABC):
             # TODO: Check this...
             return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
+    def find_spikes(self):
+        """
+        Find the spikes in activity in the chatlog based off of the calculated average activities.
+
+        _extended_summary_
+        """        
+        
+        # """"""
+        # pass
+        # """
+        # Finds spikes in the chatlog.
+        # A spike is a point in the chatlog where the activity is above a certain threshold.
+
+        # Should be called after the chatlog_post_process() method (after all of the overall averages have been calced)
+        # """
+
     def chatlog_post_process(self):
         """
         After we have finished iterating through the chatlog and constructing all of the samples,
@@ -340,7 +367,6 @@ class ChatAnalytics(ABC):
 
         self.totalUniqueUsers = len(self._overallUserChats)
 
-    
         # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
         # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility
         actualDuration = (len(self.samples)-1)*self.interval
@@ -351,14 +377,19 @@ class ChatAnalytics(ABC):
         # Need to calculate unique users per second based on sample unique users, totalUniqueUsers/duration doesn't tell us what we want to know
         self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
-
         # TODO: Calculate more advanced fields like "averageChatsPerUser"
 
-        # Process and remove the final sample
+        # Process and remove the final sample from the currentSample field
         self._currentSample.sample_post_process()
         # TODO del doesnt work because it messes with the internal representation of the object which pisses off output for some reason, look into this...
         # del self._currentSample
         # NOTE: delattr didn't do what was required on first attempt but perhaps it was employed incorrectly
+
+
+        # Spikes are determined after the final averages have been calculated
+        self.spikes = self.find_spikes()
+        # TODO: Add spikes field to the JSON object and document it as well
+
 
         # Remove all other internal variables not suitable for output TODO fix del and do it
         # del self._overallUserChats
