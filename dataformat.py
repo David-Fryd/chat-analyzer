@@ -2,6 +2,7 @@ import json
 from argparse import ArgumentTypeError
 from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
+
 from chat_downloader.sites.common import Chat
 from typing import List
 import logging
@@ -15,15 +16,10 @@ TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
 # How many times larger a data point must be from its average to be considered a "spike"
-# Lower sensitivities mean more data points are considered "spikes", resulting in more false positives
+# Lower thresholds mean more data points are considered "spikes", possibly resulting in more false positives
 # SHOULD BE > 1, Values <=1 result in undesireable behavior (stuff that is below average is considered a spike)
-SPIKE_SENSITIVITY: float = 2.0
-# TODO: Control SPIKE_SENSITIVITY with options argparse
-
-# How many samples must the activity exceed avg*SPIKE_SENSITIVITY to be considered a "spike"
-# The smaller the sample size, the larger this number should probably be.
-SPIKE_SUSTAIN_REQUIREMENT: int = 2
-# TODO: Control SPIKE_SUSTAIN_REQUIREMENT with options argparse
+SPIKE_MULT_THRESHOLD: float = 2.0
+# TODO: Control SPIKE_MULT_THRESHOLD with options argparse
 
 # NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
 
@@ -120,44 +116,75 @@ class Sample():
         # TODO: Remove this temporary measure
         # del self._userChats # TODO: Fix, it doesn't work!
         self._userChats.clear()
-        
-
-    # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
-
-
-    # TODO: activity per second reported on front end like:     activity per second (totalActivityInSample)
 
     def __post_init__(self):
             self.startTime_text = seconds_to_time(self.startTime)
             self.endTime_text = seconds_to_time(self.endTime)
             self.sampleDuration = self.endTime - self.startTime
-
 @dataclass
 class Highlight():
-    """Class that stores two samples, a start/end of a noteable section of video
+    """
+    Contains generic information about a noteable section of the chatlog
     
     ---
 
     Attributes:
-        start: Sample
-            The start Sample corresponding to a highlight.
-        end: Sample
-            The end Sample corresponding to a highlight.
-        length: int
-            The length (in seconds) of the highlight. (Calculated based on sample timestamps)
-    
+        [Defined when class Initialized]
+        startTime: float
+            The start time (inclusive) (in seconds) corresponding to a highlight.
+        endTime: float
+            The end time (exclusive) (in seconds) corresponding to a highlight.
+        description: str (optional)
+            A description of the highlight (if any).
+
+        [Automatically re-defined on post-init]
+        duration: float
+            The duration (in seconds) of the highlight (end-start)
+        duration_text: str
+            The duration represented in text format (i.e. hh:mm:ss)
+        startTime_text: str
+            The start time represented in text format (i.e. hh:mm:ss)
+        endTime_text: str
+            The end time represented in text format (i.e. hh:mm:ss)
+
     """
-    start: Sample
-    end: Sample
+    # Defined when class Initialized
+    startTime: float
+    endTime: float
+    description: str 
 
-    # TODO: Figure out best fields to store depending on how we decide to use highlights later
-
-
-    length: int = field(init=False)
+    # Automatically defined on init (still have to set defaults b/c of @dataclass sublcass)
+    duration: float = field(default=0.0, init=False)
+    duration_text: str = field(default='', init=False)
+    startTime_text: str = field(default='', init=False)
+    endTime_text: str = field(default='', init=False)
 
     def __post_init__(self):
-        # self.length = self.end.timeStamp? - self.start.timeStamp? 
-        raise NotImplementedError 
+        self.duration = self.endTime - self.startTime
+        self.duration_text = seconds_to_time(self.duration)
+        self.startTime_text = seconds_to_time(self.startTime)
+        self.endTime_text = seconds_to_time(self.endTime)
+
+@dataclass
+class Spike(Highlight):
+    """
+    Contains information about an activity spike in the chatlog
+    
+    ---
+
+    Attributes:
+        type: str
+            The attribute/field that spiked. i.e. "activity", "uniqueUsers", "chatMessages", etc.
+            NOTE: In current implementation, generic "activity" is the only thing that triggers a spike
+            TODO: Consider making this an enum/standardizing the type better so it is easily converted/used with the dataclasses themselves
+        peak: float
+            The highest activity of any sample contained within the spike. 
+    
+    """
+    type: str
+    peak: float
+
+
 
 @dataclass
 class ChatAnalytics(ABC):
@@ -248,10 +275,12 @@ class ChatAnalytics(ABC):
     totalChatMessages: int = 0
     totalUniqueUsers: int = 0
 
-    # Defined w/ default and modified AFTER analysis
+    # Defined w/ default and modified AFTER analysis (post processing)
     overallAvgActivityPerSecond: float = 0
     overallAvgChatMessagesPerSecond: float = 0
     overallAvgUniqueUsersPerSecond: float = 0
+    highlights: List[Highlight] = field(default_factory=list) # TODO: Implement highlights
+    spikes: List[Spike] = field(default_factory=list)
 
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -341,19 +370,57 @@ class ChatAnalytics(ABC):
 
     def find_spikes(self):
         """
-        Find the spikes in activity in the chatlog based off of the calculated average activities.
+        Find the spikes in activity in the chatlog based off of the calculated average activities (*per second*).
 
-        _extended_summary_
-        """        
+        A spike is a point in the chatlog where the activity is significantly different from the average activity.
+        Activity is significantly different if it is > avg*SPIKE_MULT_THRESHOLD.
+        We detect a spike if the high activity level is maintained for at least SPIKE_SUSTAIN_REQUIREMENT # of samples.
+
+        Spikes are stored as highlights, and may last for multiple samples.
+
+        This method should only be called after the averages have been calculated,
+        ensuring accurate results when determining spikes.
+
+        TODO: Should we be tracking spikes in total activity, or offer more granular control?
+        For now, totalActivity is the only thing we track. It's naive but it works for now.
+
+        """   
+
+        self.spikes: List[Spike] = []
+
+        _firstSample: Sample = None
+        _lastSample: Sample = None
+        _peak: float = 0
+
+
+        for sample in self.samples:
+            if(sample.avgActivityPerSecond >= self.overallAvgActivityPerSecond * SPIKE_MULT_THRESHOLD ):
+                # If first sample is not null set first sample to current sample
+                if(_firstSample == None):
+                    _firstSample = sample
+                # Set the peak to the maximum of the current peak and the current sample's activity
+                _peak = max(_peak, sample.avgActivityPerSecond)
+                # Set the last sample to the current sample
+                _lastSample = sample
+            else:
+                # We are either finished with a spike, or we are not in a spike
+                # If we were building a spike, append the spike to the spike list and reset internal variables
+                if(_firstSample != None):
+                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type="activity", description="Activity Spike")
+                    self.spikes.append(spike)
+                    _firstSample = None
+                    _lastSample = None
+                    _peak = 0
+
         
-        # """"""
+        # """
         # pass
         # """
         # Finds spikes in the chatlog.
         # A spike is a point in the chatlog where the activity is above a certain threshold.
 
         # Should be called after the chatlog_post_process() method (after all of the overall averages have been calced)
-        # """
+        # """ 
 
     def chatlog_post_process(self):
         """
@@ -387,7 +454,7 @@ class ChatAnalytics(ABC):
 
 
         # Spikes are determined after the final averages have been calculated
-        self.spikes = self.find_spikes()
+        self.find_spikes()
         # TODO: Add spikes field to the JSON object and document it as well
 
 
@@ -407,8 +474,7 @@ class ChatAnalytics(ABC):
         Iterates through the whole chatlog and produces the analytical data
 
         :param chatlog: The chatlog we have downloaded 
-        :type chatlog: chat_downloader.sites.common
-
+        :type chatlog: chat_downloader.sites.common.Chat
         """
 
         # For debug/tracking
@@ -425,7 +491,7 @@ class ChatAnalytics(ABC):
             if(idx%1000==0 and idx!=0):
                 # Progress stats
                 print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
-                
+
             self.process_message(msg)
 
         print(f"\t(100%) \t {seconds_to_time(self.duration)} / {seconds_to_time(self.duration)} \t Processed {self.totalActivity} messages", end='\r')
