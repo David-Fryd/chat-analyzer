@@ -573,7 +573,7 @@ class YoutubeChatAnalytics(ChatAnalytics):
     overallAvgMembershipsPerSecond: float = 0
 
     # Constants
-    superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_paid_sponsor_item'}
+    superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
     
 
     def __post_init__(self):
