@@ -558,8 +558,20 @@ class YoutubeChatAnalytics(ChatAnalytics):
     ---
 
     Attributes:
-        [See ChatAnalytics class for common fields]
-        # TODO: Add youtube specific fields. Superchats, etc...
+        [See ChatAnalytics class for common fields and descriptions]
+        [Defined w/ default and modified DURING analysis]
+        totalSuperchats: int
+            The total number of superchats (regular/ticker) that appeared in the chat.
+            NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
+        totalMemberships: int
+            The total number of memberships that appeared in the chat.
+
+        [Defined w/ default and modified AFTER analysis]
+        overallAvgSuperchatsPerSecond: float
+            The average number of superchats per second across the whole chatlog.
+        overallAvgMembershipsPerSecond: float
+            The average number of memberships per second across the whole chatlog.
+    
     """
     # Defined here on subclass init
     platform: str = YOUTUBE_NETLOC
@@ -572,10 +584,9 @@ class YoutubeChatAnalytics(ChatAnalytics):
     overallAvgSuperchatsPerSecond: float = 0
     overallAvgMembershipsPerSecond: float = 0
 
-    # Constants
+    # Constants (not dumped in json)
     superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
     
-
     def __post_init__(self):
         super().__post_init__()
          # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
