@@ -95,6 +95,11 @@ class Sample():
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
     _userChats: dict = field(default_factory=dict) # author['id'] -> numChats for current sample
 
+    def __post_init__(self):
+            self.startTime_text = seconds_to_time(self.startTime)
+            self.endTime_text = seconds_to_time(self.endTime)
+            self.sampleDuration = self.endTime - self.startTime
+
     def sample_post_process(self):
         """
         After we have finished adding messages to a particular sample (moving on to the next sample),
@@ -116,11 +121,64 @@ class Sample():
         # TODO: Remove this temporary measure
         # del self._userChats # TODO: Fix, it doesn't work!
         self._userChats.clear()
+@dataclass
+class TwitchSample(Sample):
+    """
+    Class that contains data specific to Twitch of a specific time interval of the chat.
+    
+    ---
+
+    Attributes:
+        [Defined w/ default and modified DURING analysis of sample]
+        ...
+        TODO: Implement
+    """
 
     def __post_init__(self):
-            self.startTime_text = seconds_to_time(self.startTime)
-            self.endTime_text = seconds_to_time(self.endTime)
-            self.sampleDuration = self.endTime - self.startTime
+        raise NotImplementedError("TwitchSample is not yet implemented")
+        super().__post_init__()
+
+@dataclass
+class YoutubeSample(Sample):
+    """
+    Class that contains data specific to Youtube of a specific time interval of the chat.
+    
+    ---
+
+    Attributes:
+        [Defined w/ default and modified DURING analysis of sample]
+        superchats: int
+            The total number of superchats (regular/ticker) that appeared in chat within the start/endTime of this sample.
+            NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
+        memberships: int
+            The total number of memberships that appeared in chat within the start/endTime of this sample.
+
+        [Defined w/ default and modified AFTER analysis of sample]
+        avgSuperchatsPerSecond: float
+            The average number of superchats per second across this sample interval. (superchats/sampleDuration)
+        avgMembershipsPerSecond: float
+            The average number of memberships per second across this sample interval. (memberships/sampleDuration)
+    """
+    # Defined w/ default and modified DURING analysis of sample
+    superchats: int = 0
+    memberships: int = 0
+
+    # Defined w/ default and modified AFTER analysis of sample
+    avgSuperchatsPerSecond: float = 0
+    avgMembershipsPerSecond: float = 0
+
+    def sample_post_process(self):
+        """
+        After we have finished adding messages to a particular sample (moving on to the next sample),
+        we call sample_post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
+
+        """
+        super().sample_post_process()
+        self.avgSuperchatsPerSecond = self.superchats/self.sampleDuration
+        self.avgMembershipsPerSecond = self.memberships/self.sampleDuration
+
+    
+
 @dataclass
 class Highlight():
     """
@@ -138,6 +196,7 @@ class Highlight():
             A description of the highlight (if any).
 
         [Automatically re-defined on post-init]
+        TODO: Remove duration and duration_text fields when we ensure that it is trivial to take care of in naive graphing sense (in this class and similar)
         duration: float
             The duration (in seconds) of the highlight (end-start)
         duration_text: str
@@ -164,7 +223,6 @@ class Highlight():
         self.duration_text = seconds_to_time(self.duration)
         self.startTime_text = seconds_to_time(self.startTime)
         self.endTime_text = seconds_to_time(self.endTime)
-
 @dataclass
 class Spike(Highlight):
     """
@@ -183,7 +241,6 @@ class Spike(Highlight):
     """
     type: str
     peak: float
-
 
 
 @dataclass
@@ -257,7 +314,7 @@ class ChatAnalytics(ABC):
     duration: float
     interval: int
 
-    # Automatically Defined on init
+    # Automatically Defined on subclass init
     # Because platform has default in the child class, must come after non-defaults above
     platform: str
 
@@ -287,12 +344,10 @@ class ChatAnalytics(ABC):
     _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
     _currentSample: Sample = None # field(default_factory=None)
 
-
     def __post_init__(self):
         self.duration_text = seconds_to_time(self.duration)
         self.interval_text = seconds_to_time(self.interval)
     
-
     def create_new_sample(self):
         """
         Post-processes the previous sample, then appends & creates a new sample
@@ -324,9 +379,15 @@ class ChatAnalytics(ABC):
         # New sample end time will not extend past the length of the video
         new_sample_end_time = min(new_sample_start_time + self.interval, self.duration)
 
-        self._currentSample = Sample(startTime=new_sample_start_time, endTime=new_sample_end_time)
-        self.samples.append(self._currentSample)
+        if(self.platform==YOUTUBE_NETLOC):
+            self._currentSample = YoutubeSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
+        elif(self.platform==TWITCH_NETLOC):
+            self._currentSample = TwitchSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
+        else:
+            # If we have arrived here, we assume we support the platform but it has no sample-specific concerns
+            self._currentSample = Sample(startTime=new_sample_start_time, endTime=new_sample_end_time)
 
+        self.samples.append(self._currentSample)
 
     def process_message(self, msg):
         """Given a msg object from chat, update appropriate statistics based on the chat"""
@@ -338,7 +399,7 @@ class ChatAnalytics(ABC):
 
         # Before processing the msg, make sure that msg belongs with the current sample
         if(self._currentSample == None or msg_time_in_seconds >= self._currentSample.endTime):
-            self.create_new_sample() #TODO Pass a NETLOC, so we can create the correct type of subsample
+            self.create_new_sample()
 
         # Every type of message contributes to total activity
         self.totalActivity += 1
@@ -383,7 +444,7 @@ class ChatAnalytics(ABC):
 
         TODO: Should we be tracking spikes in total activity, or offer more granular control?
         For now, totalActivity is the only thing we track. It's naive but it works for now.
-
+        What else should we be detecting spikes of/should we be offering options?
         """   
 
         self.spikes: List[Spike] = []
@@ -411,16 +472,6 @@ class ChatAnalytics(ABC):
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
-
-        
-        # """
-        # pass
-        # """
-        # Finds spikes in the chatlog.
-        # A spike is a point in the chatlog where the activity is above a certain threshold.
-
-        # Should be called after the chatlog_post_process() method (after all of the overall averages have been calced)
-        # """ 
 
     def chatlog_post_process(self):
         """
@@ -465,9 +516,6 @@ class ChatAnalytics(ABC):
         self._currentSample = None
 
         print("Post-processing complete")
-        
-
-    # duration: int # important for samples that don't match the interval (at the end of the video when the remaining time isnt divisible by the interval)
 
     def process_chatlog(self, chatlog: Chat):
         """
@@ -491,6 +539,10 @@ class ChatAnalytics(ABC):
             if(idx%1000==0 and idx!=0):
                 # Progress stats
                 print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
+            # TODO: Remove [DEBUG]
+            # if(idx==10000):
+            #     break
+
 
             self.process_message(msg)
 
@@ -509,13 +561,52 @@ class YoutubeChatAnalytics(ChatAnalytics):
         [See ChatAnalytics class for common fields]
         # TODO: Add youtube specific fields. Superchats, etc...
     """
-
+    # Defined here on subclass init
     platform: str = YOUTUBE_NETLOC
+
+    # Defined w/ default and modified DURING analysis
+    totalSuperchats: int = 0
+    totalMemberships: int = 0
+
+    # Defined w/ default and modified AFTER analysis (post processing)
+    overallAvgSuperchatsPerSecond: float = 0
+    overallAvgMembershipsPerSecond: float = 0
+
+    # Constants
+    superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_paid_sponsor_item'}
     
+
+    def __post_init__(self):
+        super().__post_init__()
+         # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
+        self._currentSample: YoutubeSample = self._currentSample
+
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and youtube-specific fields"""
         super().process_message(msg)
-        # TODO: Implement:
+        # TODO: Remove Print statements [DEBUG]
+        if(msg['message_type']!='text_message' and msg['message_type'] not in self.superchat_msg_types and msg['message_type']!='membership_item'):
+            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
+            print(msg)
+        
+        if(msg['message_type'] in self.superchat_msg_types):
+            self.totalSuperchats += 1
+            self._currentSample.superchats += 1
+        if(msg['message_type'] == 'membership_item'):
+            self.totalMemberships += 1
+            self._currentSample.memberships += 1
+
+    def chatlog_post_process(self):
+        # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
+        # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility
+        actualDuration = (len(self.samples)-1)*self.interval
+        actualDuration += self.samples[-1].sampleDuration
+
+        self.overallAvgSuperchatsPerSecond = self.totalSuperchats/actualDuration
+        self.overallAvgMembershipsPerSecond = self.totalMemberships/actualDuration
+
+        super().chatlog_post_process()
 
     def to_JSON(self):
         # TODO: Check this...
@@ -538,6 +629,11 @@ class TwitchChatAnalytics(ChatAnalytics):
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
         super().process_message(msg)
+        # TODO: Remove Print statements [DEBUG]
+        if(msg['message_type']!='text_message'):
+            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
+            print(msg)
         # TODO: Implement:
     
     
@@ -566,11 +662,14 @@ Main TODO list:
     # TODO: Best/(Top 5) chatters.
     # TODO: Median messages per chatter
 
+    # TODO: Use statistics library to find outliers, report median, std dev, etc... 
 
     # TODO: Go through messsage types to figure out what we should be tracking in the ChatAnalytics
 
     For Samples:
     # TODO: How many chatters spoke that haven't spoken in the last X samples/minutes/interval? (Not critical)
+
+=
 
     # ADVANCED TODO: 
     #   Semantic analysis using DL
