@@ -130,13 +130,21 @@ class TwitchSample(Sample):
 
     Attributes:
         [Defined w/ default and modified DURING analysis of sample]
-        ...
-        TODO: Implement
+        subscriptions: int
+            The total number of subscriptions (that people purhcased themselves) that appeared in chat within the start/endTime of this sample.
+        giftSubscriptions: int
+            The total number of gift subscriptions that appeared in chat within the start/endTime of this sample.
+        upgradeSubscriptions: int
+            The total number of upgraded subscriptions that appeared in chat within the start/endTime of this sample.
     """
+    #Defined w/ default and modified DURING analysis of sample
+    subscriptions: int = 0
+    giftSubscriptions: int = 0
+    upgradeSubscriptions: int = 0
 
-    def __post_init__(self):
-        raise NotImplementedError("TwitchSample is not yet implemented")
-        super().__post_init__()
+    # def __post_init__(self):
+    #     raise NotImplementedError("TwitchSample is not yet implemented")
+    #     super().__post_init__()
 
 @dataclass
 class YoutubeSample(Sample):
@@ -152,31 +160,10 @@ class YoutubeSample(Sample):
             NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
         memberships: int
             The total number of memberships that appeared in chat within the start/endTime of this sample.
-
-        [Defined w/ default and modified AFTER analysis of sample]
-        avgSuperchatsPerSecond: float
-            The average number of superchats per second across this sample interval. (superchats/sampleDuration)
-        avgMembershipsPerSecond: float
-            The average number of memberships per second across this sample interval. (memberships/sampleDuration)
     """
     # Defined w/ default and modified DURING analysis of sample
     superchats: int = 0
     memberships: int = 0
-
-    # Defined w/ default and modified AFTER analysis of sample
-    avgSuperchatsPerSecond: float = 0
-    avgMembershipsPerSecond: float = 0
-
-    def sample_post_process(self):
-        """
-        After we have finished adding messages to a particular sample (moving on to the next sample),
-        we call sample_post_process() to process the cumulative data points (so we don't have to do this every time we add a message)
-
-        """
-        super().sample_post_process()
-        self.avgSuperchatsPerSecond = self.superchats/self.sampleDuration
-        self.avgMembershipsPerSecond = self.memberships/self.sampleDuration
-
     
 
 @dataclass
@@ -344,6 +331,10 @@ class ChatAnalytics(ABC):
     _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
     _currentSample: Sample = None # field(default_factory=None)
 
+    # Constants (not dumped in json)
+    txt_msg_types = {'text_message'} # Messages we just consider regular text_message
+
+
     def __post_init__(self):
         self.duration_text = seconds_to_time(self.duration)
         self.interval_text = seconds_to_time(self.interval)
@@ -405,7 +396,7 @@ class ChatAnalytics(ABC):
         self.totalActivity += 1
         self._currentSample.activity += 1
 
-        if(msg['message_type']=='text_message'): # text_message is a traditional chat
+        if(msg['message_type'] in self.txt_msg_types): # text_message is a traditional chat
             self.totalChatMessages += 1
             self._currentSample.chatMessages += 1
 
@@ -555,6 +546,9 @@ class YoutubeChatAnalytics(ChatAnalytics):
     Extension of the ChatAnalytics class, meant to contain data that all chats have
     and data specific to YouTube chats.
 
+    NOTE: Most youtube-specific attributes don't make a lot of sense to continously report a per-second value,
+    so we don't!
+
     ---
 
     Attributes:
@@ -565,12 +559,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
             NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
         totalMemberships: int
             The total number of memberships that appeared in the chat.
-
-        [Defined w/ default and modified AFTER analysis]
-        overallAvgSuperchatsPerSecond: float
-            The average number of superchats per second across the whole chatlog.
-        overallAvgMembershipsPerSecond: float
-            The average number of memberships per second across the whole chatlog.
     
     """
     # Defined here on subclass init
@@ -580,44 +568,31 @@ class YoutubeChatAnalytics(ChatAnalytics):
     totalSuperchats: int = 0
     totalMemberships: int = 0
 
-    # Defined w/ default and modified AFTER analysis (post processing)
-    overallAvgSuperchatsPerSecond: float = 0
-    overallAvgMembershipsPerSecond: float = 0
-
     # Constants (not dumped in json)
     superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
     
     def __post_init__(self):
         super().__post_init__()
-         # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
+        # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
         self._currentSample: YoutubeSample = self._currentSample
 
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and youtube-specific fields"""
         super().process_message(msg)
-        # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type']!='text_message' and msg['message_type'] not in self.superchat_msg_types and msg['message_type']!='membership_item'):
-            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
-            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
-            print(msg)
-        
+               
         if(msg['message_type'] in self.superchat_msg_types):
             self.totalSuperchats += 1
             self._currentSample.superchats += 1
         if(msg['message_type'] == 'membership_item'):
             self.totalMemberships += 1
             self._currentSample.memberships += 1
+    
+     # TODO: Remove Print statements [DEBUG]
+        if(msg['message_type']!='text_message' and msg['message_type'] not in self.superchat_msg_types and msg['message_type']!='membership_item'):
+            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
+            print(msg)
 
-    def chatlog_post_process(self):
-        # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
-        # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility
-        actualDuration = (len(self.samples)-1)*self.interval
-        actualDuration += self.samples[-1].sampleDuration
-
-        self.overallAvgSuperchatsPerSecond = self.totalSuperchats/actualDuration
-        self.overallAvgMembershipsPerSecond = self.totalMemberships/actualDuration
-
-        super().chatlog_post_process()
 
     def to_JSON(self):
         # TODO: Check this...
@@ -628,24 +603,70 @@ class TwitchChatAnalytics(ChatAnalytics):
     Extension of the ChatAnalytics class, meant to contain data that all chats have
     and data specific to Twitch chats.
 
+    NOTE: Most twitch-specific attributes don't make a lot of sense to continously report a per-second value,
+    so we don't!
+
     ---
 
     Attributes:
         [See ChatAnalytics class for common fields]
-        # TODO: Add twitch specific fields. Superchats, etc...
-    """
+        [Defined w/ default and modified DURING analysis]
+        totalSubscriptions: int
+            The total number of subscriptions that appeared in the chat (which people purchased themselves).
+        totalGiftSubscriptions: int
+            The total number of gift subscriptions that appeared in the chat.
+        totalUpgradeSubscriptions: int
+            The total number of upgraded subscriptions that appeared in the chat.
 
+    """
+    # Defined here on subclass init
     platform: str = TWITCH_NETLOC
+    
+    # Defined w/ default and modified DURING analysis
+    totalSubscriptions: int = 0
+    totalGiftSubscriptions: int = 0
+    totalUpgradeSubscriptions: int = 0
+
+
+    # Constants (not dumped in json)
+    subscription_msg_types = {'subscription', 'resubscription', 'extend_subscription', 'standard_pay_forward', 'community_pay_forward'}
+    gift_sub_msg_types = {'subscription_gift' , 'anonymous_subscription_gift' , 'anonymous_mystery_subscription_gift', 'mystery_subscription_gift', 'prime_community_gift_received'}
+    upgrade_sub_msg_types = {'prime_paid_upgrade', 'gift_paid_upgrade', 'reward_gift', 'anonymous_gift_paid_upgrade'}
+
+    def __post_init__(self):
+        super().__post_init__()
+        # Add this to text message types so that txt messages are processed in super process along with other txt messages
+        self.txt_msg_types.add('highlighted_message')
+        self.txt_msg_types.add('send_message_in_subscriber_only_mode')
+        # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
+        self._currentSample: TwitchSample = self._currentSample
+
+    def chatlog_post_process(self):
+        super().chatlog_post_process()
 
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
         super().process_message(msg)
+        if(msg['message_type'] in self.subscription_msg_types):
+            self.totalSubscriptions += 1
+            self._currentSample.subscriptions += 1
+        
+        if(msg['message_type'] in self.gift_sub_msg_types):
+            self.totalGiftSubscriptions += 1
+            self._currentSample.giftSubscriptions += 1
+        
+        if(msg['message_type'] in self.upgrade_sub_msg_types):
+            self.totalUpgradeSubscriptions += 1
+            self._currentSample.upgradeSubscriptions += 1
+
+
         # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type']!='text_message'):
+        if(msg['message_type'] not in self.txt_msg_types and msg['message_type'] not in self.subscription_msg_types and msg['message_type'] not in self.upgrade_sub_msg_types and msg['message_type'] not in self.gift_sub_msg_types):
             print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
-            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
-            print(msg)
+            # print(msg)
         # TODO: Implement:
+
+        # if(msg['message_type'] in self.txt_msg_types)
     
     
     def to_JSON(self):
