@@ -10,7 +10,7 @@ import logging
 from chat_downloader.utils.core import seconds_to_time
 
 # The platforms we currently support downloading from.
-# Each has a corresponding ChatAnalytics extension with site-specific behavior
+# Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
 YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
@@ -141,11 +141,6 @@ class TwitchSample(Sample):
     subscriptions: int = 0
     giftSubscriptions: int = 0
     upgradeSubscriptions: int = 0
-
-    # def __post_init__(self):
-    #     raise NotImplementedError("TwitchSample is not yet implemented")
-    #     super().__post_init__()
-
 @dataclass
 class YoutubeSample(Sample):
     """
@@ -436,6 +431,8 @@ class ChatAnalytics(ABC):
         TODO: Should we be tracking spikes in total activity, or offer more granular control?
         For now, totalActivity is the only thing we track. It's naive but it works for now.
         What else should we be detecting spikes of/should we be offering options?
+
+        TODO: use getattr to specify which attribute we are trying to find a spike for
         """   
 
         self.spikes: List[Spike] = []
@@ -689,7 +686,6 @@ Main TODO list:
     Stats to track/things to do (not yet implemented) ---
     From most to least important/pressing:
     # TODO: Highest 1,5,10 min periods of engangement (potentially more/different periods) (Highlights)
-    # TODO: Local maxima spikes of activity, spikes within certain time of eachother grouped into same highlight (Highlights)
     # TODO: Average messages per chatter (not all users, just average among active chatters) (NOT avg chat per viewers because we don't know how many viewers there are)
     # TODO: Best/(Top 5) chatters.
     # TODO: Median messages per chatter
