@@ -23,6 +23,11 @@ SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 SPIKE_MULT_THRESHOLD: float = 2.0
 # TODO: Control SPIKE_MULT_THRESHOLD with options argparse
 
+# We print progress of the download/process every UPDATE_PROGRESS_INTERVAL messages
+UPDATE_PROGRESS_INTERVAL: int = 1000
+# The formatting to print the progress status with
+PROG_PRINT_TEMPLATE = "{:^15}| {:^25} | {:^20}"
+
 # NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
 
 @dataclass
@@ -568,17 +573,23 @@ class ChatAnalytics(ABC):
 
         print("Post-processing complete")
 
+   
+
     def process_chatlog(self, chatlog: Chat):
         """
-        Iterates through the whole chatlog and produces the analytical data
+        Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
         :param chatlog: The chatlog we have downloaded 
         :type chatlog: chat_downloader.sites.common.Chat
         """
 
-        # For debug/tracking
-        print("Processing chat log:")
-        print("\tCompletion \t Processed Time / Total") # Header for progress stats
+        # Display progress as chats are downloaded/processed
+        print("Downloading & Processing chat log...")
+
+        # Header
+        print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
+        
+
 
         self.mediaTitle = chatlog.title
         # Uses manually added url after the download (non-native field)
@@ -587,19 +598,38 @@ class ChatAnalytics(ABC):
 
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
-            if(idx%1000==0 and idx!=0):
-                # Progress stats
-                print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
-            # TODO: Remove [DEBUG]
-            # if(idx==2000):
-            #     break
-
+            # Display progress every UPDATE_PROGRESS_INTERVAL messages
+            if(idx%UPDATE_PROGRESS_INTERVAL==0 and idx!=0):
+                self.print_process_progress(msg, idx)
+                # TODO: Remove [DEBUG]
+                # if(idx==2000):
+                #     break
 
             self.process_message(msg)
 
-        print(f"\t(100%) \t {seconds_to_time(self.duration)} / {seconds_to_time(self.duration)} \t Processed {self.totalActivity} messages", end='\r')
+        self.print_process_progress(None, None, finished=True)
+
         # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
         self.chatlog_post_process()
+
+    def print_process_progress(self, msg, idx, finished=False):
+        """
+        Prints progress of the chat download/process to the console.
+
+        If finished is true, normal printing is skipped and the last bar of progress is printed.
+        This is important because we print progress every UPDATE_PROGRESS_INTERVAL messages, and the total number of 
+        messages is not usually divisible by this. We therefore have to slightly change the approach to printing progress for this special case.
+        """
+
+        if(finished):
+            print(PROG_PRINT_TEMPLATE.format("(100%)", f"{seconds_to_time(self.duration)} / {seconds_to_time(self.duration)}", f"{self.totalActivity}", f"Processed {self.totalActivity} messages"), end='\r')
+        else:
+            # Progress stats
+            completion: float = round((float(msg['time_in_seconds'])/self.duration)*100, 2) # Completion %
+            processed_media_time: str = msg['time_text']
+            total_duration: str = seconds_to_time(self.duration)
+            msgs_processed: int = idx
+            print(PROG_PRINT_TEMPLATE.format(f"({completion}%)", f"{processed_media_time} / {total_duration}", f"{self.totalActivity}", f"Processed {msgs_processed} messages"), end='\r')
 @dataclass
 class YoutubeChatAnalytics(ChatAnalytics):
     """
