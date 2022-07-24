@@ -217,10 +217,10 @@ class Spike(Highlight):
     Attributes:
         type: str
             The attribute/field that spiked. i.e. "activity", "uniqueUsers", "chatMessages", etc.
-            NOTE: In current implementation, generic "activity" is the only thing that triggers a spike
-            TODO: Consider making this an enum/standardizing the type better so it is easily converted/used with the dataclasses themselves
         peak: float
             The highest activity of any sample contained within the spike. 
+        percentile: float # TODO: Remove or implement (implementation would be pretty time-consuming for not a whole lot of gain)
+            This spike is in the top 'percentile'% of all spikes of the same 'type'
     
     """
     type: str
@@ -293,6 +293,13 @@ class ChatAnalytics(ABC):
             The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
         overallAvgUniqueUsersPerSecond: float
             The average number of unique users chatting per second.
+        highlights: List[Highlight] 
+            TODO: Implement highlights
+        spikes: List[Spike]
+            A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
+        spike_percentiles: dict[str: list[int]] TODO: Implement or remove
+            For every unique spike 'type' in spikes, we report the percentile values for commonly saught-after percentiles. For example, if spikes were calculated for 
+            the 'avgUniqueUsersPerSecond' field, spike_percentiles will contain an entry: 'avgUniqueUsersPerSecond' -> [0th, 25th, 50th, 75th, 90th, 95th, 99th] (where each of the vals is the percentile val?)
     """
     # Defined when class Initialized
     duration: float
@@ -322,6 +329,7 @@ class ChatAnalytics(ABC):
     overallAvgUniqueUsersPerSecond: float = 0
     highlights: List[Highlight] = field(default_factory=list) # TODO: Implement highlights
     spikes: List[Spike] = field(default_factory=list)
+    # spike_percentiles: dict[str: list[int]] = field(default_factory=dict) # TODO: Implement or remove
 
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -455,7 +463,7 @@ class ChatAnalytics(ABC):
 
         # In order to calculate the percentile cutoff, we have to do two passes. 
         # First to calculate the cutoff, second to find the samples that meet the cutoff.
-        field_values = [s.__getattribute__(field_to_use) for s in self.samples]
+        field_values = [getattr(s, field_to_use) for s in self.samples]
         percentile_value_cutoff = np.percentile(field_values, [percentile])
 
         _firstSample: Sample = None
@@ -463,20 +471,21 @@ class ChatAnalytics(ABC):
         _peak: float = 0
 
         for sample in self.samples:
-            if(sample.__getattribute__(field_to_use) >= percentile_value_cutoff):
+            if(getattr(sample, field_to_use) >= percentile_value_cutoff):
                 # If first sample is not null set first sample to current sample
                 if(_firstSample == None):
                     _firstSample = sample
                 # Set the peak to the maximum of the current peak and the current sample's activity
-                _peak = max(_peak, sample.__getattribute__(field_to_use))
+                _peak = max(_peak, getattr(sample, field_to_use))
                 # Set the last sample to the current sample
                 _lastSample = sample
             else:
                 # We are either finished with a spike, or we are not in a spike
                 # If we were building a spike, append the spike to the spike list and reset internal variables
                 if(_firstSample != None):
-                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} spike >= {percentile} percentile (>= {percentile_value_cutoff})")
-                    spike_list.append(spike) # ERROR: Not appending alleviates the error, but I don't know why
+                    # TODO: Add betterdescription
+                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
+                    spike_list.append(spike)
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
@@ -547,7 +556,7 @@ class ChatAnalytics(ABC):
 
         # Spikes are determined after the final averages have been calculated
         # The appending within get_spikes causes the error: AttributeError: 'set' object has no attribute '__dict__'
-        self.spikes = self.get_spikes('avgActivityPerSecond', 90) # TODO: Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
+        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', 90) # TODO: Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
         # TODO: Add spikes field to the JSON object and document it as well
 
 
