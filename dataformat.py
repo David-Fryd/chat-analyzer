@@ -475,12 +475,14 @@ class ChatAnalytics(ABC):
                 # We are either finished with a spike, or we are not in a spike
                 # If we were building a spike, append the spike to the spike list and reset internal variables
                 if(_firstSample != None):
-                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type={field_to_use}, description=f"{field_to_use} spike >= {percentile} percentile (>= {percentile_value_cutoff})")
-                    spike_list.append(spike)
+                    # spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type={field_to_use}, description=f"{field_to_use} spike >= {percentile} percentile (>= {percentile_value_cutoff})")
+                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type="activity", description="Activity Spike")
+                    spike_list.append(spike) # ERROR: Not appending alleviates the error, but I don't know why
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
 
+        print("spike list type: ", type(spike_list))
         return spike_list
         
 
@@ -546,7 +548,9 @@ class ChatAnalytics(ABC):
 
 
         # Spikes are determined after the final averages have been calculated
+        # The appending within get_spikes causes the error: AttributeError: 'set' object has no attribute '__dict__'
         self.spikes = self.get_spikes('avgActivityPerSecond', 90) # TODO: Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
+        print("self.spikes type: ", type(self.spikes))
         # TODO: Add spikes field to the JSON object and document it as well
 
 
@@ -581,7 +585,7 @@ class ChatAnalytics(ABC):
                 # Progress stats
                 print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
             # TODO: Remove [DEBUG]
-            if(idx==10000):
+            if(idx==2000):
                 break
 
 
