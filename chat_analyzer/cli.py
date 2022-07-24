@@ -9,9 +9,14 @@ def main():
     parser.add_argument("--interval", default=5, type=int, help="Interval of the chat to analyze")
 
 
+    # TODO: Add mutually exclusive 'MODE'
+        # standard has everything built in
+        # re-process an old output file
+        # process a downloaded chat json file produced separately by the chat-downloader
+
     # TODO: Add sample size, etc...
 
-
+    # TODO: Settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
     # We print progress of the download/process every UPDATE_PROGRESS_INTERVAL messages
