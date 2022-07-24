@@ -1,5 +1,0 @@
-# Documentation Related
-sphinxcontrib-programoutput
-
-# Program related
-chat-downloader
