@@ -11,6 +11,7 @@ from dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 MAX_INTERVAL = 120
 MIN_INTERVAL = 1
 
+
 def download_chatlog(url: str):
     """
     Downloads and returns the chat log using Xenonva's chat-downloader
@@ -112,6 +113,8 @@ def run(**kwargs):
     url = kwargs.get('url')
     interval = kwargs.get('interval')
 
+    print_proggress_interval = kwargs.get('print_proggress_interval')
+
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     if(interval > MAX_INTERVAL or interval < MIN_INTERVAL):
         raise ValueError(f"Sample interval must be {MIN_INTERVAL} <= interval <= {MAX_INTERVAL}")
@@ -136,7 +139,7 @@ def run(**kwargs):
         exit(1)
 
     # Now, we can process the data!
-    chatAnalytics.process_chatlog(chatlog, url)
+    chatAnalytics.process_chatlog(chatlog, url, print_proggress_interval)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
     print("---")
@@ -187,6 +190,12 @@ def run(**kwargs):
 # url = 'https://www.twitch.tv/videos/1530042943' # MMG's stream
 # url = 'https://clips.twitch.tv/AverageSparklyTortoisePeoplesChamp' # (error) chat replay not avail
 # url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
+
+# TODO: Check the one below for type: sponsorships_gift_redemption_announcement
+# url = 'https://www.youtube.com/watch?v=1jRVuFcBj3M&list=PLLGT0cEMIAzcd5XagsMwz22-NFPmToKIP&index=2&ab_channel=Ludwig'
+
+# TODO: Consider 'raid' type:
+# url = 'https://www.twitch.tv/videos/1538666427'
 
 # run(url=url, interval=5)
 

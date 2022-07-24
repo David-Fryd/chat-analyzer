@@ -4,6 +4,7 @@ from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
 
 import numpy as np
+import chat_analyzer
 
 from chat_downloader.sites.common import Chat
 from typing import List
@@ -11,14 +12,16 @@ import logging
 
 from chat_downloader.utils.core import seconds_to_time
 
+# from chat_analyzer import UPDATE_PROGRESS_INTERVAL
+
+
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
 YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
-# We print progress of the download/process every UPDATE_PROGRESS_INTERVAL messages
-UPDATE_PROGRESS_INTERVAL: int = 1000
+
 # The formatting to print the progress status with
 PROG_PRINT_TEMPLATE = "{:^15}| {:^25} | {:^20}"
 
@@ -538,7 +541,7 @@ class ChatAnalytics(ABC):
 
    
 
-    def process_chatlog(self, chatlog: Chat, url: str):
+    def process_chatlog(self, chatlog: Chat, url: str, print_progress_interval: int):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
@@ -546,13 +549,16 @@ class ChatAnalytics(ABC):
         :type chatlog: chat_downloader.sites.common.Chat
         :param url: The URL of the video we have downloaded the log from
         :type url: str
+        :param print_progress_interval: After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
+        :type print_progress_interval: int
         """
 
         # Display progress as chats are downloaded/processed
         print("Downloading & Processing chat log...")
 
         # Header
-        print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
+        if(print_progress_interval > 0):
+            print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
 
         self.mediaTitle = chatlog.title
         self.mediaURL = url
@@ -560,15 +566,16 @@ class ChatAnalytics(ABC):
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
-            if(idx%UPDATE_PROGRESS_INTERVAL==0 and idx!=0):
+            if(print_progress_interval > 0 and idx%print_progress_interval==0 and idx!=0):
                 self.print_process_progress(msg, idx)
-                # TODO: Remove [DEBUG]
-                # if(idx==2000):
-                #     break
+            # TODO: Remove [DEBUG]
+            # if(idx==2000):
+            #     break
 
             self.process_message(msg)
 
-        self.print_process_progress(None, None, finished=True)
+        if(print_progress_interval > 0):
+            self.print_process_progress(None, None, finished=True)
 
         # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
         self.chatlog_post_process()
@@ -733,7 +740,10 @@ class TwitchChatAnalytics(ChatAnalytics):
         # TODO: Check this...
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
-
+def update_from_kwargs(**kwargs):
+    """Given the options from the CLI, modify internal settings, constants, variables, etc...
+    """
+    # TODO: Potentially remove, do we need this? Or can we just import settings from chat_analyzer.py?
 
 
 """
