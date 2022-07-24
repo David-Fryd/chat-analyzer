@@ -27,6 +27,11 @@ def download_chatlog(url: str):
         "message_types" : 'all'
     }
 
+    # TODO: control message_types based on CLI args
+
+    # TODO: Add option/flag to re-process a local output file for spikes
+    # TODO: Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths)
+
     # TODO: Print information more intelligently (and selectively based on arguments) (using logging) instead of regular print statements
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
 
@@ -34,8 +39,6 @@ def download_chatlog(url: str):
         chat = ChatDownloader().get_chat(
             chat_download_settings['url'], 
             message_types=[chat_download_settings['message_types']])       # create a generator
-        # Manually adds a url field to the Chat object
-        chat.url = url
     except Exception as exception:
         # TODO: Print errors more intelligently (using logging or to stderr) instead of regular print statements
         logging.critical("ERORR: Could not get chat: "+ str(exception))
@@ -125,7 +128,7 @@ def run(url: str, interval: int):
         exit(1)
 
     # Now, we can process the data!
-    chatAnalytics.process_chatlog(chatlog)
+    chatAnalytics.process_chatlog(chatlog, url)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
     print("---")
@@ -138,7 +141,7 @@ def run(url: str, interval: int):
 
     jsonObj = chatAnalytics.to_JSON()
     # print(jsonObj)
-    with open('markiplier.json', 'w') as f:
+    with open('output/'+chatlog.title+'.json', 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4) 
 
     """
@@ -165,17 +168,21 @@ def run(url: str, interval: int):
 
 # Some testing URLs
 # TODO: Replace url with argparse arg
-url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
+# url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
 # url = 'asdds.com/a/b/c/d' # (error) invalid URL
 # url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
 # url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
 # url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
-# url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
+url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
 # url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
-url = 'https://www.twitch.tv/videos/1289325547'
-
+url = 'https://www.twitch.tv/videos/1289325547' # markiplier peen stream
+# url = 'https://www.twitch.tv/videos/1530042943' # MMG's stream
+# url = 'https://clips.twitch.tv/AverageSparklyTortoisePeoplesChamp' # (error) chat replay not avail
+# url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
 
 run(url=url, interval=5)
+
+
 
 
 
