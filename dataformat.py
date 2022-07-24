@@ -575,12 +575,14 @@ class ChatAnalytics(ABC):
 
    
 
-    def process_chatlog(self, chatlog: Chat):
+    def process_chatlog(self, chatlog: Chat, url: str):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
         :param chatlog: The chatlog we have downloaded 
         :type chatlog: chat_downloader.sites.common.Chat
+        :param url: The URL of the video we have downloaded the log from
+        :type url: str
         """
 
         # Display progress as chats are downloaded/processed
@@ -588,14 +590,10 @@ class ChatAnalytics(ABC):
 
         # Header
         print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
-        
-
 
         self.mediaTitle = chatlog.title
-        # Uses manually added url after the download (non-native field)
-        self.mediaURL = chatlog.url
+        self.mediaURL = url
         
-
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
