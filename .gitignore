@@ -1,2 +1,11 @@
 .DS_Store
 localtestJSON/
+
+# TODO: Ensure we don't break anything by ignoring .vscode/
+.vscode/
+__pycache__/
+chat_analyzer/__pycache__/
+front-end-todo.txt
+
+# Local/Demo output
+output/
