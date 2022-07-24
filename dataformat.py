@@ -3,6 +3,8 @@ from argparse import ArgumentTypeError
 from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
 
+import numpy as np
+
 from chat_downloader.sites.common import Chat
 from typing import List
 import logging
@@ -327,7 +329,7 @@ class ChatAnalytics(ABC):
     _currentSample: Sample = None # field(default_factory=None)
 
     # Constants (not dumped in json)
-    txt_msg_types = {'text_message'} # Messages we just consider regular text_message
+    _txt_msg_types = {'text_message'} # Messages we just consider regular text_message
 
 
     def __post_init__(self):
@@ -391,7 +393,7 @@ class ChatAnalytics(ABC):
         self.totalActivity += 1
         self._currentSample.activity += 1
 
-        if(msg['message_type'] in self.txt_msg_types): # text_message is a traditional chat
+        if(msg['message_type'] in self._txt_msg_types): # text_message is a traditional chat
             self.totalChatMessages += 1
             self._currentSample.chatMessages += 1
 
@@ -411,13 +413,20 @@ class ChatAnalytics(ABC):
         # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
         # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
 
-        def to_JSON(self):
+    def to_JSON(self):
             # TODO: Check this...
             return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
-    def find_spikes(self):
+    def get_engagement_sections(self):
+        # TODO: Implement
+        # Use a two pointer approach to find the start and end of each engagement section
+        # (1 min, 5 min, 10 min, highest engagement, or smth like that)
+        raise NotImplementedError
+ 
+
+    def get_spikes(self, field_to_use: str, percentile: float):
         """
-        Find the spikes in activity in the chatlog based off of the calculated average activities (*per second*).
+        Find and return a list of samples with significant spikes in a given field/attribute.
 
         A spike is a point in the chatlog where the activity is significantly different from the average activity.
         Activity is significantly different if it is > avg*SPIKE_MULT_THRESHOLD.
@@ -433,33 +442,77 @@ class ChatAnalytics(ABC):
         What else should we be detecting spikes of/should we be offering options?
 
         TODO: use getattr to specify which attribute we are trying to find a spike for
-        """   
 
-        self.spikes: List[Spike] = []
+        :param field_to_use: _description_
+        :type field_to_use: str
+        :param percentile: _description_
+        :type percentile: float
+        :return: _description_
+        :rtype: List[Sample]
+        """        
+
+        spike_list: List[Spike] = []
+
+        # In order to calculate the percentile cutoff, we have to do two passes. 
+        # First to calculate the cutoff, second to find the samples that meet the cutoff.
+        field_values = [s.__getattribute__(field_to_use) for s in self.samples]
+        percentile_value_cutoff = np.percentile(field_values, [percentile])
 
         _firstSample: Sample = None
         _lastSample: Sample = None
         _peak: float = 0
 
-
         for sample in self.samples:
-            if(sample.avgActivityPerSecond >= self.overallAvgActivityPerSecond * SPIKE_MULT_THRESHOLD ):
+            if(sample.__getattribute__(field_to_use) >= percentile_value_cutoff):
                 # If first sample is not null set first sample to current sample
                 if(_firstSample == None):
                     _firstSample = sample
                 # Set the peak to the maximum of the current peak and the current sample's activity
-                _peak = max(_peak, sample.avgActivityPerSecond)
+                _peak = max(_peak, sample.__getattribute__(field_to_use))
                 # Set the last sample to the current sample
                 _lastSample = sample
             else:
                 # We are either finished with a spike, or we are not in a spike
                 # If we were building a spike, append the spike to the spike list and reset internal variables
                 if(_firstSample != None):
-                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type="activity", description="Activity Spike")
-                    self.spikes.append(spike)
+                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type={field_to_use}, description=f"{field_to_use} spike >= {percentile} percentile (>= {percentile_value_cutoff})")
+                    spike_list.append(spike)
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
+
+        return spike_list
+        
+
+
+
+ 
+
+    
+
+        # _firstSample: Sample = None
+        # _lastSample: Sample = None
+        # _peak: float = 0
+
+
+        # for sample in self.samples:
+        #     if(sample.avgActivityPerSecond >= self.overallAvgActivityPerSecond * SPIKE_MULT_THRESHOLD ):
+        #         # If first sample is not null set first sample to current sample
+        #         if(_firstSample == None):
+        #             _firstSample = sample
+        #         # Set the peak to the maximum of the current peak and the current sample's activity
+        #         _peak = max(_peak, sample.avgActivityPerSecond)
+        #         # Set the last sample to the current sample
+        #         _lastSample = sample
+        #     else:
+        #         # We are either finished with a spike, or we are not in a spike
+        #         # If we were building a spike, append the spike to the spike list and reset internal variables
+        #         if(_firstSample != None):
+        #             spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type="activity", description="Activity Spike")
+        #             self.spikes.append(spike)
+        #             _firstSample = None
+        #             _lastSample = None
+        #             _peak = 0
 
     def chatlog_post_process(self):
         """
@@ -493,7 +546,7 @@ class ChatAnalytics(ABC):
 
 
         # Spikes are determined after the final averages have been calculated
-        self.find_spikes()
+        self.spikes = self.get_spikes('avgActivityPerSecond', 90) # TODO: Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
         # TODO: Add spikes field to the JSON object and document it as well
 
 
@@ -528,8 +581,8 @@ class ChatAnalytics(ABC):
                 # Progress stats
                 print(f"\t({(round((float(msg['time_in_seconds'])/self.duration)*100, 2))}%) \t {msg['time_text']} / {seconds_to_time(self.duration)} \t Processed {idx} messages", end='\r')
             # TODO: Remove [DEBUG]
-            # if(idx==10000):
-            #     break
+            if(idx==10000):
+                break
 
 
             self.process_message(msg)
@@ -626,15 +679,15 @@ class TwitchChatAnalytics(ChatAnalytics):
 
 
     # Constants (not dumped in json)
-    subscription_msg_types = {'subscription', 'resubscription', 'extend_subscription', 'standard_pay_forward', 'community_pay_forward'}
-    gift_sub_msg_types = {'subscription_gift' , 'anonymous_subscription_gift' , 'anonymous_mystery_subscription_gift', 'mystery_subscription_gift', 'prime_community_gift_received'}
-    upgrade_sub_msg_types = {'prime_paid_upgrade', 'gift_paid_upgrade', 'reward_gift', 'anonymous_gift_paid_upgrade'}
+    _subscription_msg_types = {'subscription', 'resubscription', 'extend_subscription', 'standard_pay_forward', 'community_pay_forward'}
+    _gift_sub_msg_types = {'subscription_gift' , 'anonymous_subscription_gift' , 'anonymous_mystery_subscription_gift', 'mystery_subscription_gift', 'prime_community_gift_received'}
+    _upgrade_sub_msg_types = {'prime_paid_upgrade', 'gift_paid_upgrade', 'reward_gift', 'anonymous_gift_paid_upgrade'}
 
     def __post_init__(self):
         super().__post_init__()
         # Add this to text message types so that txt messages are processed in super process along with other txt messages
-        self.txt_msg_types.add('highlighted_message')
-        self.txt_msg_types.add('send_message_in_subscriber_only_mode')
+        self._txt_msg_types.add('highlighted_message')
+        self._txt_msg_types.add('send_message_in_subscriber_only_mode')
         # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
         self._currentSample: TwitchSample = self._currentSample
 
@@ -644,21 +697,21 @@ class TwitchChatAnalytics(ChatAnalytics):
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
         super().process_message(msg)
-        if(msg['message_type'] in self.subscription_msg_types):
+        if(msg['message_type'] in self._subscription_msg_types):
             self.totalSubscriptions += 1
             self._currentSample.subscriptions += 1
         
-        if(msg['message_type'] in self.gift_sub_msg_types):
+        if(msg['message_type'] in self._gift_sub_msg_types):
             self.totalGiftSubscriptions += 1
             self._currentSample.giftSubscriptions += 1
         
-        if(msg['message_type'] in self.upgrade_sub_msg_types):
+        if(msg['message_type'] in self._upgrade_sub_msg_types):
             self.totalUpgradeSubscriptions += 1
             self._currentSample.upgradeSubscriptions += 1
 
 
         # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type'] not in self.txt_msg_types and msg['message_type'] not in self.subscription_msg_types and msg['message_type'] not in self.upgrade_sub_msg_types and msg['message_type'] not in self.gift_sub_msg_types):
+        if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
             print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
             # print(msg)
         # TODO: Implement:
