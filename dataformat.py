@@ -17,12 +17,6 @@ YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 
-# How many times larger a data point must be from its average to be considered a "spike"
-# Lower thresholds mean more data points are considered "spikes", possibly resulting in more false positives
-# SHOULD BE > 1, Values <=1 result in undesireable behavior (stuff that is below average is considered a spike)
-SPIKE_MULT_THRESHOLD: float = 2.0
-# TODO: Control SPIKE_MULT_THRESHOLD with options argparse
-
 # We print progress of the download/process every UPDATE_PROGRESS_INTERVAL messages
 UPDATE_PROGRESS_INTERVAL: int = 1000
 # The formatting to print the progress status with
@@ -496,37 +490,6 @@ class ChatAnalytics(ABC):
                     _peak = 0
 
         return spike_list
-        
-
-
-
- 
-
-    
-
-        # _firstSample: Sample = None
-        # _lastSample: Sample = None
-        # _peak: float = 0
-
-
-        # for sample in self.samples:
-        #     if(sample.avgActivityPerSecond >= self.overallAvgActivityPerSecond * SPIKE_MULT_THRESHOLD ):
-        #         # If first sample is not null set first sample to current sample
-        #         if(_firstSample == None):
-        #             _firstSample = sample
-        #         # Set the peak to the maximum of the current peak and the current sample's activity
-        #         _peak = max(_peak, sample.avgActivityPerSecond)
-        #         # Set the last sample to the current sample
-        #         _lastSample = sample
-        #     else:
-        #         # We are either finished with a spike, or we are not in a spike
-        #         # If we were building a spike, append the spike to the spike list and reset internal variables
-        #         if(_firstSample != None):
-        #             spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type="activity", description="Activity Spike")
-        #             self.spikes.append(spike)
-        #             _firstSample = None
-        #             _lastSample = None
-        #             _peak = 0
 
     def chatlog_post_process(self):
         """
