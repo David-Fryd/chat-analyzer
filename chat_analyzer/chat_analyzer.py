@@ -92,7 +92,7 @@ def check_chatlog_supported(chatlog: Chat, url: str):
 
 
 # TODO: interval and url are determined from argparse and given to this function here
-def run(url: str, interval: int):
+def run(**kwargs):
     """Runs the chat-analyzer
     
     :param url: The URL of the past stream/VOD we want to download and analyze
@@ -103,6 +103,14 @@ def run(url: str, interval: int):
     #TODO: Define return(s) and rtype docs
     
     """
+
+    for arg in kwargs:
+        value = kwargs[arg]
+
+        print(f"analyzing arg {arg}: {value}")
+
+    url = kwargs.get('url')
+    interval = kwargs.get('interval')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     if(interval > MAX_INTERVAL or interval < MIN_INTERVAL):
@@ -173,14 +181,14 @@ def run(url: str, interval: int):
 # url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
 # url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
 # url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
-url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
-# url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
-url = 'https://www.twitch.tv/videos/1289325547' # markiplier peen stream
+# url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
+# # url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
+# url = 'https://www.twitch.tv/videos/1289325547' # markiplier peen stream
 # url = 'https://www.twitch.tv/videos/1530042943' # MMG's stream
 # url = 'https://clips.twitch.tv/AverageSparklyTortoisePeoplesChamp' # (error) chat replay not avail
 # url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
 
-run(url=url, interval=5)
+# run(url=url, interval=5)
 
 
 
