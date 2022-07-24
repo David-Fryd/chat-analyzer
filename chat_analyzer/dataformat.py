@@ -620,8 +620,10 @@ class YoutubeChatAnalytics(ChatAnalytics):
     totalMemberships: int = 0
 
     # Constants (not dumped in json)
-    superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
+    _superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
     
+    # TODO: Look into sponsorships_gift_redemption_announcement (...'was gifted a membership by...')
+
     def __post_init__(self):
         super().__post_init__()
         # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
@@ -631,7 +633,7 @@ class YoutubeChatAnalytics(ChatAnalytics):
         """Given a msg object from chat, update common fields and youtube-specific fields"""
         super().process_message(msg)
                
-        if(msg['message_type'] in self.superchat_msg_types):
+        if(msg['message_type'] in self._superchat_msg_types):
             self.totalSuperchats += 1
             self._currentSample.superchats += 1
         if(msg['message_type'] == 'membership_item'):
@@ -639,7 +641,7 @@ class YoutubeChatAnalytics(ChatAnalytics):
             self._currentSample.memberships += 1
     
      # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type']!='text_message' and msg['message_type'] not in self.superchat_msg_types and msg['message_type']!='membership_item'):
+        if(msg['message_type']!='text_message' and msg['message_type'] not in self._superchat_msg_types and msg['message_type']!='membership_item'):
             print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
             # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
             print(msg)
