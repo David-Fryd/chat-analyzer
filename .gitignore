@@ -5,7 +5,6 @@ localtestJSON/
 .vscode/
 __pycache__/
 chat_analyzer/__pycache__/
-front-end-todo.txt
 
 # Local/Demo output
 output/
