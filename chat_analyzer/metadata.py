@@ -1,0 +1,10 @@
+"""Set metadata for chat-analyzer"""
+
+__title__ = 'chat-analyzer'
+__program__ = 'chat_analyzer'
+__summary__ = 'A program that analyzes chat logs from previous live streams and reports useful data about activity over the stream\'s lifetime.'
+__author__ = 'David Fryd'
+__email__ = 'info@chatanalyze.com'
+__copyright__ = '2022 David Fryd'
+__url__ = 'https://github.com/David-Fryd/chat-analyzer'
+__version__ = '0.1.0'

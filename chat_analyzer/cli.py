@@ -1,10 +1,13 @@
 import argparse
 
+from metadata import (
+    __version__,
+    __summary__,
+    __program__
+)
 
 from analyzer import run, MAX_INTERVAL, MIN_INTERVAL
 from dataformat import SUPPORTED_PLATFORMS
-
-program_description = "A program that analyzes chat logs from previous live streams and reports useful data about activity over the stream's lifetime."
 
 MAX_INTERVAL
 MIN_INTERVAL
@@ -20,10 +23,19 @@ def check_interval(interval):
         raise argparse.ArgumentTypeError(f"Interval must be at most {MAX_INTERVAL} and at least {MIN_INTERVAL}")
     return interval
 
-def main():
-    parser = argparse.ArgumentParser(program_description, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+def check_positive_int(value):
+    """
+    Check that the value is a positive integer"""
+    value = int(value)
+    if value < 0:
+        raise argparse.ArgumentTypeError("Value must be a positive integer")
+    return value
 
-    parser.add_argument('--debug','-d', action='store_true', help='Enable debug mode')
+def main():
+    parser = argparse.ArgumentParser(description=__summary__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.prog = __program__
+    parser.add_argument('--version', action='version', version=__version__)
 
     parser._positionals.title = 'Required Arguments'
     parser._optionals.title = 'Optional Arguments'
@@ -65,6 +77,11 @@ def main():
     parser.add_argument("--print-proggress-interval", "-ppi", default=1000, type=int, help="Interval of progress printing TODO: Add better description")
 
     # output_group = parser.add_argument_group("Output")
+    
+
+    debug = parser.add_argument_group('Debugging')
+    debug.add_argument('--debug','-d', action='store_true', help='Enable debug mode (debug info is printed)')
+    debug.add_argument('--break','-v', type=check_positive_int, help='Stop execution after processing this number of messages. WARNING: May cause undefined behavior, because certain parts of execution assume that chatlog has been completely processed.')
 
     args = parser.parse_args()
 
@@ -88,6 +105,7 @@ def main():
 # url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
 
 # TODO: Check the one below for type: sponsorships_gift_redemption_announcement
+# TODO: Look into sponsorships_gift_redemption_announcement (...'was gifted a membership by...')
 # url = 'https://www.youtube.com/watch?v=1jRVuFcBj3M&list=PLLGT0cEMIAzcd5XagsMwz22-NFPmToKIP&index=2&ab_channel=Ludwig'
 
 # TODO: Consider 'raid' type:
