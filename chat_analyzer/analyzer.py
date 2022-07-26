@@ -1,6 +1,6 @@
 import json
-
 import logging
+
 from chat_downloader import ChatDownloader
 from urllib.parse import urlparse
 from chat_downloader.sites.common import Chat
@@ -27,7 +27,6 @@ def download_chatlog(url: str):
         "url" : url,
         "message_types" : 'all' #(TODO#56ab7)
     }
-    
 
     # TODO: Print information more intelligently (and selectively based on arguments) (using logging) instead of regular print statements
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
@@ -98,7 +97,6 @@ def run(**kwargs):
     :type interval: int
 
     #TODO: Define return(s) and rtype docs
-    
     """
 
     # Interpret and extract CLI arguments from kwargs
@@ -158,7 +156,3 @@ def run(**kwargs):
     
     # TODO: When returned, the method that gets it should decide how to output it based on CLI
     return chatAnalytics
-
-
-
-
