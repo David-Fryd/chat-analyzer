@@ -23,6 +23,8 @@ def check_interval(interval):
 def main():
     parser = argparse.ArgumentParser(program_description, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    parser.add_argument('--debug','-d', action='store_true', help='Enable debug mode')
+
     parser._positionals.title = 'Required Arguments'
     parser._optionals.title = 'Optional Arguments'
     # parser._subparsers.title = 'Subcommands'
