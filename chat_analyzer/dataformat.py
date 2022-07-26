@@ -25,8 +25,6 @@ PROG_PRINT_TEMPLATE = "{:^15}| {:^25} | {:^20}"
 
 @dataclass
 class Sample():
-    # TODO: Implement subclasses
-    # TODO: Implement max-per-sample in addition to average for other fields
     """
     Class that contains data of a specific time interval of the chat.
     Messages will be included in a sample if they are contained within [startTime, endTime)
@@ -115,11 +113,8 @@ class Sample():
             self.avgChatMessagesPerSecond = self.chatMessages/self.sampleDuration
             self.avgUniqueUsersPerSecond = self.uniqueUsers/self.sampleDuration
         else:
-            # TODO: Look at the chat-analyzer log function and use that instead for consistency?
             logging.warning(f"Sample was created with duration < 0 (duration: {self.sampleDuration}): {self}")
 
-        # TODO: Remove this temporary measure
-        # del self._userChats # TODO: Fix, it doesn't work!
         self._userChats.clear()
 @dataclass
 class TwitchSample(Sample):
@@ -178,7 +173,6 @@ class Highlight():
             A description of the highlight (if any).
 
         [Automatically re-defined on post-init]
-        TODO: Remove duration and duration_text fields when we ensure that it is trivial to take care of in naive graphing sense (in this class and similar)
         duration: float
             The duration (in seconds) of the highlight (end-start)
         duration_text: str
@@ -217,8 +211,6 @@ class Spike(Highlight):
             The attribute/field that spiked. i.e. "activity", "uniqueUsers", "chatMessages", etc.
         peak: float
             The highest activity of any sample contained within the spike. 
-        percentile: float # TODO: Remove or implement (implementation would be pretty time-consuming for not a whole lot of gain)
-            This spike is in the top 'percentile'% of all spikes of the same 'type'
     
     """
     type: str
@@ -252,7 +244,7 @@ class ChatAnalytics(ABC):
         interval: int
             The time interval (in seconds) at which to compress datapoints into samples. (Duration of the samples/How granular the analytics are)
             i.e. at interval=10, each sample's fields contain data about 10 seconds of cumulative data.
-            *Only exception is the last sample which may contain less than interval. #TODO: Word this line more clearly
+            *Only exception is the last sample which may contain less than interval b/c media duration is not necessarily divisible by the interval.
             #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
         
         [Automatically Defined on init]
@@ -292,12 +284,9 @@ class ChatAnalytics(ABC):
         overallAvgUniqueUsersPerSecond: float
             The average number of unique users chatting per second.
         highlights: List[Highlight] 
-            TODO: Implement highlights
+            Not yet implemented
         spikes: List[Spike]
             A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
-        spike_percentiles: dict[str: list[int]] TODO: Implement or remove
-            For every unique spike 'type' in spikes, we report the percentile values for commonly saught-after percentiles. For example, if spikes were calculated for 
-            the 'avgUniqueUsersPerSecond' field, spike_percentiles will contain an entry: 'avgUniqueUsersPerSecond' -> [0th, 25th, 50th, 75th, 90th, 95th, 99th] (where each of the vals is the percentile val?)
     """
     # Defined when class Initialized
     duration: float
@@ -325,10 +314,8 @@ class ChatAnalytics(ABC):
     overallAvgActivityPerSecond: float = 0
     overallAvgChatMessagesPerSecond: float = 0
     overallAvgUniqueUsersPerSecond: float = 0
-    highlights: List[Highlight] = field(default_factory=list) # TODO: Implement highlights
+    highlights: List[Highlight] = field(default_factory=list) # Not implemented yet
     spikes: List[Spike] = field(default_factory=list)
-    # spike_percentiles: dict[str: list[int]] = field(default_factory=dict) # TODO: Implement or remove
-
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
     _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
@@ -347,20 +334,9 @@ class ChatAnalytics(ABC):
         Post-processes the previous sample, then appends & creates a new sample
         following the previous sample sequentially. If a previous sample doesn't exist, 
         creates the first sample.
-        
-        NOTE: In the current implementation, there could exist consecutive samples with 0 activity 
-        (or identical, but less likely), which are easily compressed. However, this uncompressed approach
-        makes naively graphing the points easier, which is a primary objective of the output of this program.
 
-        TODO: Implement an option to enable run-length encoding/compression:
-                A sequence of identical no-activity samples could eventually be compressed
-                into 1 or 3 samples. (3 sample approach helps preserve naive graphing):
-                    1 sample apprch: 1 sample consumes all of the consecutive identical samples and modifies
-                                        start/end/duration accordingly
-                    3 sample apprch: 3 sample approach preserves first and last sample, and combines
-                                        intermediate samples. That way the slope into/out of the silence
-                                        interval is preserved.
-                    Other potential options, but these are the ones we have considered that are not terribly complex
+        NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12,
+        there are still a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
         """
 
         # We need a new sample, process the last one and create a new sample
@@ -415,16 +391,10 @@ class ChatAnalytics(ABC):
                 # keeps track of unique user per *sample*
                 self._currentSample._userChats[authID] = self._currentSample._userChats[authID] + 1 if authID in self._currentSample._userChats else 1
 
-
-        # NOTE: If there there are only 2 chats, one at time 0:03, and the other at 5:09:12, there are still
-        # we still have a lot of empty samples in between (because we still want to graph/track the silence times with temporal stability)
-
     def to_JSON(self):
-            # TODO: Check this...
             return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
     def get_engagement_sections(self):
-        # TODO: Implement
         # Use a two pointer approach to find the start and end of each engagement section
         # (1 min, 5 min, 10 min, highest engagement, or smth like that)
         raise NotImplementedError
@@ -442,12 +412,6 @@ class ChatAnalytics(ABC):
 
         This method should only be called after the averages have been calculated,
         ensuring accurate results when determining spikes.
-
-        TODO: Should we be tracking spikes in total activity, or offer more granular control?
-        For now, totalActivity is the only thing we track. It's naive but it works for now.
-        What else should we be detecting spikes of/should we be offering options?
-
-        TODO: use getattr to specify which attribute we are trying to find a spike for
 
         :param field_to_use: _description_
         :type field_to_use: str
@@ -481,7 +445,6 @@ class ChatAnalytics(ABC):
                 # We are either finished with a spike, or we are not in a spike
                 # If we were building a spike, append the spike to the spike list and reset internal variables
                 if(_firstSample != None):
-                    # TODO: Add betterdescription
                     spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
                     spike_list.append(spike)
                     _firstSample = None
@@ -512,24 +475,16 @@ class ChatAnalytics(ABC):
         # Need to calculate unique users per second based on sample unique users, totalUniqueUsers/duration doesn't tell us what we want to know
         self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
-        # TODO: Calculate more advanced fields like "averageChatsPerUser"
-
         # Process and remove the final sample from the currentSample field
         self._currentSample.sample_post_process()
-        # TODO del doesnt work because it messes with the internal representation of the object which pisses off output for some reason, look into this...
-        # del self._currentSample
-        # NOTE: delattr didn't do what was required on first attempt but perhaps it was employed incorrectly
-
 
         # Spikes are determined after the final averages have been calculated
         # The appending within get_spikes causes the error: AttributeError: 'set' object has no attribute '__dict__'
-        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', 90) # TODO: Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
-        # TODO: Add spikes field to the JSON object and document it as well
+        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', 90) 
 
-
-        # Remove all other internal variables not suitable for output TODO fix del and do it
+        # Remove all other internal variables not suitable for output
         # del self._overallUserChats
-        self._overallUserChats.clear()# TODO: Remove this temporary measure
+        self._overallUserChats.clear()
         # del self._currentSample
         self._currentSample = None
 
@@ -563,10 +518,7 @@ class ChatAnalytics(ABC):
         for idx, msg in enumerate(chatlog):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
             if(print_progress_interval > 0 and idx%print_progress_interval==0 and idx!=0):
-                self.print_process_progress(msg, idx)
-            # TODO: Remove [DEBUG]
-            # if(idx==2000):
-            #     break
+                self.print_process_progress(msg, idx)   
 
             self.process_message(msg)
 
@@ -624,8 +576,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
 
     # Constants (not dumped in json)
     _superchat_msg_types = {'paid_message', 'paid_sticker', 'ticker_paid_message_item', 'ticker_paid_sticker_item', 'ticker_sponsor_item'}
-    
-    # TODO: Look into sponsorships_gift_redemption_announcement (...'was gifted a membership by...')
 
     def __post_init__(self):
         super().__post_init__()
@@ -649,9 +599,7 @@ class YoutubeChatAnalytics(ChatAnalytics):
             # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
             print(msg)
 
-
     def to_JSON(self):
-        # TODO: Check this...
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 @dataclass
 class TwitchChatAnalytics(ChatAnalytics):
@@ -720,20 +668,9 @@ class TwitchChatAnalytics(ChatAnalytics):
         if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
             print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
             # print(msg)
-        # TODO: Implement:
-
-        # if(msg['message_type'] in self.txt_msg_types)
     
     
     def to_JSON(self):
-        """
-        Returns a JSON string representation of the object
-
-        :return: JSON string representation of the object
-        :rtype: str
-        """
-
-        # TODO: Check this...
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
 def update_from_kwargs(**kwargs):
