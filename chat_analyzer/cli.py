@@ -67,3 +67,26 @@ def main():
     args = parser.parse_args()
 
     run(**args.__dict__)
+
+
+
+
+# Some testing URLs
+# TODO: Replace url with argparse arg
+# url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
+# url = 'asdds.com/a/b/c/d' # (error) invalid URL
+# url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
+# url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
+# url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
+# url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
+# # url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
+# url = 'https://www.twitch.tv/videos/1289325547' # markiplier peen stream
+# url = 'https://www.twitch.tv/videos/1530042943' # MMG's stream
+# url = 'https://clips.twitch.tv/AverageSparklyTortoisePeoplesChamp' # (error) chat replay not avail
+# url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
+
+# TODO: Check the one below for type: sponsorships_gift_redemption_announcement
+# url = 'https://www.youtube.com/watch?v=1jRVuFcBj3M&list=PLLGT0cEMIAzcd5XagsMwz22-NFPmToKIP&index=2&ab_channel=Ludwig'
+
+# TODO: Consider 'raid' type:
+# url = 'https://www.twitch.tv/videos/1538666427'

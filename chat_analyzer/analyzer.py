@@ -114,7 +114,8 @@ def run(**kwargs):
     mode = kwargs.get('mode')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
-    if(interval > MAX_INTERVAL or interval < MIN_INTERVAL):
+    # NOTE: We double check here in addition to in CLI
+    if(interval > MAX_INTERVAL or interval < MIN_INTERVAL): 
         raise ValueError(f"Sample interval must be {MIN_INTERVAL} <= interval <= {MAX_INTERVAL}")
 
     # Get the chat using the chat downloader and ensure that we can work with that data
@@ -148,60 +149,15 @@ def run(**kwargs):
     print("---")
     print("---")
 
-    # Temporary null of the internal variables here so they arent printed, TODO: REMOVE
-    chatAnalytics._userChats = None
-
     # print(chatAnalytics)
 
     jsonObj = chatAnalytics.to_JSON()
     # print(jsonObj)
     with open('output/'+chatlog.title+'.json', 'w') as f:
-        json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4) 
-
-    """
-    analyticsJSONObj = jsonpickle.encode(chatAnalytics, unpicklable=False)
-    
-    print("\n\n\n\n\n\n\n\n\nJSON OBJ:")
-    analyticsJSONData = json.dumps(analyticsJSONObj, indent=4)
-    print(analyticsJSONData)
-
-    with open('analytics.json', 'w') as f:
-        json.dump(analyticsJSONObj, f, ensure_ascii=False, indent=4)
-
-    with open('analytics2.txt', 'w') as f:
-        json.dump(analyticsJSONObj, f, ensure_ascii=False, indent=4)
-    """
+        json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
     
     # TODO: When returned, the method that gets it should decide how to output it based on CLI
     return chatAnalytics
-
-
-# TODO: This gets called from another file that takes in arguments and passes them to run.
-# For testing purposes we just call it here internally
-
-
-# Some testing URLs
-# TODO: Replace url with argparse arg
-# url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
-# url = 'asdds.com/a/b/c/d' # (error) invalid URL
-# url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
-# url = 'https://www.twitch.tv/videos/1522574868'  # summit1g's 14 hour stream
-# url = 'https://www.youtube.com/watch?v=PTWpoZITraE&ab_channel=RobScallon' # (error) Youtube video without chat replay
-# url = 'https://www.youtube.com/watch?v=UR902_1LhVk&t=24333s&ab_channel=Ludwig' # Ludwig's 1 million dollar game poker stream, 8:57:25, 158366 totalActivity
-# # url = 'https://www.youtube.com/watch?v=vjBNozL9Daw' #(error for now TODO: test later) no chat replay
-# url = 'https://www.twitch.tv/videos/1289325547' # markiplier peen stream
-# url = 'https://www.twitch.tv/videos/1530042943' # MMG's stream
-# url = 'https://clips.twitch.tv/AverageSparklyTortoisePeoplesChamp' # (error) chat replay not avail
-# url = 'https://www.twitch.tv/videos/1534993737' # Huge fkin XQC stream
-
-# TODO: Check the one below for type: sponsorships_gift_redemption_announcement
-# url = 'https://www.youtube.com/watch?v=1jRVuFcBj3M&list=PLLGT0cEMIAzcd5XagsMwz22-NFPmToKIP&index=2&ab_channel=Ludwig'
-
-# TODO: Consider 'raid' type:
-# url = 'https://www.twitch.tv/videos/1538666427'
-
-# run(url=url, interval=5)
-
 
 
 
