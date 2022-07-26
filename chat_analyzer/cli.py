@@ -15,9 +15,9 @@ def check_interval(interval):
     ensure that the entered interval respects that boundary"""
     interval = int(interval)
     if interval < MIN_INTERVAL:
-        raise argparse.ArgumentTypeError(f"Interval must be at least {MIN_INTERVAL}")
+        raise argparse.ArgumentTypeError(f"Interval must be at least {MIN_INTERVAL} and at most {MAX_INTERVAL}")
     if interval > MAX_INTERVAL:
-        raise argparse.ArgumentTypeError(f"Interval must be at most {MAX_INTERVAL}")
+        raise argparse.ArgumentTypeError(f"Interval must be at most {MAX_INTERVAL} and at least {MIN_INTERVAL}")
     return interval
 
 def main():
@@ -46,7 +46,7 @@ def main():
         \033[1m\'reprocess\'\033[0m mode reads from a .json file produced by this program in a previous run, and recalculates the post-processed data based on the existing samples.""")
     
     
-    parser.add_argument("--interval", default=5, type=check_interval, help="Interval of the chat to analyze")
+    parser.add_argument("--interval", "-i" , default=5, type=check_interval, help="Interval of the chat to analyze")
 
     # TODO: Add mutually exclusive 'MODE
         # standard has everything built in
