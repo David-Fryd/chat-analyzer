@@ -1,19 +1,15 @@
 import json
+import analyzer
+import numpy as np
+import logging
+
 from argparse import ArgumentTypeError
 from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
-
-import numpy as np
-import analyzer
-
 from chat_downloader.sites.common import Chat
 from typing import List
-import logging
 
 from chat_downloader.utils.core import seconds_to_time
-
-
-
 
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
@@ -744,41 +740,3 @@ def update_from_kwargs(**kwargs):
     """Given the options from the CLI, modify internal settings, constants, variables, etc...
     """
     # TODO: Potentially remove, do we need this? Or can we just import settings from analyzer.py?
-
-
-"""
-Main TODO list:
-
-    Stats to track/things to do (not yet implemented) ---
-    From most to least important/pressing:
-    # TODO: Highest 1,5,10 min periods of engangement (potentially more/different periods) (Highlights)
-    # TODO: Average messages per chatter (not all users, just average among active chatters) (NOT avg chat per viewers because we don't know how many viewers there are)
-    # TODO: Best/(Top 5) chatters.
-    # TODO: Median messages per chatter
-
-    # TODO: Use statistics library to find outliers, report median, std dev, etc... 
-
-    # TODO: Go through messsage types to figure out what we should be tracking in the ChatAnalytics
-
-    For Samples:
-    # TODO: How many chatters spoke that haven't spoken in the last X samples/minutes/interval? (Not critical)
-
-=
-
-    # ADVANCED TODO: 
-    #   Semantic analysis using DL
-    # 
-"""
-
-
-# TODO: Front end advertising:
-"""
-For creators: don't forget to subscribe effective? what is most engaging part of stream?
-
-For editors: more quickyl find interesting parts
-
-potential creators:
-    pick popular youtube/twitch streamers, see what part of their streams generate the most engagement
-
-Researchers
-"""
