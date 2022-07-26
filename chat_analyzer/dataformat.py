@@ -4,7 +4,7 @@ from dataclasses import dataclass,field
 from abc import ABC, abstractclassmethod
 
 import numpy as np
-import chat_analyzer
+import analyzer
 
 from chat_downloader.sites.common import Chat
 from typing import List
@@ -12,7 +12,7 @@ import logging
 
 from chat_downloader.utils.core import seconds_to_time
 
-# from chat_analyzer import UPDATE_PROGRESS_INTERVAL
+
 
 
 # The platforms we currently support downloading from.
@@ -743,7 +743,7 @@ class TwitchChatAnalytics(ChatAnalytics):
 def update_from_kwargs(**kwargs):
     """Given the options from the CLI, modify internal settings, constants, variables, etc...
     """
-    # TODO: Potentially remove, do we need this? Or can we just import settings from chat_analyzer.py?
+    # TODO: Potentially remove, do we need this? Or can we just import settings from analyzer.py?
 
 
 """

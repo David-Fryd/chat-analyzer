@@ -25,13 +25,9 @@ def download_chatlog(url: str):
     # Define the arguments for getting the chatlog using chat-downloader
     chat_download_settings =  {
         "url" : url,
-        "message_types" : 'all'
+        "message_types" : 'all' #(TODO#56ab7)
     }
-
-    # TODO: control message_types based on CLI args
-
-    # TODO: Add option/flag to re-process a local output file for spikes
-    # TODO: Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths)
+    
 
     # TODO: Print information more intelligently (and selectively based on arguments) (using logging) instead of regular print statements
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
@@ -105,23 +101,30 @@ def run(**kwargs):
     
     """
 
+    # Interpret and extract CLI arguments from kwargs
     for arg in kwargs:
         value = kwargs[arg]
-
         print(f"analyzing arg {arg}: {value}")
 
-    url = kwargs.get('url')
+    source = kwargs.get('source') # Is either a url, or a json filepath that is raw chat data or an already processed output file...
     interval = kwargs.get('interval')
 
     print_proggress_interval = kwargs.get('print_proggress_interval')
+
+    mode = kwargs.get('mode')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     if(interval > MAX_INTERVAL or interval < MIN_INTERVAL):
         raise ValueError(f"Sample interval must be {MIN_INTERVAL} <= interval <= {MAX_INTERVAL}")
 
     # Get the chat using the chat downloader and ensure that we can work with that data
-    chatlog: Chat = download_chatlog(url)
-    check_chatlog_supported(chatlog, url)
+    chatlog: Chat
+    if(mode=='url'):
+        url = source
+        chatlog = download_chatlog(url)
+        check_chatlog_supported(chatlog, url)
+    else:
+        raise NotImplementedError(f"Mode {mode} is not yet supported... oops :(")
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
