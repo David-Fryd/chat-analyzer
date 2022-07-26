@@ -1,7 +1,7 @@
 # Chat Analyzer TODO
 
 ## High Priority
-- Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
+- **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
 - Print output destination on completion
 - In addition to regular & integrated processing, add 2 modes:
   - Add option/flag to re-process a local output file for spikes
@@ -10,6 +10,8 @@
 - Define output file, and print where file is created/output upon completion
 
 ## Medium Priority
+- Update README
+  - JSON output documentation
 - Add debug early break in process_chatlog in dataformat
 - Find other types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
 - Implement `get_engagement_sections`
@@ -28,7 +30,7 @@
 - Develop meaningful error codes whenever `exit()` is invoked. (See chat_analyzer.py, and maybe other places)
 
 ## Low Priority
-- Improve spike descriptions
+- Improve spike descriptions fields in `get_spikes` when they are created
 - Control message types that we analyze/download based on CLI. (Edit chat_download_settings before passing to the chat downloader)
 - Prune redundant fields from `dataformat` classes, for example: `duration` and `duration_text` fields from `Highlight` when we ensure naive front-end graphing solution
 - Spike percentile field

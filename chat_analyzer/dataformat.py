@@ -242,9 +242,10 @@ class ChatAnalytics(ABC):
         duration: float
             The total duration (in seconds) of the associated video/media. Message times correspond to the video times
         interval: int
-            The time interval (in seconds) at which to compress datapoints into samples. (Duration of the samples/How granular the analytics are)
-            i.e. at interval=10, each sample's fields contain data about 10 seconds of cumulative data.
-            *Only exception is the last sample which may contain less than interval b/c media duration is not necessarily divisible by the interval.
+            The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
+            granular the analytics are. At interval=10, each sample's fields contain data about 10 seconds of cumulative data.
+            *(With the exception of the last sample, which may be shorter than the interval.)* 
+            This is b/c media duration is not necessarily divisible by the interval.
             #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
         
         [Automatically Defined on init]
@@ -492,7 +493,7 @@ class ChatAnalytics(ABC):
 
    
 
-    def process_chatlog(self, chatlog: Chat, url: str, print_progress_interval: int):
+    def process_chatlog(self, chatlog: Chat, url: str, print_interval: int):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
@@ -508,7 +509,7 @@ class ChatAnalytics(ABC):
         print("Downloading & Processing chat log...")
 
         # Header
-        if(print_progress_interval > 0):
+        if(print_interval > 0):
             print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
 
         self.mediaTitle = chatlog.title
@@ -517,12 +518,12 @@ class ChatAnalytics(ABC):
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
-            if(print_progress_interval > 0 and idx%print_progress_interval==0 and idx!=0):
+            if(print_interval > 0 and idx%print_interval==0 and idx!=0):
                 self.print_process_progress(msg, idx)   
 
             self.process_message(msg)
 
-        if(print_progress_interval > 0):
+        if(print_interval > 0):
             self.print_process_progress(None, None, finished=True)
 
         # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
@@ -593,11 +594,11 @@ class YoutubeChatAnalytics(ChatAnalytics):
             self.totalMemberships += 1
             self._currentSample.memberships += 1
     
-     # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type']!='text_message' and msg['message_type'] not in self._superchat_msg_types and msg['message_type']!='membership_item'):
-            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
-            # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
-            print(msg)
+    #  # TODO: Remove Print statements [DEBUG]
+    #     if(msg['message_type']!='text_message' and msg['message_type'] not in self._superchat_msg_types and msg['message_type']!='membership_item'):
+    #         print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+    #         # print("\033[1;33mGroup:" + msg['message_group'] + "\033[0m")
+    #         print(msg)
 
     def to_JSON(self):
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
@@ -664,10 +665,10 @@ class TwitchChatAnalytics(ChatAnalytics):
             self._currentSample.upgradeSubscriptions += 1
 
 
-        # TODO: Remove Print statements [DEBUG]
-        if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
-            print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
-            # print(msg)
+        # # TODO: Remove Print statements [DEBUG]
+        # if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
+        #     print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+        #     # print(msg)
     
     
     def to_JSON(self):

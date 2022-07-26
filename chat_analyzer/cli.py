@@ -9,9 +9,6 @@ from metadata import (
 from analyzer import run, MAX_INTERVAL, MIN_INTERVAL
 from dataformat import SUPPORTED_PLATFORMS
 
-MAX_INTERVAL
-MIN_INTERVAL
-
 def check_interval(interval):
     """
     Based on the MAX_INTERVAL and MIN_INTERVAL from chat_analyzer.py,
@@ -34,23 +31,41 @@ def check_positive_int(value):
 def main():
     parser = argparse.ArgumentParser(description=__summary__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
+    # Parser info
     parser.prog = __program__
-    parser.add_argument('--version', action='version', version=__version__)
-
     parser._positionals.title = 'Required Arguments'
     parser._optionals.title = 'Optional Arguments'
     # parser._subparsers.title = 'Subcommands'
 
+    # Meta-arguments
+    parser.add_argument('--version', action='version', version=__version__)
+
     # TODO: Add subparser for different modes (instead of having a --modes thing)?
     # https://stackoverflow.com/questions/8250010/argparse-identify-which-subparser-was-used/9286586#9286586
     # https://stackoverflow.com/questions/17073688/how-to-use-argparse-subparsers-correctly
+    # TODO: Add mutually exclusive 'MODE
+        # standard has everything built in
+        # re-process an old output file
+        # process a downloaded chat json file produced separately by the chat-downloader
 
+    # Required arguments
     parser.add_argument("source", type=str,\
         help=f"""A url to a past stream/VOD. We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
         In --mode=='chatfile' or 'reprocess', source is a filepath to a 
         .json raw chat log produced by Xenonva's chat-downloader, 
         or a .json output file previously produced by this program (respectively).""")
 
+    # Sampling Arguments
+    sampling = parser.add_argument_group("Sampling")
+    sampling.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
+            The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
+            granular the analytics are. At interval=10, each sample's fields contain data about 10 seconds of cumulative data.
+            *(With the exception of the last sample, which may be shorter than the interval.)*""")
+    sampling.add_argument("--print-interval", default=100, type=int, help="Number of messages between progress updates to the console. If <= 0, progress is not printed.")
+
+
+
+    # 
     mg = parser.add_argument_group("Program Behavior (Mode)")
     mode_group = mg.add_mutually_exclusive_group()
     mode_group.add_argument("--mode", default="url", choices=["url", "chatfile", "reprocess"], type=str,\
@@ -60,21 +75,14 @@ def main():
         \033[1m\'reprocess\'\033[0m mode reads from a .json file produced by this program in a previous run, and recalculates the post-processed data based on the existing samples.""")
     
     
-    parser.add_argument("--interval", "-i" , default=5, type=check_interval, help="Interval of the chat to analyze")
+    
 
-    # TODO: Add mutually exclusive 'MODE
-        # standard has everything built in
-        # re-process an old output file
-        # process a downloaded chat json file produced separately by the chat-downloader
 
-    # TODO: Add sample size, etc...
 
     # TODO: Settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
-    # We print progress of the download/process every UPDATE_PROGRESS_INTERVAL messages
-    # if <=0, we don't print progress
-    parser.add_argument("--print-proggress-interval", "-ppi", default=1000, type=int, help="Interval of progress printing TODO: Add better description")
+    
 
     # output_group = parser.add_argument_group("Output")
     
@@ -110,3 +118,6 @@ def main():
 
 # TODO: Consider 'raid' type:
 # url = 'https://www.twitch.tv/videos/1538666427'
+
+
+# python chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5

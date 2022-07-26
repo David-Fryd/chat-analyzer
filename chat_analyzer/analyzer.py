@@ -41,7 +41,8 @@ def download_chatlog(url: str):
     print("Successfully retrieved chat generator:")
     print("\tTitle: %s" % (str(chat.title)))
     print("\tDuration: %s (%s seconds)" % (seconds_to_time(chat.duration), str(chat.duration)))
-    print("\t\033[1;33mNOTICE: generator from chat-downloader is currently largest rate-limiting factor.\n\t\033[0;33mTODO: Figure out ways to circumvent/separate rate-limiting factors.\033[0m")
+    print("""\t\033[1;33mNOTICE: Downloading chats is the largest rate-limiting factor.
+             \t\033[0;33mIf you intend to sample the data differently multiple times, consider using \033[1;33mchatfile\033[0;33m mode.\n\033[0m""")
 
     return chat
 
@@ -97,7 +98,7 @@ def run(**kwargs):
     source = kwargs.get('source') # Is either a url, or a json filepath that is raw chat data or an already processed output file...
     interval = kwargs.get('interval')
 
-    print_proggress_interval = kwargs.get('print_proggress_interval')
+    print_interval = kwargs.get('print_interval')
 
     mode = kwargs.get('mode')
 
@@ -131,13 +132,17 @@ def run(**kwargs):
         exit(1)
 
     # Now, we can process the data!
-    chatAnalytics.process_chatlog(chatlog, url, print_proggress_interval)
+    chatAnalytics.process_chatlog(chatlog, url, print_interval)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
     jsonObj = chatAnalytics.to_JSON()
-    # print(jsonObj)
-    with open('output/'+chatlog.title+'.json', 'w') as f:
+    
+    output_filepath:str ='output/'+chatlog.title+'.json'
+
+    with open(output_filepath, 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
+    
+    print(f"Successfully wrote chat analytics to {output_filepath}")
     
     return chatAnalytics
