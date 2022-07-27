@@ -45,6 +45,7 @@ class ProcessSettings():
     # Post-processing (Analyzing) Arguments
     spike_percentile: float
 
+
 # NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
 @dataclass
 class Sample():
@@ -354,7 +355,6 @@ class ChatAnalytics(ABC):
     # Constants (not dumped in json)
     _txt_msg_types = {'text_message'} # Messages we just consider regular text_message
 
-
     def __post_init__(self):
         self.duration_text = seconds_to_time(self.duration)
         self.interval_text = seconds_to_time(self.interval)
@@ -420,9 +420,6 @@ class ChatAnalytics(ABC):
 
                 # keeps track of unique user per *sample*
                 self._currentSample._userChats[authID] = self._currentSample._userChats[authID] + 1 if authID in self._currentSample._userChats else 1
-
-    def to_JSON(self):
-            return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 
     def get_engagement_sections(self):
         # Use a two pointer approach to find the start and end of each engagement section
@@ -524,8 +521,6 @@ class ChatAnalytics(ABC):
 
         print("Post-processing (Analyzing) complete!")
 
-   
-
     def process_chatlog(self, chatlog: Chat, url: str, settings: ProcessSettings):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
@@ -583,6 +578,9 @@ class ChatAnalytics(ABC):
             total_duration: str = seconds_to_time(self.duration)
             msgs_processed: int = idx
             print(PROG_PRINT_TEMPLATE.format(f"({completion}%)", f"{processed_media_time} / {total_duration}", f"{self.totalActivity}", f"Processed {msgs_processed} messages"), end='\r')
+
+    def to_JSON(self):
+        return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
 @dataclass
 class YoutubeChatAnalytics(ChatAnalytics):
     """
@@ -700,18 +698,10 @@ class TwitchChatAnalytics(ChatAnalytics):
             self.totalUpgradeSubscriptions += 1
             self._currentSample.upgradeSubscriptions += 1
 
-
-        # # TODO: Remove Print statements [DEBUG]
-        # if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
-        #     print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
-        #     # print(msg)
-    
+    # # TODO: Remove Print statements [DEBUG]
+    # if(msg['message_type'] not in self._txt_msg_types and msg['message_type'] not in self._subscription_msg_types and msg['message_type'] not in self._upgrade_sub_msg_types and msg['message_type'] not in self._gift_sub_msg_types):
+    #     print("\033[1;31mType:" + msg['message_type'] + "\033[0m")
+    #     # print(msg)
     
     def to_JSON(self):
         return json.dumps(self, indent = 4, default=lambda o: o.__dict__)
-
-def update_from_kwargs(**kwargs):
-    """Given the options from the CLI, modify internal settings, constants, variables, etc...
-    """
-    # TODO: Potentially remove, do we need this? Or can we just import settings from analyzer.py?
-
