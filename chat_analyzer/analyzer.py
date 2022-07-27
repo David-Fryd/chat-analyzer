@@ -47,8 +47,8 @@ def download_chatlog(url: str):
     print("Successfully retrieved chat generator:")
     print("\tTitle: %s" % (str(chat.title)))
     print("\tDuration: %s (%s seconds)" % (seconds_to_time(chat.duration), str(chat.duration)))
-    print("""\t\033[1;33mNOTICE: Downloading chats is the largest rate-limiting factor.
-             \t\033[0;33mIf you intend to sample the data differently multiple times, consider using \033[1;33mchatfile\033[0;33m mode.\n\033[0m""")
+    print("""\033[1;31mNOTICE: Downloading chats is the largest rate-limiting factor.
+             \033[0;31mIf you intend to sample the data differently multiple times, consider using \033[1;33mchatfile\033[0;31m mode, or saving the chat data with \033[1;33m--save-chatfile\033[0;31m.\n\033[0m""")
 
     return chat
 
@@ -115,6 +115,8 @@ def run(**kwargs):
     # Output
     description = kwargs.get('description')
     output_filepath = kwargs.get('output')
+    # Debugging
+    msg_break = kwargs.get('break')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
@@ -146,7 +148,7 @@ def run(**kwargs):
         exit(1)
 
     # Now, we can process & analyze the data!
-    chatAnalytics.process_chatlog(chatlog, url, print_interval)
+    chatAnalytics.process_chatlog(chatlog, url, print_interval, msg_break)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    

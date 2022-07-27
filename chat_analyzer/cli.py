@@ -126,7 +126,7 @@ def main():
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
     mode_group.add_argument("--save-chatfile", "-s", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
 
-    # Sampling Arguments
+    # Processing Arguments
     sampling_group = parser.add_argument_group("Processing (Sampling)")
     sampling_group.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
@@ -158,7 +158,7 @@ def main():
 
     debug = parser.add_argument_group('Debugging')
     debug.add_argument('--debug','-db', action='store_true', help='Enable debug mode (debug info is printed)')
-    # debug.add_argument('--break','-v', type=check_positive_int, help='Stop execution after processing this number of messages. WARNING: May cause undefined behavior, because certain parts of execution assume that chatlog has been completely processed.')
+    debug.add_argument('--break','-b', type=int, default=-1, help='Stop processing messages after BREAK number of messages have been processed. No effect if val < 0')
 
     args = parser.parse_args()
     kwargs = args.__dict__

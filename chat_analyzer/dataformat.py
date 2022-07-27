@@ -406,7 +406,6 @@ class ChatAnalytics(ABC):
         # (1 min, 5 min, 10 min, highest engagement, or smth like that)
         raise NotImplementedError
  
-
     def get_spikes(self, field_to_use: str, percentile: float):
         """
         Find and return a list of samples with significant spikes in a given field/attribute.
@@ -470,7 +469,7 @@ class ChatAnalytics(ABC):
         Also removes the internal fields that don't need to be output in the JSON object.
         """
         print(f"\nDownloaded & Processed {self.totalActivity} messages.")
-        print("Post processing...")
+        print("Post-processing (Analyzing)...")
 
         self.totalUniqueUsers = len(self._overallUserChats)
 
@@ -497,11 +496,11 @@ class ChatAnalytics(ABC):
         # del self._currentSample
         self._currentSample = None
 
-        print("Post-processing complete")
+        print("Post-processing (Analyzing) complete!")
 
    
 
-    def process_chatlog(self, chatlog: Chat, url: str, print_interval: int):
+    def process_chatlog(self, chatlog: Chat, url: str, print_interval: int, msg_break: int):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
@@ -511,10 +510,12 @@ class ChatAnalytics(ABC):
         :type url: str
         :param print_progress_interval: After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
         :type print_progress_interval: int
+        :param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
+        :type msg_break: int
         """
 
         # Display progress as chats are downloaded/processed
-        print("Downloading & Processing chat log...")
+        print("Processing (Sampling) chat data...")
 
         # Header
         if(print_interval > 0):
@@ -529,7 +530,7 @@ class ChatAnalytics(ABC):
             if(print_interval > 0 and idx%print_interval==0 and idx!=0):
                 self.print_process_progress(msg, idx)   
             # TODO: Remove (DEBUG)
-            if idx==2000:
+            if idx==msg_break:
                 break
 
             self.process_message(msg)
