@@ -105,7 +105,7 @@ def main():
         In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
         produced by Xenonva's chat-downloader, or by this program's `--save-chatfile` flag. 
 
-        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file containing \033[3mexisting sample data to reanalyze\033[0m, that was once produced by this program.""")
+        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.""")
 
     # Mode arguments
     mode_group = parser.add_argument_group("Program Behavior (Mode)")
@@ -124,7 +124,8 @@ def main():
         \n""")
     # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
-    mode_group.add_argument("--save-chatfile", "-s", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
+    # TODO: Add argument to specify output of the saved chatfile
+    mode_group.add_argument("--save-chatfile", "-sc", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
 
     # Processing Arguments
     sampling_group = parser.add_argument_group("Processing (Sampling)")
@@ -141,7 +142,7 @@ def main():
     mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
     mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93.0, type=check_percentile_float, help="""
     A number between 0 and 100, representing the percentile of the chat activity to use as the threshold for detecting spikes. 
-    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93.0, any sample in the top 7.0%% of activity will be considered a spike.""")
+    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93.0, any sample in the 93rd percentile (top 7.0%%) of activity will be considered a spike.""")
      # mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="Specify the total amount of cumulative spike time (in seconds) that we want output.")
     # TODO: More settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
@@ -150,7 +151,7 @@ def main():
    
     # Output Arguments
     output_group = parser.add_argument_group("Output")
-    output_group.add_argument("--description", "-d" , type=str, help="A description included in the output file to help distinguish it from other output files")
+    output_group.add_argument("--description", "-d" , type=str, help="R|A description included in the output file to help distinguish it from other output files.\nex: -d \"Ludwig product announcement, small intervals\"")
     output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[MEDIA TITLE].json.' 
                                                     If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
     output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
