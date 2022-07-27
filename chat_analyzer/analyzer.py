@@ -18,6 +18,8 @@ MIN_INTERVAL = 1
 # Can be set via CLI --debug flag
 DEBUG = False
 
+
+
 def download_chatlog(url: str):
     """
     Downloads and returns the chat log using Xenonva's chat-downloader
@@ -118,6 +120,8 @@ def run(**kwargs):
     # Debugging
     msg_break = kwargs.get('break')
 
+    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, save_chatfile=save_chatfile , spike_percentile=spike_percentile)
+
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
     if(interval > MAX_INTERVAL or interval < MIN_INTERVAL): 
@@ -148,7 +152,7 @@ def run(**kwargs):
         exit(1)
 
     # Now, we can process & analyze the data!
-    chatAnalytics.process_chatlog(chatlog, url, print_interval, msg_break)
+    chatAnalytics.process_chatlog(chatlog, url, process_settings)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    

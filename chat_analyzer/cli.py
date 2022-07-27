@@ -28,12 +28,12 @@ def check_positive_int(value):
         raise argparse.ArgumentTypeError("Value must be a positive integer")
     return value
 
-def check_percentile_int(value):
+def check_percentile_float(value):
     """
     Check that the value is between 0 and 100 exclusive"""
-    value = int(value)
+    value = float(value)
     if value <= 0 or value >= 100:
-        raise argparse.ArgumentTypeError("Percentile must be between 1 and 99 inclusive")
+        raise argparse.ArgumentTypeError("Percentile must be between 0 and 100 exclusive")
     return value
 
 
@@ -139,9 +139,9 @@ def main():
     postprocess_group = parser.add_argument_group("Post Processing (Analyzing)")
     # TODO: Actually connect this to spike percentile detection and properly connect mutex group
     mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
-    mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93, type=check_percentile_int, help="""
+    mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93.0, type=check_percentile_float, help="""
     A number between 0 and 100, representing the percentile of the chat activity to use as the threshold for detecting spikes. 
-    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93, any sample in the top 7%% of activity will be considered a spike.""")
+    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93.0, any sample in the top 7.0%% of activity will be considered a spike.""")
      # mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="Specify the total amount of cumulative spike time (in seconds) that we want output.")
     # TODO: More settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
@@ -151,7 +151,7 @@ def main():
     # Output Arguments
     output_group = parser.add_argument_group("Output")
     output_group.add_argument("--description", "-d" , type=str, help="A description included in the output file to help distinguish it from other output files")
-    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[VIDEO TITLE].json.' 
+    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[MEDIA TITLE].json.' 
                                                     If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
     output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
@@ -169,6 +169,8 @@ def main():
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
+    if(kwargs['save_chatfile']):
+        parser.error("The --save-chatfile flag is not yet implemented! :(")
             
     run(**kwargs)
 

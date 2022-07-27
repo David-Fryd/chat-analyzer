@@ -1,5 +1,4 @@
 import json
-import analyzer
 import numpy as np
 import logging
 
@@ -21,8 +20,32 @@ SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 # The formatting to print the progress status with
 PROG_PRINT_TEMPLATE = "{:^15}| {:^25} | {:^20}"
 
-# NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
+@dataclass
+class ProcessSettings():
+    """
+    Utility class for passing information from the analyzer to the chatlog processor and post-processor
+    
+    [Processing (Sampling) Arguments]
+    :param print_progress_interval: After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
+    :type print_progress_interval: int
+    :param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
+    :type msg_break: int
+    :param save_chatfile: Save the raw chat data to a file as we process messages. If False, the chatlog is not saved.
+    :type save_chatfile: bool
 
+    [Post-processing (Analyzing) Arguments]
+    :param spike_percentile:
+    :type spike_percentile: float
+
+    """
+    # Processing (Sampling) Arguments
+    print_interval: int
+    msg_break: int
+    save_chatfile: bool
+    # Post-processing (Analyzing) Arguments
+    spike_percentile: float
+
+# NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
 @dataclass
 class Sample():
     """
@@ -459,7 +482,7 @@ class ChatAnalytics(ABC):
 
         return spike_list
 
-    def chatlog_post_process(self):
+    def chatlog_post_process(self, settings: ProcessSettings):
         """
         After we have finished iterating through the chatlog and constructing all of the samples,
         we call chatlog_post_process() to process the cumulative data points (so we don't have to do this every time we add a sample).
@@ -467,6 +490,9 @@ class ChatAnalytics(ABC):
         This step is sometimes referred to as "analysis".
 
         Also removes the internal fields that don't need to be output in the JSON object.
+
+        :param settings: Utility class for passing information from the analyzer to the chatlog processor and post-processor
+        :type settings: ProcessSettings
         """
         print(f"\nDownloaded & Processed {self.totalActivity} messages.")
         print("Post-processing (Analyzing)...")
@@ -488,7 +514,7 @@ class ChatAnalytics(ABC):
 
         # Spikes are determined after the final averages have been calculated
         # The appending within get_spikes causes the error: AttributeError: 'set' object has no attribute '__dict__'
-        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', 90) 
+        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', settings.spike_percentile) 
 
         # Remove all other internal variables not suitable for output
         # del self._overallUserChats
@@ -500,7 +526,7 @@ class ChatAnalytics(ABC):
 
    
 
-    def process_chatlog(self, chatlog: Chat, url: str, print_interval: int, msg_break: int):
+    def process_chatlog(self, chatlog: Chat, url: str, settings: ProcessSettings):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
@@ -508,17 +534,15 @@ class ChatAnalytics(ABC):
         :type chatlog: chat_downloader.sites.common.Chat
         :param url: The URL of the video we have downloaded the log from
         :type url: str
-        :param print_progress_interval: After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
-        :type print_progress_interval: int
-        :param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
-        :type msg_break: int
+        :param settings: Utility class for passing information from the analyzer to the chatlog processor and post-processor
+        :type settings: ProcessSettings
         """
 
         # Display progress as chats are downloaded/processed
         print("Processing (Sampling) chat data...")
 
         # Header
-        if(print_interval > 0):
+        if(settings.print_interval > 0):
             print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
 
         self.mediaTitle = chatlog.title
@@ -527,19 +551,19 @@ class ChatAnalytics(ABC):
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
-            if(print_interval > 0 and idx%print_interval==0 and idx!=0):
+            if(settings.print_interval > 0 and idx%settings.print_interval==0 and idx!=0):
                 self.print_process_progress(msg, idx)   
             # TODO: Remove (DEBUG)
-            if idx==msg_break:
+            if idx==settings.msg_break:
                 break
 
             self.process_message(msg)
 
-        if(print_interval > 0):
+        if(settings.print_interval > 0):
             self.print_process_progress(None, None, finished=True)
 
         # Calculate the [Defined w/ default and modified after analysis] fields of the ChatAnalytics
-        self.chatlog_post_process()
+        self.chatlog_post_process(settings)
 
     def print_process_progress(self, msg, idx, finished=False):
         """
@@ -658,8 +682,8 @@ class TwitchChatAnalytics(ChatAnalytics):
         # Adds typing to the current sample (safer dev to ensure fields contained within specific sample type)
         self._currentSample: TwitchSample = self._currentSample
 
-    def chatlog_post_process(self):
-        super().chatlog_post_process()
+    def chatlog_post_process(self, settings):
+        super().chatlog_post_process(settings)
 
     def process_message(self, msg):
         """Given a msg object from chat, update common fields and twitch-specific fields"""
@@ -690,3 +714,4 @@ def update_from_kwargs(**kwargs):
     """Given the options from the CLI, modify internal settings, constants, variables, etc...
     """
     # TODO: Potentially remove, do we need this? Or can we just import settings from analyzer.py?
+
