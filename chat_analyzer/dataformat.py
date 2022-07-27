@@ -459,6 +459,8 @@ class ChatAnalytics(ABC):
         After we have finished iterating through the chatlog and constructing all of the samples,
         we call chatlog_post_process() to process the cumulative data points (so we don't have to do this every time we add a sample).
 
+        This step is sometimes referred to as "analysis".
+
         Also removes the internal fields that don't need to be output in the JSON object.
         """
         print(f"\nDownloaded & Processed {self.totalActivity} messages.")

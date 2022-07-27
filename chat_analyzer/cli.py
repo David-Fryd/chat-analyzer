@@ -28,8 +28,49 @@ def check_positive_int(value):
         raise argparse.ArgumentTypeError("Value must be a positive integer")
     return value
 
+def check_percentile_int(value):
+    """
+    Check that the value is between 0 and 100 exclusive"""
+    value = int(value)
+    if value <= 0 or value >= 100:
+        raise argparse.ArgumentTypeError("Percentile must be between 1 and 99 inclusive")
+    return value
+
+
+# Anecdotally determined
+# For messages that wrap w/ R|, this helps keep spacing consistent. No good way to access indent from argparser
+# INDENT_INCREMENT = 2
+# Standard help position is 2*INDENT_INCREMENT according to the argparse src
+HELP_INDENT_POSITION = 3
+
+class SmartFormatter(argparse.HelpFormatter):
+    """
+    Any help string starting with 'R|' has its newlines (\n) preserved, in addition to
+    keeping the fxnality from the HelpFormatter (displaying defaults next to descriptions).
+    
+    Adapted from and thanks to:
+    https://stackoverflow.com/questions/3853722/how-to-insert-newlines-on-argparse-help-text
+    """
+
+    # def __init__(self) :
+    #     super().__init__(indent_increment=INDENT_INCREMENT)
+
+    def _split_lines(self, text, width):
+        if text.startswith('R|'):
+            lineList = text[2:].splitlines() 
+            # Remove whitespace from before each of the strings so nice spacing doens't affect output inset
+            lineList = [line.lstrip() for line in lineList]
+            # NOTE: Not using textwrap.wrap here like in argparse because it messes w escape characters. Anecdotally determined indent position instead:
+            import textwrap
+            lineList = [str(textwrap.fill(line, width, subsequent_indent="\t"*HELP_INDENT_POSITION)) for line in lineList]
+            return lineList
+        # this is the RawTextHelpFormatter._split_lines
+        return argparse.HelpFormatter._split_lines(self, text, width)
+
 def main():
-    parser = argparse.ArgumentParser(description=__summary__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description=__summary__, formatter_class=SmartFormatter)
+
+    # TODO: Actually hook up a lot of these args to the analyzer!
 
     # Parser info
     parser.prog = __program__
@@ -40,51 +81,68 @@ def main():
     # Meta-arguments
     parser.add_argument('--version', action='version', version=__version__)
 
-    # TODO: Add subparser for different modes (instead of having a --modes thing)?
-    # https://stackoverflow.com/questions/8250010/argparse-identify-which-subparser-was-used/9286586#9286586
-    # https://stackoverflow.com/questions/17073688/how-to-use-argparse-subparsers-correctly
-    # TODO: Add mutually exclusive 'MODE
-        # standard has everything built in
-        # re-process an old output file
-        # process a downloaded chat json file produced separately by the chat-downloader
-
     # Required arguments
     parser.add_argument("source", type=str,\
-        help=f"""A url to a past stream/VOD. We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
-        In --mode=='chatfile' or 'reprocess', source is a filepath to a 
-        .json raw chat log produced by Xenonva's chat-downloader, 
-        or a .json output file previously produced by this program (respectively).""")
+        help=f"""R|
+        Raw chat data to process and analyze, or processed sample data to re-analyze.
+
+        In mode=\033[1m'url'\033[0m, source is a url to a past stream/VOD. 
+        We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
+
+        In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
+        produced by Xenonva's chat-downloader, or by this program's `--save-chatfile` flag. 
+
+        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file containing \033[3mexisting sample data to reanalyze\033[0m, 
+        that was once produced by this program.""")
+
+
+    # Mode arguments
+    mode_group = parser.add_argument_group("Program Behavior (Mode)")
+    # mutex_mode_group = mode_group.add_mutually_exclusive_group()
+    mode_group.add_argument("--mode", default="url", choices=["url", "chatfile", "reanalyze"], type=str,\
+        help="""R|The program can be run in three modes:
+
+        \033[3mNOTE: All modes result in chat analytics output as a .json file.\033[0m
+
+        \033[1m\'url\'\033[0m mode (default) downloads raw chat data from an appropriate source, processes the raw chat data into samples, and then analyzes the samples.
+
+        \033[1m\'chatfile\'\033[0m mode reads raw chat data from a .json file, processes the raw chat data into samples, and then analyzes the samples.
+        (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile').
+
+        \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. The existing samples are not affected.""")
+    # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
+    # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
+    mode_group.add_argument("--save-chatfile", "-s", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
+
+
+    # Output Arguments
+    # output_group = parser.add_argument_group("Output")
+    # TODO: Implement
 
     # Sampling Arguments
-    sampling = parser.add_argument_group("Sampling")
-    sampling.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
+    sampling_group = parser.add_argument_group("Sampling")
+    sampling_group.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
             granular the analytics are. At interval=10, each sample's fields contain data about 10 seconds of cumulative data.
             *(With the exception of the last sample, which may be shorter than the interval.)*""")
-    sampling.add_argument("--print-interval", default=100, type=int, help="Number of messages between progress updates to the console. If <= 0, progress is not printed.")
-
-
-
-    # 
-    mg = parser.add_argument_group("Program Behavior (Mode)")
-    mode_group = mg.add_mutually_exclusive_group()
-    mode_group.add_argument("--mode", default="url", choices=["url", "chatfile", "reprocess"], type=str,\
-        help="""The program can be run in three modes:
-        \033[1m\'url\'\033[0m mode (default) will download the chatlog and simultaneously process the chats as they are downloaded.
-        \033[1m\'chatfile\'\033[0m mode reads from a .json file with raw chat data produced by Xenonva's chat-downloader.
-        \033[1m\'reprocess\'\033[0m mode reads from a .json file produced by this program in a previous run, and recalculates the post-processed data based on the existing samples.""")
+    sampling_group.add_argument("--print-interval", default=100, type=int, help="Number of messages between progress updates to the console. If <= 0, progress is not printed.")
     
     
-    
-
-
+    # Post Processing Arguments
+    postprocess_group = parser.add_argument_group("Post Processing")
+    # TODO: Actually connect this to spike percentile detection and properly connect mutex group
+    mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
+    mutex_postprocess_group.add_argument("--spike-percentile", default=90, type=check_percentile_int, help="SDFSFSAFSA")
+    mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="SDFSFSAFSA")
+    # postprocess_group.add_argument("--postprocess", "-p", action="store_true", help="")
 
     # TODO: Settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
     
 
-    # output_group = parser.add_argument_group("Output")
+    output_group = parser.add_argument_group("Output")
+    output_group.add_argument("--output", "-o", type=str, help="The filepath to write the output to. If not specified, the output is written to 'output/[VIDEO TITLE].json'.")
     
 
     debug = parser.add_argument_group('Debugging')
@@ -92,8 +150,14 @@ def main():
     debug.add_argument('--break','-v', type=check_positive_int, help='Stop execution after processing this number of messages. WARNING: May cause undefined behavior, because certain parts of execution assume that chatlog has been completely processed.')
 
     args = parser.parse_args()
+    kwargs = args.__dict__
 
-    run(**args.__dict__)
+    # Argument dependency-checks:
+    if(kwargs['save_chatfile'] and kwargs['mode'] != 'url'):
+        parser.error('The --save-chatfile flag can only be used in mode=\033[1m\'url\'\033[0m.')
+
+
+    run(**kwargs)
 
 
 

@@ -46,6 +46,7 @@
     - 1 sample apprch: 1 sample consumes all of the consecutive identical samples and modifies start/end/duration accordingly
     - 3 sample apprch: 3 sample approach preserves first and last sample, and combines intermediate samples. That way the slope into/out of the silence interval is preserved.
     - Other potential options, but these are the ones we have considered that are not terribly complex
+- Fix textwrap.wrap() ignoring escape characters in _split_lines in `cli.py`
             
 
 ## In the future...
