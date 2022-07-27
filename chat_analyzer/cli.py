@@ -43,10 +43,10 @@ def check_percentile_int(value):
 # Standard help position is 2*INDENT_INCREMENT according to the argparse src
 HELP_INDENT_POSITION = 3
 
-# Constants for the argparse help
-SUPPRESS = '==SUPPRESS=='
-ZERO_OR_MORE = '*'
-OPTIONAL = '?'
+# Constants for the argparse get help string
+# SUPPRESS = '==SUPPRESS=='
+# ZERO_OR_MORE = '*'
+# OPTIONAL = '?'
 class SmartFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
     Any help string starting with 'R|' has its newlines (\n) preserved, in addition to
@@ -70,7 +70,6 @@ class SmartFormatter(argparse.ArgumentDefaultsHelpFormatter):
             return lineList
         # this is the RawTextHelpFormatter._split_lines
         return argparse.HelpFormatter._split_lines(self, text, width)
-
     
     # def _get_help_string(self, action):
     #     help = action.help
@@ -130,11 +129,6 @@ def main():
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
     mode_group.add_argument("--save-chatfile", "-s", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
 
-
-    # Output Arguments
-    # output_group = parser.add_argument_group("Output")
-    # TODO: Implement
-
     # Sampling Arguments
     sampling_group = parser.add_argument_group("Processing (Sampling)")
     sampling_group.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
@@ -150,16 +144,17 @@ def main():
     mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
     mutex_postprocess_group.add_argument("--spike-percentile", default=90, type=check_percentile_int, help="SDFSFSAFSA")
     mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="SDFSFSAFSA")
-    # postprocess_group.add_argument("--postprocess", "-p", action="store_true", help="")
-
+    
     # TODO: Settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
-    # TODO: Add a console output group (verbose, quiet, progress update, etc...)
+    
     
 
     output_group = parser.add_argument_group("Output")
-    output_group.add_argument("--output", "-o", type=str, help="The filepath to write the output to. If not specified, the output is written to 'output/[VIDEO TITLE].json'.")
-    
+    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[VIDEO TITLE].json.' 
+                                                    If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
+    output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
+    # TODO: Add a console output group (verbose, quiet, progress update, etc...)
 
     debug = parser.add_argument_group('Debugging')
     debug.add_argument('--debug','-d', action='store_true', help='Enable debug mode (debug info is printed)')
@@ -171,15 +166,16 @@ def main():
     # Argument dependency-checks:
     if(kwargs['save_chatfile'] and kwargs['mode'] != 'url'):
         parser.error('The --save-chatfile flag can only be used in mode=\033[1m\'url\'\033[0m.')
-
-
+    if(kwargs['output']):
+        if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
+            kwargs['output'] += '.json'
+            
     run(**kwargs)
 
 
 
 
 # Some testing URLs
-# TODO: Replace url with argparse arg
 # url = 'https://www.youtube.com/watch?v=97w16cYskVI' # yt stream that comes with lots of message types (retrieved from chat-downloader testing sample) TODO: [blocked now?! check into]
 # url = 'asdds.com/a/b/c/d' # (error) invalid URL
 # url = 'https://www.youtube.com/watch?v=5qap5aO4i9A' # (error) stream still live (lo-fi hip hop girl runs 24/7)
