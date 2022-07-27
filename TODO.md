@@ -1,13 +1,13 @@
 # Chat Analyzer TODO
 
-## High Priority
+## High Priority (Next release)
 - **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
 - In addition to regular & integrated processing, add 2 modes:
   - Add option/flag to re-process a local output file for spikes
   - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths) 
 - Update README
   - JSON output documentation
-- -s fxnality
+- --save-chatfile fxnality
 
 ## Medium Priority
 - Add debug early break in process_chatlog in dataformat
