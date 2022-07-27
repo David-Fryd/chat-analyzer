@@ -85,8 +85,6 @@ class SmartFormatter(argparse.ArgumentDefaultsHelpFormatter):
 def main():
     parser = argparse.ArgumentParser(description=__summary__, formatter_class=SmartFormatter)
 
-    # TODO: Actually hook up a lot of these args to the analyzer!
-
     # Parser info
     parser.prog = __program__
     parser._positionals.title = 'Required Arguments'
@@ -108,7 +106,6 @@ def main():
         produced by Xenonva's chat-downloader, or by this program's `--save-chatfile` flag. 
 
         In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file containing \033[3mexisting sample data to reanalyze\033[0m, that was once produced by this program.""")
-
 
     # Mode arguments
     mode_group = parser.add_argument_group("Program Behavior (Mode)")
@@ -142,23 +139,26 @@ def main():
     postprocess_group = parser.add_argument_group("Post Processing (Analyzing)")
     # TODO: Actually connect this to spike percentile detection and properly connect mutex group
     mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
-    mutex_postprocess_group.add_argument("--spike-percentile", default=90, type=check_percentile_int, help="SDFSFSAFSA")
-    mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="SDFSFSAFSA")
-    
-    # TODO: Settings for finding spike. Sensitivity based, or "top-5 based" or...?
+    mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93, type=check_percentile_int, help="""
+    A number between 0 and 100, representing the percentile of the chat activity to use as the threshold for detecting spikes. 
+    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93, any sample in the top 7%% of activity will be considered a spike.""")
+     # mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="Specify the total amount of cumulative spike time (in seconds) that we want output.")
+    # TODO: More settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
-    
-    
+    # TODO: Allow user to specify which field they want spike detection on (possibly multiple fields resulting in multiple types of spikes in the list)
 
+   
+    # Output Arguments
     output_group = parser.add_argument_group("Output")
+    output_group.add_argument("--description", "-d" , type=str, help="A description included in the output file to help distinguish it from other output files")
     output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[VIDEO TITLE].json.' 
                                                     If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
     output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
 
     debug = parser.add_argument_group('Debugging')
-    debug.add_argument('--debug','-d', action='store_true', help='Enable debug mode (debug info is printed)')
-    debug.add_argument('--break','-v', type=check_positive_int, help='Stop execution after processing this number of messages. WARNING: May cause undefined behavior, because certain parts of execution assume that chatlog has been completely processed.')
+    debug.add_argument('--debug','-db', action='store_true', help='Enable debug mode (debug info is printed)')
+    # debug.add_argument('--break','-v', type=check_positive_int, help='Stop execution after processing this number of messages. WARNING: May cause undefined behavior, because certain parts of execution assume that chatlog has been completely processed.')
 
     args = parser.parse_args()
     kwargs = args.__dict__
