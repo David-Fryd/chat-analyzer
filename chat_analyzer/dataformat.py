@@ -243,7 +243,7 @@ class ChatAnalytics(ABC):
             The total duration (in seconds) of the associated video/media. Message times correspond to the video times
         interval: int
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
-            granular the analytics are. At interval=10, each sample's fields contain data about 10 seconds of cumulative data.
+            granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
             *(With the exception of the last sample, which may be shorter than the interval.)* 
             This is b/c media duration is not necessarily divisible by the interval.
             #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).

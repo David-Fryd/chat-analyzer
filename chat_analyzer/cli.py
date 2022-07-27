@@ -123,8 +123,8 @@ def main():
     sampling_group = parser.add_argument_group("Sampling")
     sampling_group.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
-            granular the analytics are. At interval=10, each sample's fields contain data about 10 seconds of cumulative data.
-            *(With the exception of the last sample, which may be shorter than the interval.)*""")
+            granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
+            *(With the exception of the last sample, which may be shorter than the interval).*""")
     sampling_group.add_argument("--print-interval", default=100, type=int, help="Number of messages between progress updates to the console. If <= 0, progress is not printed.")
     
     
