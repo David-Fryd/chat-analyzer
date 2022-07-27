@@ -2,7 +2,7 @@
 
 __title__ = 'chat-analyzer'
 __program__ = 'chat_analyzer'
-__summary__ = 'A program that processes and analyzes chat logs from live stream, then reports useful data about chat activity over the stream\'s lifetime.'
+__summary__ = 'A program that processes and analyzes chat data from a live stream, then reports useful information about chat activity over the stream\'s lifetime.'
 __author__ = 'David Fryd'
 __email__ = 'info@chatanalyze.com'
 __copyright__ = '2022 David Fryd'
