@@ -240,14 +240,18 @@ class ChatAnalytics(ABC):
     Attributes:
        [Defined when class Initialized]
         duration: float
-            The total duration (in seconds) of the associated video/media. Message times correspond to the video times
+            The total duration (in seconds) of the associated video/media. Message times correspond to the video times.
         interval: int
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
             granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
             *(With the exception of the last sample, which may be shorter than the interval.)* 
             This is b/c media duration is not necessarily divisible by the interval.
             #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
-        
+        description: str
+            A description included to help distinguish it from other analytical data.
+        program_version: str
+            The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.
+
         [Automatically Defined on init]
         platform: str
             Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
@@ -292,6 +296,8 @@ class ChatAnalytics(ABC):
     # Defined when class Initialized
     duration: float
     interval: int
+    description: str
+    program_version: str
 
     # Automatically Defined on subclass init
     # Because platform has default in the child class, must come after non-defaults above
@@ -522,6 +528,9 @@ class ChatAnalytics(ABC):
             # Display progress every UPDATE_PROGRESS_INTERVAL messages
             if(print_interval > 0 and idx%print_interval==0 and idx!=0):
                 self.print_process_progress(msg, idx)   
+            # TODO: Remove (DEBUG)
+            if idx==2000:
+                break
 
             self.process_message(msg)
 

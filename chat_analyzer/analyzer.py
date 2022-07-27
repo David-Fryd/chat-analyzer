@@ -7,6 +7,9 @@ from urllib.parse import urlparse
 from chat_downloader.sites.common import Chat
 from dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 
+from metadata import (
+    __version__
+    )
 
 # Times in seconds dictating how granular the interval can be (how long the individual samples are)
 MAX_INTERVAL = 120
@@ -109,6 +112,9 @@ def run(**kwargs):
     print_interval = kwargs.get('print_interval')
     # Post-processing (Analyzing) arguments
     spike_percentile = kwargs.get('spike_percentile')
+    # Output
+    description = kwargs.get('description')
+    output_filepath = kwargs.get('output')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
@@ -130,9 +136,9 @@ def run(**kwargs):
     platform = urlparse(url).netloc
 
     if(platform == YOUTUBE_NETLOC):
-        chatAnalytics = YoutubeChatAnalytics(duration=duration, interval=interval)
+        chatAnalytics = YoutubeChatAnalytics(duration=duration, interval=interval, description=description, program_version=__version__)
     elif(platform == TWITCH_NETLOC):
-        chatAnalytics = TwitchChatAnalytics(duration=duration, interval=interval)
+        chatAnalytics = TwitchChatAnalytics(duration=duration, interval=interval, description=description, program_version=__version__)
     else:
         logging.critical(
             "ERROR: No corresponding ChatAnalytics object.\n\
@@ -145,11 +151,9 @@ def run(**kwargs):
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
     jsonObj = chatAnalytics.to_JSON()
-    
-    output_filepath:str ='output/'+chatlog.title+'.json'
-    if(kwargs.get('output')):
-        output_filepath = kwargs.get('output')
 
+    if(output_filepath==None):
+        output_filepath ='output/'+chatlog.title+'.json'
 
     with open(output_filepath, 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
