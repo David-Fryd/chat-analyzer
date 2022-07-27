@@ -2,18 +2,14 @@
 
 ## High Priority
 - **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
-- Print output destination on completion
 - In addition to regular & integrated processing, add 2 modes:
   - Add option/flag to re-process a local output file for spikes
-  - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths)
-- Spike Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
-- Define output file, and print where file is created/output upon completion
+  - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths) 
 - Update README
   - JSON output documentation
 - -s fxnality
 
 ## Medium Priority
-
 - Add debug early break in process_chatlog in dataformat
 - Find other types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
 - Implement `get_engagement_sections`
@@ -30,6 +26,7 @@
 - Additional tracking for samples:
   - How many chatters spoke that haven't spoken in the last X samples/minutes/interval? (Not critical)
 - Develop meaningful error codes whenever `exit()` is invoked. (See chat_analyzer.py, and maybe other places)
+- Spike have a way to determine percentile that equals x mins of videos
 
 ## Low Priority
 - Improve spike descriptions fields in `get_spikes` when they are created
