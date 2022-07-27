@@ -8,10 +8,12 @@
   - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths)
 - Spike Percentile based on CLI args, also have a way to determine percentile that equals x mins of videos
 - Define output file, and print where file is created/output upon completion
-
-## Medium Priority
 - Update README
   - JSON output documentation
+- -s fxnality
+
+## Medium Priority
+
 - Add debug early break in process_chatlog in dataformat
 - Find other types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
 - Implement `get_engagement_sections`
@@ -46,7 +48,7 @@
     - 1 sample apprch: 1 sample consumes all of the consecutive identical samples and modifies start/end/duration accordingly
     - 3 sample apprch: 3 sample approach preserves first and last sample, and combines intermediate samples. That way the slope into/out of the silence interval is preserved.
     - Other potential options, but these are the ones we have considered that are not terribly complex
-- Fix textwrap.wrap() ignoring escape characters in _split_lines in `cli.py`
+- Fix/override _get_help_string in `cli.py` so that defaults are printed at the beginning. (Non-trivial, argparse src logic is a little funky)
             
 
 ## In the future...

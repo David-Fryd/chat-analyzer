@@ -43,7 +43,11 @@ def check_percentile_int(value):
 # Standard help position is 2*INDENT_INCREMENT according to the argparse src
 HELP_INDENT_POSITION = 3
 
-class SmartFormatter(argparse.HelpFormatter):
+# Constants for the argparse help
+SUPPRESS = '==SUPPRESS=='
+ZERO_OR_MORE = '*'
+OPTIONAL = '?'
+class SmartFormatter(argparse.ArgumentDefaultsHelpFormatter):
     """
     Any help string starting with 'R|' has its newlines (\n) preserved, in addition to
     keeping the fxnality from the HelpFormatter (displaying defaults next to descriptions).
@@ -67,6 +71,18 @@ class SmartFormatter(argparse.HelpFormatter):
         # this is the RawTextHelpFormatter._split_lines
         return argparse.HelpFormatter._split_lines(self, text, width)
 
+    
+    # def _get_help_string(self, action):
+    #     help = action.help
+    #     print("before key error?")
+    #     if '%(default)' not in action.help:
+    #         print("after key error?")
+    #         if action.default is not SUPPRESS:
+    #             defaulting_nargs = [OPTIONAL, ZERO_OR_MORE]
+    #             if action.option_strings or action.nargs in defaulting_nargs:
+    #                 help += ' \033[1m(DEFAULT: %(default)s)\033[0m'
+    #     return help
+
 def main():
     parser = argparse.ArgumentParser(description=__summary__, formatter_class=SmartFormatter)
 
@@ -86,14 +102,13 @@ def main():
         help=f"""R|
         Raw chat data to process and analyze, or processed sample data to re-analyze.
 
-        In mode=\033[1m'url'\033[0m, source is a url to a past stream/VOD. 
+        In mode=\033[1m'url'\033[0m, (default) source is a url to a past stream/VOD. 
         We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
 
         In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
         produced by Xenonva's chat-downloader, or by this program's `--save-chatfile` flag. 
 
-        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file containing \033[3mexisting sample data to reanalyze\033[0m, 
-        that was once produced by this program.""")
+        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file containing \033[3mexisting sample data to reanalyze\033[0m, that was once produced by this program.""")
 
 
     # Mode arguments
@@ -109,7 +124,8 @@ def main():
         \033[1m\'chatfile\'\033[0m mode reads raw chat data from a .json file, processes the raw chat data into samples, and then analyzes the samples.
         (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile').
 
-        \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. The existing samples are not affected.""")
+        \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. The existing samples are not affected.
+        \n""")
     # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
     mode_group.add_argument("--save-chatfile", "-s", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
@@ -120,7 +136,7 @@ def main():
     # TODO: Implement
 
     # Sampling Arguments
-    sampling_group = parser.add_argument_group("Sampling")
+    sampling_group = parser.add_argument_group("Processing (Sampling)")
     sampling_group.add_argument("--interval", "-i" , default=5, type=check_interval, help="""
             The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
             granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
@@ -128,8 +144,8 @@ def main():
     sampling_group.add_argument("--print-interval", default=100, type=int, help="Number of messages between progress updates to the console. If <= 0, progress is not printed.")
     
     
-    # Post Processing Arguments
-    postprocess_group = parser.add_argument_group("Post Processing")
+    # Post Processing (Analyzing) Arguments
+    postprocess_group = parser.add_argument_group("Post Processing (Analyzing)")
     # TODO: Actually connect this to spike percentile detection and properly connect mutex group
     mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
     mutex_postprocess_group.add_argument("--spike-percentile", default=90, type=check_percentile_int, help="SDFSFSAFSA")
