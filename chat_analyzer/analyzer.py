@@ -2,6 +2,7 @@ import json
 import logging
 
 from chat_downloader import ChatDownloader
+from util import dprint
 from urllib.parse import urlparse
 from chat_downloader.sites.common import Chat
 from dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
@@ -11,6 +12,8 @@ from dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 MAX_INTERVAL = 120
 MIN_INTERVAL = 1
 
+# Can be set via CLI --debug flag
+DEBUG = False
 
 def download_chatlog(url: str):
     """
@@ -91,16 +94,21 @@ def run(**kwargs):
     """
 
     # Interpret and extract CLI arguments from kwargs
-    for arg in kwargs:
-        value = kwargs[arg]
-        print(f"analyzing arg {arg}: {value}")
-
-    source = kwargs.get('source') # Is either a url, or a json filepath that is raw chat data or an already processed output file...
+    DEBUG = kwargs.get('debug')
+    if(DEBUG):
+        for arg in kwargs:
+            value = kwargs[arg]
+            dprint(f"analyzing arg {arg}: {value}")
+    
+    source = kwargs.get('source') # Is either a url or a filepath
+    # Mode arguments
+    program_mode = kwargs.get('mode') # choices=["url", "chatfile", "reanalyze"]
+    save_chatfile = kwargs.get('save_chatfile')
+    # Processing (Sampling) arguments
     interval = kwargs.get('interval')
-
     print_interval = kwargs.get('print_interval')
-
-    mode = kwargs.get('mode')
+    # Post-processing (Analyzing) arguments
+    spike_percentile = kwargs.get('spike_percentile')
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
@@ -109,12 +117,12 @@ def run(**kwargs):
 
     # Get the chat using the chat downloader and ensure that we can work with that data
     chatlog: Chat
-    if(mode=='url'):
+    if(program_mode=='url'):
         url = source
         chatlog = download_chatlog(url)
         check_chatlog_supported(chatlog, url)
     else:
-        raise NotImplementedError(f"Mode {mode} is not yet supported... oops :(")
+        raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
@@ -131,7 +139,7 @@ def run(**kwargs):
             NOTE: Should have caught this in supported platforms checks earlier...")
         exit(1)
 
-    # Now, we can process the data!
+    # Now, we can process & analyze the data!
     chatAnalytics.process_chatlog(chatlog, url, print_interval)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
