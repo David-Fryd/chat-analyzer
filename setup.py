@@ -17,8 +17,6 @@ requirements = [ # TODO: Check if this is correct
     # For the chat_analyzer
     'argparse',
     'numpy',
-    # 'logging',
-
 
     # For included chat_downloader
     'requests',
@@ -84,58 +82,5 @@ setup(
         ],
     },
 
-    # author=metadata['__author__'],
-    # author_email=metadata['__email__'],
-    # url=metadata['__url__'],
-    # version=metadata['__version__'],
-    # python_requires='>=3.6',
-    # classifiers=[
-    #     'Development Status :: 4 - Beta',
-    #     'Intended Audience :: Developers',
-    #     'License :: OSI Approved :: MIT License',
-    #     'Natural Language :: English',
-    #     'Programming Language :: Python :: 3',
-    #     'Programming Language :: Python :: 3.6',
-    #     'Programming Language :: Python :: 3.7',
-    #     'Programming Language :: Python :: 3.8',
-    #     'Programming Language :: Python :: 3.9',
-    #     'Programming Language :: Python :: 3.10',
-    #     'Operating System :: OS Independent',
-    # ],
-    # description=metadata['__summary__'],
-    # entry_points={
-    #     'console_scripts': [
-    #         'chat_analyzer=chat_analyzer.cli:main',
-    #     ],
-    # },
-    # install_requires=requirements,
-    # extras_require={
-    #     'dev': [
-    #         'flake8',
-    #         'twine',
-    #         'wheel',
-    #         'tox',
-
-    #         # Testing and coverage
-    #         'pytest',
-    #         'coverage',
-
-    #         # Documentation
-    #         'sphinx',
-    #         'sphinx-rtd-theme',
-    #         'sphinxcontrib-programoutput'
-    #     ]
-    # },
-    # license='MIT license',
-    # long_description=readme,  # + '\n\n' + history,
-    # long_description_content_type='text/x-rst',
-    # include_package_data=True,
-    # keywords='python chat downloader youtube twitch',
-    # name='chat-downloader',
-    # packages=find_packages(include=['chat_downloader', 'chat_downloader.*']),
-    # package_data={
-    #     'chat_downloader': ['formatting/*.json']
-    # },
-    # test_suite='tests',
-    # zip_safe=False,
+    # TODO: Reference Xenova's setup for the chat_downloader to see if theres anything worth adding later
 )
