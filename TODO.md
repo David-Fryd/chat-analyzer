@@ -1,6 +1,7 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
+- get_spikes is actually behaving like get highest engagement. Find local spikes/such using differences between individual samples, and rename the current spike logic, args, etc... to "engagement"
 - **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
 - In addition to regular & integrated processing, add 2 modes:
   - Add option/flag to re-process a local output file for spikes
@@ -8,6 +9,7 @@
 - Update README
   - JSON output documentation
 - --save-chatfile fxnality
+- Better class documentation
 
 ## Medium Priority
 - Add debug early break in process_chatlog in dataformat

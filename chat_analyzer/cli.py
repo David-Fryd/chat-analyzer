@@ -1,13 +1,13 @@
 import argparse
 
-from metadata import (
+from .metadata import (
     __version__,
     __summary__,
     __program__
 )
 
-from analyzer import run, MAX_INTERVAL, MIN_INTERVAL
-from dataformat import SUPPORTED_PLATFORMS
+from .analyzer import run, MAX_INTERVAL, MIN_INTERVAL
+from .dataformat import SUPPORTED_PLATFORMS
 
 def check_interval(interval):
     """
@@ -165,6 +165,8 @@ def main():
     kwargs = args.__dict__
 
     # Argument dependency-checks:
+    if(kwargs['mode'] != 'url'):
+        parser.error(f"Only 'url' mode is supported in version {__version__}")
     if(kwargs['save_chatfile'] and kwargs['mode'] != 'url'):
         parser.error('The --save-chatfile flag can only be used in mode=\033[1m\'url\'\033[0m.')
     if(kwargs['output']):
@@ -172,7 +174,6 @@ def main():
             kwargs['output'] += '.json'
     if(kwargs['save_chatfile']):
         parser.error("The --save-chatfile flag is not yet implemented! :(")
-            
     run(**kwargs)
 
 

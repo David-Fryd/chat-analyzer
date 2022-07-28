@@ -2,12 +2,12 @@ import json
 import logging
 
 from chat_downloader import ChatDownloader
-from util import dprint
+from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
+from .util import dprint
 from urllib.parse import urlparse
 from chat_downloader.sites.common import Chat
-from dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 
-from metadata import (
+from .metadata import (
     __version__
     )
 

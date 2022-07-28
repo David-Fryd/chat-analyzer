@@ -1,4 +1,9 @@
 .DS_Store
+
+chat_analyzer.egg-info/
+
+do-not-package/
+
 localtestJSON/
 
 # TODO: Ensure we don't break anything by ignoring .vscode/
