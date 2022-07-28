@@ -1,3 +1,0 @@
-[console_scripts]
-chat_analyzer = chat_analyzer.cli:main
-
