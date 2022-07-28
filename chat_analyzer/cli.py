@@ -1,13 +1,13 @@
 import argparse
 
-from metadata import (
+from .metadata import (
     __version__,
     __summary__,
     __program__
 )
 
-from analyzer import run, MAX_INTERVAL, MIN_INTERVAL
-from dataformat import SUPPORTED_PLATFORMS
+from .analyzer import run, MAX_INTERVAL, MIN_INTERVAL
+from .dataformat import SUPPORTED_PLATFORMS
 
 def check_interval(interval):
     """
