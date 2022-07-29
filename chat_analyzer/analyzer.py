@@ -20,12 +20,12 @@ DEBUG = False
 
 # Define the arguments for getting the chatlog using chat-downloader
 chat_download_settings =  {
-    "url" : None, # Set in download_chatlog()
+    "url" : None, # Set in get_chatlog_downloader()
     "message_types" : 'all',
-    "output" : None, # If save-chatfile, set to that path before download_chatlog()
+    "output" : None, # If save-chatfile, set to that path before get_chatlog_downloader()
 }
 
-def download_chatlog(url: str):
+def get_chatlog_downloader(url: str):
     """
     Gets a chat-downloader generator using Xenonva's chat-downloader
     
@@ -140,7 +140,7 @@ def run(**kwargs):
         if(save_chatfile_output!=None):
             chat_download_settings['output']= save_chatfile_output
         url = source
-        chatlog = download_chatlog(url)
+        chatlog = get_chatlog_downloader(url)
         check_chatlog_supported(chatlog, url)
     else:
         raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
