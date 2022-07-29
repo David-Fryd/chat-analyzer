@@ -127,7 +127,7 @@ def run(**kwargs):
     # Debugging
     msg_break = kwargs.get('break')
 
-    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, save_chatfile_output=save_chatfile_output, highlight_percentile=highlight_percentile, highlight_metric=highlight_metric, spike_sensitivity=spike_sensitivity)
+    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, highlight_percentile=highlight_percentile, highlight_metric=highlight_metric, spike_sensitivity=spike_sensitivity)
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
