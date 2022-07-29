@@ -567,7 +567,8 @@ class ChatAnalytics(ABC):
         self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
         # Process and remove the final sample from the currentSample field
-        self._currentSample.sample_post_process()
+        if(self._currentSample): # Won't exist if we read in the obj from a file with it missing already
+            self._currentSample.sample_post_process()
 
         # Highlights & Spikes are determined after the final averages have been calculated
         self.highlights = self.get_highlights(settings.highlight_metric, settings.highlight_percentile)

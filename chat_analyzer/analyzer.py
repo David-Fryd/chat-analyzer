@@ -113,6 +113,44 @@ def get_chatmsgs_from_chatfile(filepath: str):
         # dprint([m['message'] for m in chat_messages])
     return chat_messages
 
+def get_ChatAnalytics_from_file(filepath: str):
+    """Given a path to a previous output file of this program containing analytical data,
+    extract the data into a ChatAnalytics object and return it.
+    
+    :param filepath: a path to a previous output file of this program containing analytical data
+    :type filepath: str
+    :returns: a ChatAnalytics object
+    :rtype: ChatAnalytics
+    """
+
+    chatAnalytics: ChatAnalytics
+
+    with open(filepath, 'r') as f:
+        jsonData = json.load(f)
+
+        platform_from_file = jsonData['platform']
+        if(platform_from_file == YOUTUBE_NETLOC):
+            chatAnalytics = YoutubeChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
+        elif(platform_from_file == TWITCH_NETLOC):
+            chatAnalytics = TwitchChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
+        else:
+            logging.CRITICAL(f"Unrecognized platform when reading analytics data from file: {platform_from_file}")
+            exit(1)
+
+        for attr in dict.keys(jsonData):
+            # Nested objects have to be set manually
+            if(attr == 'samples'):
+                setattr(chatAnalytics, attr, [])
+                for sample_string in jsonData[attr]:
+                    sample_object = Sample(-1,-1)
+                    for attr2 in dict.keys(sample_string):
+                        setattr(sample_object, attr2, sample_string[attr2])
+                    chatAnalytics.samples.append(sample_object)
+            else:
+                setattr(chatAnalytics, attr, jsonData[attr])
+
+    return chatAnalytics
+
 def output_json_to_file(json_obj, filepath):
     if not os.path.exists(filepath): # code block adopted from Xenova's countinous_write.py
         directory = os.path.dirname(filepath)
@@ -195,37 +233,36 @@ def run(**kwargs):
         chatlog = Chat(chat=chat_msg_iterator, title=chat_title, duration=chat_duration, status=chat_status)
         # NOTE: platform required to provided through CLI, so don't need to set it here
         # NOTE: We assume that its a supported platform because user had to provide a platform via CLI which checks it there
-    elif(program_mode=='reanalyze'):
-        # get platform in here for reanalyze mode
-        raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
-    else:
-        raise NotImplementedError(f"Unrecognized program mode: {program_mode}")
-
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
-    duration = chatlog.duration
     
-
-    if(platform == YOUTUBE_NETLOC):
-        chatAnalytics = YoutubeChatAnalytics(duration=duration, interval=interval, description=description, program_version=__version__)
-    elif(platform == TWITCH_NETLOC):
-        chatAnalytics = TwitchChatAnalytics(duration=duration, interval=interval, description=description, program_version=__version__)
+    if(program_mode=='reanalyze'):
+        # Create the ChatAnalytics object from the saved json file
+        chatAnalytics = get_ChatAnalytics_from_file(source)
+        if(DEBUG):
+            dprint(f"chatanalytics object: {type(chatAnalytics)}")
+        chatAnalytics.chatlog_post_process(process_settings)
     else:
-        logging.critical(
-            "ERROR: No corresponding ChatAnalytics object.\n\
-            NOTE: Should have caught this in supported platforms checks earlier...")
-        exit(1)
-
-    # Now, we can process & analyze the data!
-    chatAnalytics.process_chatlog(chatlog, source, process_settings)
+        # We aren't reanalyzing a file, create the chatAnalytics object and process normally
+        if(platform == YOUTUBE_NETLOC):
+            chatAnalytics = YoutubeChatAnalytics(duration=chatlog.duration, interval=interval, description=description, program_version=__version__)
+        elif(platform == TWITCH_NETLOC):
+            chatAnalytics = TwitchChatAnalytics(duration=chatlog.duration, interval=interval, description=description, program_version=__version__)
+        else:
+            logging.critical(
+                "ERROR: No corresponding ChatAnalytics object.\n\
+                NOTE: Should have caught this in supported platforms checks earlier...")
+            exit(1)
+        # Now, we can process & analyze the data!
+        chatAnalytics.process_chatlog(chatlog, source, process_settings)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
     json_obj = chatAnalytics.to_JSON()
 
     if(output_filepath==None): # If user did not specify an output filepath, use this default convention
-        output_filepath =chatlog.title+'.json'
+        output_filepath =chatAnalytics.mediaTitle+'.json'
     output_json_to_file(json_obj, output_filepath)     
     
    
