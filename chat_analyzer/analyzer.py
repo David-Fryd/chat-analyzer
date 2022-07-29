@@ -1,5 +1,7 @@
+import os
 import json
 import logging
+
 
 from chat_downloader import ChatDownloader
 from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
@@ -18,30 +20,35 @@ MIN_INTERVAL = 1
 # Can be set via CLI --debug flag
 DEBUG = False
 
+# Define the arguments for getting the chatlog using chat-downloader
+chat_download_settings =  {
+    "url" : None, # Set in get_chatlog_downloader()
+    "message_types" : 'all',
+    "output" : None, # If save-chatfile, set to that path before get_chatlog_downloader()
+}
 
-
-def download_chatlog(url: str):
+def get_chatlog_downloader(url: str):
     """
-    Downloads and returns the chat log using Xenonva's chat-downloader
+    Gets a chat-downloader generator using Xenonva's chat-downloader
     
     :param url: The URL of the past stream/VOD to download the chat from
     :param type: str
     :returns: The chatlog we have downloaded
     :rtype: chat_downloader.sites.common.Chat
     """
-
-    # Define the arguments for getting the chatlog using chat-downloader
-    chat_download_settings =  {
-        "url" : url,
-        "message_types" : 'all'
-    }
+    # Provide url argument to the chat downloader
+    chat_download_settings['url'] = url
+ 
 
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
+
+    dprint(f"Chat download settings: {chat_download_settings}")
 
     try:
         chat = ChatDownloader().get_chat(
             chat_download_settings['url'], 
-            message_types=[chat_download_settings['message_types']])       # create a generator
+            message_types=[chat_download_settings['message_types']],
+            output=chat_download_settings['output'])       # create a generator
     except Exception as exception:
         logging.critical("ERORR: Could not get chat: "+ str(exception))
         exit(1)
@@ -87,6 +94,19 @@ def check_chatlog_supported(chatlog: Chat, url: str):
         logging.critical(f"ERROR: chat-analyzer does not currently support chatlogs from {platform}")
         exit(1)
 
+def output_json_to_file(json_obj, filepath):
+    if not os.path.exists(filepath): # code block adopted from Xenova's countinous_write.py
+        directory = os.path.dirname(filepath)
+        if directory:  # (non-empty directory - i.e. not in current folder)
+            # must make parent directory
+            os.makedirs(directory, exist_ok=True)
+        # open(output_filepath, 'w').close()  # create an empty file
+
+    with open(filepath, 'w') as f:
+        json.dump(json.loads(json_obj), f, ensure_ascii=False, indent=4)
+    
+    print(f"Successfully wrote chat analytics to {filepath}")
+
 def run(**kwargs):
     """Runs the chat-analyzer
     
@@ -108,19 +128,21 @@ def run(**kwargs):
     source = kwargs.get('source') # Is either a url or a filepath
     # Mode arguments
     program_mode = kwargs.get('mode') # choices=["url", "chatfile", "reanalyze"]
-    save_chatfile = kwargs.get('save_chatfile')
+    save_chatfile_output = kwargs.get('save_chatfile_output')
     # Processing (Sampling) arguments
     interval = kwargs.get('interval')
     print_interval = kwargs.get('print_interval')
     # Post-processing (Analyzing) arguments
-    spike_percentile = kwargs.get('spike_percentile')
+    highlight_percentile = kwargs.get('highlight_percentile')
+    highlight_metric = kwargs.get('highlight_metric')
+    spike_sensitivity = kwargs.get('spike_sensitivity')
     # Output
     description = kwargs.get('description')
     output_filepath = kwargs.get('output')
     # Debugging
     msg_break = kwargs.get('break')
 
-    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, save_chatfile=save_chatfile , spike_percentile=spike_percentile)
+    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, highlight_percentile=highlight_percentile, highlight_metric=highlight_metric, spike_sensitivity=spike_sensitivity)
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
@@ -130,11 +152,18 @@ def run(**kwargs):
     # Get the chat using the chat downloader and ensure that we can work with that data
     chatlog: Chat
     if(program_mode=='url'):
+        if(save_chatfile_output!=None):
+            chat_download_settings['output']= save_chatfile_output
         url = source
-        chatlog = download_chatlog(url)
+        chatlog = get_chatlog_downloader(url)
         check_chatlog_supported(chatlog, url)
     else:
         raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
+
+
+
+
+
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
@@ -156,14 +185,11 @@ def run(**kwargs):
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
-    jsonObj = chatAnalytics.to_JSON()
+    json_obj = chatAnalytics.to_JSON()
 
-    if(output_filepath==None):
-        output_filepath ='output/'+chatlog.title+'.json'
-
-    with open(output_filepath, 'w') as f:
-        json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
-    
-    print(f"Successfully wrote chat analytics to {output_filepath}")
+    if(output_filepath==None): # If user did not specify an output filepath, use this default convention
+        output_filepath =chatlog.title+'.json'
+    output_json_to_file(json_obj, output_filepath)
     
     return chatAnalytics
+

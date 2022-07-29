@@ -7,7 +7,7 @@ from .metadata import (
 )
 
 from .analyzer import run, MAX_INTERVAL, MIN_INTERVAL
-from .dataformat import SUPPORTED_PLATFORMS
+from .dataformat import SUPPORTED_PLATFORMS, SUPPORTED_PLATFORMS_SHORTHANDS
 
 def check_interval(interval):
     """
@@ -103,9 +103,12 @@ def main():
         We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
 
         In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
-        produced by Xenonva's chat-downloader, or by this program's `--save-chatfile` flag. 
+        produced by Xenonva's chat-downloader, or by this program's `--save-chatfile-output` flag. NOTE: the --platform argument is required
+        when using this mode.
 
         In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.""")
+
+    parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="When reading from a chatfile, specify the platform the chat was downloaded from. By default, Xenova's chat downloader does not store this information with the chat data so it must be manually specified.")
 
     # Mode arguments
     mode_group = parser.add_argument_group("Program Behavior (Mode)")
@@ -118,14 +121,18 @@ def main():
         \033[1m\'url\'\033[0m mode (default) downloads raw chat data from an appropriate source, processes the raw chat data into samples, and then analyzes the samples.
 
         \033[1m\'chatfile\'\033[0m mode reads raw chat data from a .json file, processes the raw chat data into samples, and then analyzes the samples.
-        (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile').
+        (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile-output').
 
         \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. The existing samples are not affected.
         \n""")
     # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
     # TODO: Add argument to specify output of the saved chatfile
-    mode_group.add_argument("--save-chatfile", "-sc", action="store_true", help="If downloading chat data from a URL, save the raw chat data to another file in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
+    mode_group.add_argument("--save-chatfile-output", "-sc", type=str, help="""
+    Filepath of the raw chat data to save. If downloading chat data from a URL, 
+    save the raw chat data to the provided filepath in addition to processing it, 
+    so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile'). 
+    NOTE: json file extension is enforced because it affects the content that the chat downloader writes to the file.""")
 
     # Processing Arguments
     sampling_group = parser.add_argument_group("Processing (Sampling)")
@@ -138,11 +145,24 @@ def main():
     
     # Post Processing (Analyzing) Arguments
     postprocess_group = parser.add_argument_group("Post Processing (Analyzing)")
-    # TODO: Actually connect this to spike percentile detection and properly connect mutex group
-    mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
-    mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93.0, type=check_percentile_float, help="""
-    A number between 0 and 100, representing the percentile of the chat activity to use as the threshold for detecting spikes. 
-    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93.0, any sample in the 93rd percentile (top 7.0%%) of activity will be considered a spike.""")
+    postprocess_group.add_argument("--highlight-percentile", "-ep", default=93.0, type=check_percentile_float, help="""
+    A number between 0 and 100, representing the cutoff percentile that a sample's attribute must meet to be considered a 'highlight' of the chatlog. 
+    Samples in the top HIGHLIGHT_PERCENTILE%% of the selected highlight metric will be considered high-engagement samples and included within the constructed highlights. 
+    The larger the percentile, the greater the metric requirement before being reported. If 'highlight-percentile'=93.0, only samples in the 93rd percentile (top 7.0%%) of the selected metric will be included in the highlights.
+    """)
+    metric_choices = ["usersPSec","chatsPSec","activityPSec"] # update metric_to_field map when adding new metrics
+    postprocess_group.add_argument("--highlight-metric", "-em", default=metric_choices[0], choices=metric_choices, type=str, help=f"""R|
+    The metric to use for engagement analysis when constructing highlights. Samples in the top HIGHLIGHT_PERCENTILE%% of the selected metric will be considered high-engagement samples and included within the constructed highlights. 
+    Each highlight metric choice corresponds to a datapoint for each sample. \n
+    \033[1m\'{metric_choices[0]}\'\033[0m compares samples based off of the average number unique users that send a chat per second of the sample.\n
+    \033[1m\'{metric_choices[1]}\'\033[0m compares samples based off of the average number of chats per second of the sample (not necessarily sent by unique users).\n 
+    \033[1m\'{metric_choices[2]}\'\033[0m compares samples based off of the average number of any type of message that appears in the chat per second of the sample.\n 
+    """)
+
+    # TODO: spike sensitivity
+    # TODO: spike metric
+
+    # mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
      # mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="Specify the total amount of cumulative spike time (in seconds) that we want output.")
     # TODO: More settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
@@ -152,7 +172,7 @@ def main():
     # Output Arguments
     output_group = parser.add_argument_group("Output")
     output_group.add_argument("--description", "-d" , type=str, help="R|A description included in the output file to help distinguish it from other output files.\nex: -d \"Ludwig product announcement, small intervals\"")
-    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[MEDIA TITLE].json.' 
+    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to '[MEDIA TITLE].json.' 
                                                     If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
     output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)
@@ -167,13 +187,19 @@ def main():
     # Argument dependency-checks:
     if(kwargs['mode'] != 'url'):
         parser.error(f"Only 'url' mode is supported in version {__version__}")
-    if(kwargs['save_chatfile'] and kwargs['mode'] != 'url'):
-        parser.error('The --save-chatfile flag can only be used in mode=\033[1m\'url\'\033[0m.')
+    if(kwargs['mode'] == 'chatfile' and kwargs['platform']== None):
+        parser.error('When reading from a chatfile, you must specify the platform the chatfile is from with --platform argument.')
+        # TODO: Add description of this to the chatfile desc and add the actual platform arg itself
+    if(kwargs['save_chatfile_output']):  
+        if(kwargs['mode'] != 'url'):
+            parser.error('The --save-chatfile-output flag can only be used in mode=\033[1m\'url\'\033[0m.')
+        if(not kwargs['save_chatfile_output'].endswith('.json')):
+            kwargs['save_chatfile_output'] += '.json'
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
-    if(kwargs['save_chatfile']):
-        parser.error("The --save-chatfile flag is not yet implemented! :(")
+
+
     run(**kwargs)
 
 
@@ -200,4 +226,4 @@ def main():
 # url = 'https://www.twitch.tv/videos/1538666427'
 
 
-# python chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5
+# chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5
