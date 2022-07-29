@@ -22,7 +22,7 @@ DEBUG = False
 
 def download_chatlog(url: str):
     """
-    Downloads and returns the chat log using Xenonva's chat-downloader
+    Gets a chat-downloader generator using Xenonva's chat-downloader
     
     :param url: The URL of the past stream/VOD to download the chat from
     :param type: str
@@ -129,6 +129,9 @@ def run(**kwargs):
     if(interval > MAX_INTERVAL or interval < MIN_INTERVAL): 
         raise ValueError(f"Sample interval must be {MIN_INTERVAL} <= interval <= {MAX_INTERVAL}")
 
+
+
+
     # Get the chat using the chat downloader and ensure that we can work with that data
     chatlog: Chat
     if(program_mode=='url'):
@@ -137,6 +140,13 @@ def run(**kwargs):
         check_chatlog_supported(chatlog, url)
     else:
         raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
+
+    if(output_filepath==None):
+        output_filepath =chatlog.title+'.json'
+    # Make sure this is a good filepath and we can eventually open it
+    # before we go through the work of processing just to error out b/c output filepath invalod...
+    with open(output_filepath, 'w') as f:
+        pass
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
@@ -159,9 +169,6 @@ def run(**kwargs):
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
     jsonObj = chatAnalytics.to_JSON()
-
-    if(output_filepath==None):
-        output_filepath =chatlog.title+'.json'
 
     with open(output_filepath, 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
