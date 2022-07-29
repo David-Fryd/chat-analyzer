@@ -488,7 +488,7 @@ class ChatAnalytics(ABC):
 
         engagement_list: List[Highlight] = []
 
-        field_to_use = METRIC_TO_FIELD(highlight_metric)
+        field_to_use = METRIC_TO_FIELD[highlight_metric]
 
         # In order to calculate the percentile cutoff, we have to do two passes. 
         # First to calculate the cutoff, second to find the samples that meet the cutoff.
