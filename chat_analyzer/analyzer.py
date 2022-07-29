@@ -125,26 +125,32 @@ def get_ChatAnalytics_from_file(filepath: str):
     with open(filepath, 'r') as f:
         jsonData = json.load(f)
 
-        platform_from_file = jsonData['platform']
-        if(platform_from_file == YOUTUBE_NETLOC):
-            chatAnalytics = YoutubeChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
-        elif(platform_from_file == TWITCH_NETLOC):
-            chatAnalytics = TwitchChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
-        else:
-            logging.CRITICAL(f"Unrecognized platform when reading analytics data from file: {platform_from_file}")
-            exit(1)
-
-        for attr in dict.keys(jsonData):
-            # Nested objects have to be set manually
-            if(attr == 'samples'):
-                setattr(chatAnalytics, attr, [])
-                for sample_string in jsonData[attr]:
-                    sample_object = Sample(-1,-1)
-                    for attr2 in dict.keys(sample_string):
-                        setattr(sample_object, attr2, sample_string[attr2])
-                    chatAnalytics.samples.append(sample_object)
+        try:
+            platform_from_file = jsonData['platform']
+            if(platform_from_file == YOUTUBE_NETLOC):
+                chatAnalytics = YoutubeChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
+            elif(platform_from_file == TWITCH_NETLOC):
+                chatAnalytics = TwitchChatAnalytics(-1,-1,'notseterror','notseterror','notseterror')
             else:
-                setattr(chatAnalytics, attr, jsonData[attr])
+                logging.CRITICAL(f"Unrecognized platform when reading analytics data from file: {platform_from_file}")
+                exit(1)
+
+            for attr in dict.keys(jsonData):
+                # Nested objects have to be set manually
+                if(attr == 'samples'):
+                    setattr(chatAnalytics, attr, [])
+                    for sample_string in jsonData[attr]:
+                        sample_object = Sample(-1,-1)
+                        for attr2 in dict.keys(sample_string):
+                            setattr(sample_object, attr2, sample_string[attr2])
+                        chatAnalytics.samples.append(sample_object)
+                else:
+                    setattr(chatAnalytics, attr, jsonData[attr])
+        except KeyError as exception:
+            missing_key = str(exception)
+            print(f"Could not find the {missing_key} key in the provided file. Please ensure that the file is a valid ChatAnalytics file previously produced by this program whose version is >= {__version__}.")
+            # logging.CRITICAL(f"Error when reading analytics data from file: {str(exception)}")
+            exit(1)
 
     return chatAnalytics
 
