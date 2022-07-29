@@ -108,7 +108,10 @@ def main():
 
         In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.""")
 
-    parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="When reading from a chatfile, specify the platform the chat was downloaded from. By default, Xenova's chat downloader does not store this information with the chat data so it must be manually specified.")
+    parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="""
+    When reading from a chatfile, specify the platform the chat was downloaded from. 
+    By default, Xenova's chat downloader does not store this information with the chat data so it must be manually specified. 
+    If the incorrect platform is entered, site-specific data will be innacurate but the program will still run and analyze common attributes.""")
 
     # Mode arguments
     mode_group = parser.add_argument_group("Program Behavior (Mode)")
