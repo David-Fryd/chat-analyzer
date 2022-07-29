@@ -148,7 +148,7 @@ def get_ChatAnalytics_from_file(filepath: str):
                     setattr(chatAnalytics, attr, jsonData[attr])
         except KeyError as exception:
             missing_key = str(exception)
-            print(f"Could not find the {missing_key} key in the provided file. Please ensure that the file is a valid ChatAnalytics file previously produced by this program whose version is >= {__version__}.")
+            print(f"Could not find the {missing_key} attribute in the provided file. Please ensure that the file is a valid ChatAnalytics file previously produced by this program whose version is >= {__version__}.")
             # logging.CRITICAL(f"Error when reading analytics data from file: {str(exception)}")
             exit(1)
 
