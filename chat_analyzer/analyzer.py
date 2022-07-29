@@ -1,5 +1,7 @@
+import os
 import json
 import logging
+
 
 from chat_downloader import ChatDownloader
 from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
@@ -92,6 +94,19 @@ def check_chatlog_supported(chatlog: Chat, url: str):
         logging.critical(f"ERROR: chat-analyzer does not currently support chatlogs from {platform}")
         exit(1)
 
+def output_json_to_file(json_obj, filepath):
+    if not os.path.exists(filepath): # code block adopted from Xenova's countinous_write.py
+        directory = os.path.dirname(filepath)
+        if directory:  # (non-empty directory - i.e. not in current folder)
+            # must make parent directory
+            os.makedirs(directory, exist_ok=True)
+        # open(output_filepath, 'w').close()  # create an empty file
+
+    with open(filepath, 'w') as f:
+        json.dump(json.loads(json_obj), f, ensure_ascii=False, indent=4)
+    
+    print(f"Successfully wrote chat analytics to {filepath}")
+
 def run(**kwargs):
     """Runs the chat-analyzer
     
@@ -146,16 +161,9 @@ def run(**kwargs):
         raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
 
 
-    if(output_filepath==None):
-        output_filepath =chatlog.title+'.json'
 
-    
 
-    # Make sure this is a good filepath and we can eventually open it
-    # before we go through the work of processing just to error out b/c output filepath invalod...
-    with open(output_filepath, 'w') as f:
-        pass
-        # TODO: do the same thing with savechatfile flag
+
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
@@ -177,11 +185,11 @@ def run(**kwargs):
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
-    jsonObj = chatAnalytics.to_JSON()
+    json_obj = chatAnalytics.to_JSON()
 
-    with open(output_filepath, 'w') as f:
-        json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
-    
-    print(f"Successfully wrote chat analytics to {output_filepath}")
+    if(output_filepath==None): # If user did not specify an output filepath, use this default convention
+        output_filepath =chatlog.title+'.json'
+    output_json_to_file(json_obj, output_filepath)
     
     return chatAnalytics
+

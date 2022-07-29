@@ -198,9 +198,7 @@ def main():
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
-    
-    
-    # TODO: make better output filepaths for the analyzed data
+
 
     run(**kwargs)
 
