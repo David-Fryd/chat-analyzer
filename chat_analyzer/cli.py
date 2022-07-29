@@ -108,12 +108,15 @@ def main():
 
         In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.""")
 
-    parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="When reading from a chatfile, specify the platform the chat was downloaded from. By default, Xenova's chat downloader does not store this information with the chat data so it must be manually specified.")
+    parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="""
+    When reading from a chatfile, specify the platform the chat was downloaded from. 
+    By default, Xenova's chat downloader does not store this information with the chat data so it must be manually specified. 
+    If the incorrect platform is entered, site-specific data will be innacurate but the program will still run and analyze common attributes.""")
 
     # Mode arguments
     mode_group = parser.add_argument_group("Program Behavior (Mode)")
     # mutex_mode_group = mode_group.add_mutually_exclusive_group()
-    mode_group.add_argument("--mode", default="url", choices=["url", "chatfile", "reanalyze"], type=str,\
+    mode_group.add_argument("--mode", "-m", default="url", choices=["url", "chatfile", "reanalyze"], type=str,\
         help="""R|The program can be run in three modes:
 
         \033[3mNOTE: All modes result in chat analytics output as a .json file.\033[0m
@@ -186,8 +189,8 @@ def main():
     kwargs = args.__dict__
 
     # Argument dependency-checks:
-    if(kwargs['mode'] != 'url'):
-        parser.error(f"Only 'url' mode is supported in version {__version__}")
+    if(kwargs['mode'] == 'reanalyze'):
+        parser.error(f"Only 'url' and 'chatfile' modes are supported in version {__version__}")
     if(kwargs['mode'] == 'chatfile' and kwargs['platform']== None):
         parser.error('When reading from a chatfile, you must specify the platform the chatfile is from with --platform argument.')
         # TODO: Add description of this to the chatfile desc and add the actual platform arg itself
@@ -199,7 +202,7 @@ def main():
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
-
+    # TODO: Interval should not be allowed with mode = reanalyze
 
     run(**kwargs)
 
@@ -227,4 +230,4 @@ def main():
 # url = 'https://www.twitch.tv/videos/1538666427'
 
 
-# chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5
+# chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 10

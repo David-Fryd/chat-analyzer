@@ -250,11 +250,14 @@ class Highlight(Section):
             The engagement metric. i.e. "avgActivityPerSecond", "avgChatMessagesPerSecond", "avgUniqueUsersPerSecond", etc.
             NOTE: It is stored as its converted value (the name of the actual field), NOT the metric str the user provided in the CLI.
         peak: float
-            The maximum value of the engagement metric throughout the whole EngagementHighlight. 
+            The maximum value of the engagement metric throughout the whole Highlight (among the samples in the Highlight). 
+        avg: float
+            The average value of the engagement metric throughout the whole Highlight (among the samples in the Highlight).
     
     """
     type: str
     peak: float
+    avg: float
 
 class Spike(Section):
     """
@@ -315,8 +318,8 @@ class ChatAnalytics(ABC):
         [Defined w/ default and modified DURING analysis]
         mediaTitle: str
             The title of the media associated with the chatlog.
-        mediaURL: str
-            The link to the media associated with the chatlog (url that it was origianlly downloaded from).
+        mediaSource: str
+            The link to the media associated with the chatlog (url that it was origianlly downloaded from or filepath of a chatfile).
         samples: List[Sample]
             An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
             Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
@@ -359,7 +362,7 @@ class ChatAnalytics(ABC):
 
     # Defined w/ default and modified DURING analysis
     mediaTitle: str = 'No Media Title'
-    mediaURL: str = 'No Media URL'
+    mediaSource: str = 'No Media Source'
 
     samples: List[Sample] = field(default_factory=list)
 
@@ -465,15 +468,14 @@ class ChatAnalytics(ABC):
 
     def get_highlights(self, highlight_metric: str, highlight_percentile: float):
         """
-        Find and return a list of highlights referencing samples that meet the percentile cutoff requirements for the provided metric
-
         Highlights reference a contiguous period of time where the provided metric remains above the percentile threshold.
+        Find and return a list of highlights referencing the start and end times of samples whose highlight_metric is in
+        the highlight_percentile for contiguous period of time of the referenced samples.
 
         A highlight may reference more than one sample if contiguous samples meet the percentile cutoff.
 
         Samples in the top 'percentile'% of the selected engagement metric will be considered high-engagement samples and included in the highlights output list. 
         The larger the percentile, the greater the metric requirement before being reported. If 'engagement-percentile'=93.0, any sample in the 93rd percentile (top 7.0%%) of the selected metric will be considered an engagement highlight.
-        
 
         These high-engagement portions of the chatlog are stored as highlights, and may last for multiple samples.
 
@@ -488,7 +490,7 @@ class ChatAnalytics(ABC):
         :rtype: List[Highlight]
         """        
 
-        engagement_list: List[Highlight] = []
+        highlights: List[Highlight] = []
 
         field_to_use = METRIC_TO_FIELD[highlight_metric]
 
@@ -500,27 +502,42 @@ class ChatAnalytics(ABC):
         _firstSample: Sample = None
         _lastSample: Sample = None
         _peak: float = 0
+        _avg: float = 0
+        _num_samples_in_highlight: int = 0
 
         for sample in self.samples:
             if(getattr(sample, field_to_use) >= percentile_value_cutoff):
+                _num_samples_in_highlight += 1
                 # If first sample is not null set first sample to current sample
                 if(_firstSample == None):
                     _firstSample = sample
-                # Set the peak to the maximum of the current peak and the current sample's activity
-                _peak = max(_peak, getattr(sample, field_to_use))
+                # TODO: Bugcheck _peak on summit's 14hr and ensure there is exactly 1 highlight w peak of 11 (highlight startTime: 31590, endTime: 31700)
+                _peak = max(_peak, getattr(sample, field_to_use)) # peak = max of the current peak and the current sample's activity
+                _avg += getattr(sample, field_to_use) # average calculated right before highlight constructed
                 # Set the last sample to the current sample
                 _lastSample = sample
             else:
                 # We are either finished with a highlight, or we are not in a highlight
                 # If we were building a highlight, append the highlight to the highlight list and reset internal variables
                 if(_firstSample != None):
-                    highlight = Highlight(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
-                    engagement_list.append(highlight)
+                    if(_avg!=0):
+                        _avg /= _num_samples_in_highlight
+                    highlight = Highlight(
+                        startTime=_firstSample.startTime,
+                        endTime=_lastSample.endTime, 
+                        peak=_peak, 
+                        avg=_avg, 
+                        type=field_to_use, 
+                        description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
+                    highlights.append(highlight)
+                    # Reset calculation vals for the next highlight
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
+                    _avg = 0
+                    _num_samples_in_highlight = 0
 
-        return engagement_list
+        return highlights
 
     def chatlog_post_process(self, settings: ProcessSettings):
         """
@@ -564,14 +581,14 @@ class ChatAnalytics(ABC):
 
         print("Post-processing (Analyzing) complete!")
 
-    def process_chatlog(self, chatlog: Chat, url: str, settings: ProcessSettings):
+    def process_chatlog(self, chatlog: Chat, source: str, settings: ProcessSettings):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
         :param chatlog: The chatlog we have downloaded 
         :type chatlog: chat_downloader.sites.common.Chat
-        :param url: The URL of the video we have downloaded the log from
-        :type url: str
+        :param source: The source of the media associated w the chatlog. URL of the media we have downloaded the log from, or a filepath
+        :type source: str
         :param settings: Utility class for passing information from the analyzer to the chatlog processor and post-processor
         :type settings: ProcessSettings
         """
@@ -584,7 +601,7 @@ class ChatAnalytics(ABC):
             print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
 
         self.mediaTitle = chatlog.title
-        self.mediaURL = url
+        self.mediaSource = source
         
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
