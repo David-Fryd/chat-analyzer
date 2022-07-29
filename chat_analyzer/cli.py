@@ -128,7 +128,11 @@ def main():
     # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
     # TODO: Add argument to specify output of the saved chatfile
-    mode_group.add_argument("--save-chatfile-output", "-sc", type=str, help="Filepath of the raw chat data to save. If downloading chat data from a URL, save the raw chat data to the provided filepath in addition to processing it, so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').")
+    mode_group.add_argument("--save-chatfile-output", "-sc", type=str, help="""
+    Filepath of the raw chat data to save. If downloading chat data from a URL, 
+    save the raw chat data to the provided filepath in addition to processing it, 
+    so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile'). 
+    NOTE: json file extension is enforced because it affects the content that the chat downloader writes to the file.""")
 
     # Processing Arguments
     sampling_group = parser.add_argument_group("Processing (Sampling)")
@@ -186,11 +190,15 @@ def main():
     if(kwargs['mode'] == 'chatfile' and kwargs['platform']== None):
         parser.error('When reading from a chatfile, you must specify the platform the chatfile is from with --platform argument.')
         # TODO: Add description of this to the chatfile desc and add the actual platform arg itself
-    if(kwargs['save_chatfile_output']!=None and kwargs['mode'] != 'url'):
-        parser.error('The --save-chatfile-output flag can only be used in mode=\033[1m\'url\'\033[0m.')
+    if(kwargs['save_chatfile_output']):  
+        if(kwargs['mode'] != 'url'):
+            parser.error('The --save-chatfile-output flag can only be used in mode=\033[1m\'url\'\033[0m.')
+        if(not kwargs['save_chatfile_output'].endswith('.json')):
+            kwargs['save_chatfile_output'] += '.json'
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
+    
     
     # TODO: make better output filepaths for the analyzed data
 
@@ -220,4 +228,4 @@ def main():
 # url = 'https://www.twitch.tv/videos/1538666427'
 
 
-# python chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5
+# chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 5
