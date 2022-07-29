@@ -1,4 +1,5 @@
-def dprint(s: str):
+def dprint(should_print: bool, s: str):
     """Simple styled debug printer
     """
-    print(f"\033[1;32m[DEBUG]:\033[3m {s}\033[0m")
+    if(should_print):
+        print(f"\033[1;32m[DEBUG]:\033[3m {s}\033[0m")

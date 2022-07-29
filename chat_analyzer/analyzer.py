@@ -42,8 +42,7 @@ def get_chatlog_downloader(url: str):
  
 
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
-    if(DEBUG):
-        dprint(f"Chat download settings: {chat_download_settings}")
+    dprint(DEBUG, f"Chat download settings: {chat_download_settings}")
 
     try:
         chat = ChatDownloader().get_chat(
@@ -109,8 +108,6 @@ def get_chatmsgs_from_chatfile(filepath: str):
     """
     with open(filepath, 'r') as f:
         chat_messages = json.load(f)
-        # dprint(len(chat_messages))
-        # dprint([m['message'] for m in chat_messages])
     return chat_messages
 
 def get_ChatAnalytics_from_file(filepath: str):
@@ -173,10 +170,9 @@ def run(**kwargs):
 
     # Interpret and extract CLI arguments from kwargs
     DEBUG = kwargs.get('debug')
-    if(DEBUG):
-        for arg in kwargs:
-            value = kwargs[arg]
-            dprint(f"analyzing arg {arg}: {value}")
+    for arg in kwargs:
+        value = kwargs[arg]
+        dprint(DEBUG, f"analyzing arg {arg}: {value}")
     
     source = kwargs.get('source') # Is either a url or a filepath
     # Optional
@@ -240,8 +236,7 @@ def run(**kwargs):
     if(program_mode=='reanalyze'):
         # Create the ChatAnalytics object from the saved json file
         chatAnalytics = get_ChatAnalytics_from_file(source)
-        if(DEBUG):
-            dprint(f"chatanalytics object: {type(chatAnalytics)}")
+        dprint(DEBUG,f"chatanalytics object: {type(chatAnalytics)}")
         chatAnalytics.chatlog_post_process(process_settings)
     else:
         # We aren't reanalyzing a file, create the chatAnalytics object and process normally
