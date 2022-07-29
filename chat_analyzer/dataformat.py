@@ -15,6 +15,11 @@ from chat_downloader.utils.core import seconds_to_time
 YOUTUBE_NETLOC = 'www.youtube.com'
 TWITCH_NETLOC = 'www.twitch.tv'
 SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
+SUPPORTED_PLATFORMS_SHORTHANDS = {
+    # Useful for CLI choices when specifying the source of the chatfile
+    "youtube" : YOUTUBE_NETLOC,
+    "twitch" : TWITCH_NETLOC
+}
 
 
 # The formatting to print the progress status with
@@ -37,8 +42,6 @@ class ProcessSettings():
     :type print_progress_interval: int
     :param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
     :type msg_break: int
-    :param save_chatfile: Save the raw chat data to a file as we process messages. If False, the chatlog is not saved.
-    :type save_chatfile: bool
 
     [Post-processing (Analyzing) Arguments]
     :param highlight_percentile: The cutoff percentile that samples must meet to be considered a highlight
@@ -52,7 +55,6 @@ class ProcessSettings():
     # Processing (Sampling) Arguments
     print_interval: int
     msg_break: int
-    save_chatfile: bool
     # Post-processing (Analyzing) Arguments
     highlight_percentile: float
     highlight_metric: str
