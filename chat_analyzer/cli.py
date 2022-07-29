@@ -131,7 +131,8 @@ def main():
     mode_group.add_argument("--save-chatfile-output", "-sc", type=str, help="""
     Filepath of the raw chat data to save. If downloading chat data from a URL, 
     save the raw chat data to the provided filepath in addition to processing it, 
-    so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile'). 
+    so that the raw data can be \033[3mfully\033[0m reprocessed and analyzed again quickly (using mode='chatfile').
+    NOTE: Chatfiles are *much* larger in comparison to the analytics file.  
     NOTE: json file extension is enforced because it affects the content that the chat downloader writes to the file.""")
 
     # Processing Arguments

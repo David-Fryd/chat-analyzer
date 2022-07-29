@@ -41,8 +41,8 @@ def get_chatlog_downloader(url: str):
  
 
     print("Getting chatlog using Xenonva's chat-downloader (https://github.com/xenova/chat-downloader)...")
-
-    dprint(f"Chat download settings: {chat_download_settings}")
+    if(DEBUG):
+        dprint(f"Chat download settings: {chat_download_settings}")
 
     try:
         chat = ChatDownloader().get_chat(
@@ -154,6 +154,7 @@ def run(**kwargs):
     if(program_mode=='url'):
         if(save_chatfile_output!=None):
             chat_download_settings['output']= save_chatfile_output
+            print(f"Raw chat data file will be saved to {save_chatfile_output}")
         url = source
         chatlog = get_chatlog_downloader(url)
         check_chatlog_supported(chatlog, url)
@@ -191,5 +192,7 @@ def run(**kwargs):
         output_filepath =chatlog.title+'.json'
     output_json_to_file(json_obj, output_filepath)
     
+   
+
     return chatAnalytics
 
