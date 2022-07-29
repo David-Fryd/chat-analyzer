@@ -113,14 +113,16 @@ def run(**kwargs):
     interval = kwargs.get('interval')
     print_interval = kwargs.get('print_interval')
     # Post-processing (Analyzing) arguments
-    spike_percentile = kwargs.get('spike_percentile')
+    highlight_percentile = kwargs.get('highlight_percentile')
+    highlight_metric = kwargs.get('highlight_metric')
+    spike_sensitivity = kwargs.get('spike_sensitivity')
     # Output
     description = kwargs.get('description')
     output_filepath = kwargs.get('output')
     # Debugging
     msg_break = kwargs.get('break')
 
-    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, save_chatfile=save_chatfile , spike_percentile=spike_percentile)
+    process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, save_chatfile=save_chatfile, highlight_percentile=highlight_percentile, highlight_metric=highlight_metric, spike_sensitivity=spike_sensitivity)
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI

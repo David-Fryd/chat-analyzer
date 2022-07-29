@@ -20,6 +20,13 @@ SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
 # The formatting to print the progress status with
 PROG_PRINT_TEMPLATE = "{:^15}| {:^25} | {:^20}"
 
+METRIC_TO_FIELD = {
+    # Used to convert the engagement-metric provided by the CLI to the actual field name of the sample class
+    "activityPSec": "avgActivityPerSecond",
+    "chatsPSec" : "avgChatMessagesPerSecond",
+    "usersPSec" : "avgUniqueUsersPerSecond",
+}
+
 @dataclass
 class ProcessSettings():
     """
@@ -34,8 +41,12 @@ class ProcessSettings():
     :type save_chatfile: bool
 
     [Post-processing (Analyzing) Arguments]
-    :param spike_percentile:
-    :type spike_percentile: float
+    :param highlight_percentile: The cutoff percentile that samples must meet to be considered a highlight
+    :type highlight_percentile: float
+    :param highlight_metric: The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
+    :type highlight_metric: str
+    :param spike_sensitivity: How sensitive the spike detector is at picking up spikes. Higher sensitivity means more spikes are detected.
+    :type spike_sensitivity: float
 
     """
     # Processing (Sampling) Arguments
@@ -43,7 +54,9 @@ class ProcessSettings():
     msg_break: int
     save_chatfile: bool
     # Post-processing (Analyzing) Arguments
-    spike_percentile: float
+    highlight_percentile: float
+    highlight_metric: str
+    spike_sensitivity: float
 
 
 # NOTE: Yes CamelCased fields in the dataclasses are unpythonic, but the primary intention is to convert these dataclasses into JSON objects and it is one less step to handle then!
@@ -181,7 +194,7 @@ class YoutubeSample(Sample):
     
 
 @dataclass
-class Highlight():
+class Section():
     """
     Contains generic information about a noteable section of the chatlog
     
@@ -190,15 +203,15 @@ class Highlight():
     Attributes:
         [Defined when class Initialized]
         startTime: float
-            The start time (inclusive) (in seconds) corresponding to a highlight.
+            The start time (inclusive) (in seconds) corresponding to a section.
         endTime: float
-            The end time (exclusive) (in seconds) corresponding to a highlight.
+            The end time (exclusive) (in seconds) corresponding to a section.
         description: str (optional)
-            A description of the highlight (if any).
+            A description of the section (if any).
 
         [Automatically re-defined on post-init]
         duration: float
-            The duration (in seconds) of the highlight (end-start)
+            The duration (in seconds) of the section (end-start)
         duration_text: str
             The duration represented in text format (i.e. hh:mm:ss)
         startTime_text: str
@@ -224,21 +237,31 @@ class Highlight():
         self.startTime_text = seconds_to_time(self.startTime)
         self.endTime_text = seconds_to_time(self.endTime)
 @dataclass
-class Spike(Highlight):
+class Highlight(Section):
     """
-    Contains information about an activity spike in the chatlog
+    Highlights reference a contiguous period of time where the provided metric remains above the percentile threshold.
     
     ---
 
     Attributes:
         type: str
-            The attribute/field that spiked. i.e. "activity", "uniqueUsers", "chatMessages", etc.
+            The engagement metric. i.e. "avgActivityPerSecond", "avgChatMessagesPerSecond", "avgUniqueUsersPerSecond", etc.
+            NOTE: It is stored as its converted value (the name of the actual field), NOT the metric str the user provided in the CLI.
         peak: float
-            The highest activity of any sample contained within the spike. 
+            The maximum value of the engagement metric throughout the whole EngagementHighlight. 
     
     """
     type: str
     peak: float
+
+class Spike(Section):
+    """
+    Contains information about an activity spike in the chatlog
+    
+    ---
+    ...
+    """
+    # TODO: Implement
 
 
 @dataclass
@@ -313,8 +336,9 @@ class ChatAnalytics(ABC):
         overallAvgUniqueUsersPerSecond: float
             The average number of unique users chatting per second.
         highlights: List[Highlight] 
-            Not yet implemented
+            A list of the high engagement sections of the chatlog.
         spikes: List[Spike]
+            Not yet implemented TODO
             A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
     """
     # Defined when class Initialized
@@ -345,8 +369,8 @@ class ChatAnalytics(ABC):
     overallAvgActivityPerSecond: float = 0
     overallAvgChatMessagesPerSecond: float = 0
     overallAvgUniqueUsersPerSecond: float = 0
-    highlights: List[Highlight] = field(default_factory=list) # Not implemented yet
-    spikes: List[Spike] = field(default_factory=list)
+    highlights: List[Highlight] = field(default_factory=list) 
+    spikes: List[Spike] = field(default_factory=list) # TODO: Not implemented yet
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
     _overallUserChats: dict = field(default_factory=dict) # author['id'] -> numChats for full duration
@@ -421,38 +445,55 @@ class ChatAnalytics(ABC):
                 # keeps track of unique user per *sample*
                 self._currentSample._userChats[authID] = self._currentSample._userChats[authID] + 1 if authID in self._currentSample._userChats else 1
 
-    def get_engagement_sections(self):
-        # Use a two pointer approach to find the start and end of each engagement section
-        # (1 min, 5 min, 10 min, highest engagement, or smth like that)
-        raise NotImplementedError
- 
-    def get_spikes(self, field_to_use: str, percentile: float):
+    # def get_engagement_sections(self):
+    #     # Use a two pointer approach to find the start and end of each engagement section
+    #     # (1 min, 5 min, 10 min, highest engagement, or smth like that)
+    #     raise NotImplementedError
+    def get_spikes(self, spike_sensitivity, spike_metric):
         """
-        Find and return a list of samples with significant spikes in a given field/attribute.
+        A spike is a point in the chatlog where from one sample to the next, there is a sharp increase in the provided metric.
 
+        ...? Are spikes sustained or..?
+        ?:
         A spike is a point in the chatlog where the activity is significantly different from the average activity.
         Activity is significantly different if it is > avg*SPIKE_MULT_THRESHOLD.
         We detect a spike if the high activity level is maintained for at least SPIKE_SUSTAIN_REQUIREMENT # of samples.
+        """    
+        raise NotImplementedError
 
-        Spikes are stored as highlights, and may last for multiple samples.
+    def get_highlights(self, highlight_metric: str, highlight_percentile: float):
+        """
+        Find and return a list of highlights referencing samples that meet the percentile cutoff requirements for the provided metric
+
+        Highlights reference a contiguous period of time where the provided metric remains above the percentile threshold.
+
+        A highlight may reference more than one sample if contiguous samples meet the percentile cutoff.
+
+        Samples in the top 'percentile'% of the selected engagement metric will be considered high-engagement samples and included in the highlights output list. 
+        The larger the percentile, the greater the metric requirement before being reported. If 'engagement-percentile'=93.0, any sample in the 93rd percentile (top 7.0%%) of the selected metric will be considered an engagement highlight.
+        
+
+        These high-engagement portions of the chatlog are stored as highlights, and may last for multiple samples.
 
         This method should only be called after the averages have been calculated,
-        ensuring accurate results when determining spikes.
+        ensuring accurate results when determining periods of high engagement.
 
-        :param field_to_use: _description_
+        :param highlight_metric: The metric samples are compared to determine if they are high-engagement samples. NOTE: Internally converted to the actual field name of a sample field.
         :type field_to_use: str
-        :param percentile: _description_
+        :param highlight_percentile: The cutoff percentile that the samples must meet to be included in a highlight
         :type percentile: float
-        :return: _description_
-        :rtype: List[Sample]
+        :return: a list of highlights referencing samples that met the percentile cutoff requirements for the provided metric
+        :rtype: List[Highlight]
         """        
 
-        spike_list: List[Spike] = []
+        engagement_list: List[Highlight] = []
+
+        field_to_use = METRIC_TO_FIELD(highlight_metric)
 
         # In order to calculate the percentile cutoff, we have to do two passes. 
         # First to calculate the cutoff, second to find the samples that meet the cutoff.
         field_values = [getattr(s, field_to_use) for s in self.samples]
-        percentile_value_cutoff = np.percentile(field_values, [percentile])
+        percentile_value_cutoff = np.percentile(field_values, [highlight_percentile])
 
         _firstSample: Sample = None
         _lastSample: Sample = None
@@ -468,16 +509,16 @@ class ChatAnalytics(ABC):
                 # Set the last sample to the current sample
                 _lastSample = sample
             else:
-                # We are either finished with a spike, or we are not in a spike
-                # If we were building a spike, append the spike to the spike list and reset internal variables
+                # We are either finished with a highlight, or we are not in a highlight
+                # If we were building a highlight, append the highlight to the highlight list and reset internal variables
                 if(_firstSample != None):
-                    spike = Spike(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
-                    spike_list.append(spike)
+                    highlight = Highlight(startTime=_firstSample.startTime, endTime=_lastSample.endTime, peak=_peak, type=field_to_use, description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
+                    engagement_list.append(highlight)
                     _firstSample = None
                     _lastSample = None
                     _peak = 0
 
-        return spike_list
+        return engagement_list
 
     def chatlog_post_process(self, settings: ProcessSettings):
         """
@@ -509,9 +550,9 @@ class ChatAnalytics(ABC):
         # Process and remove the final sample from the currentSample field
         self._currentSample.sample_post_process()
 
-        # Spikes are determined after the final averages have been calculated
-        # The appending within get_spikes causes the error: AttributeError: 'set' object has no attribute '__dict__'
-        self.spikes = self.get_spikes('avgUniqueUsersPerSecond', settings.spike_percentile) 
+        # Highlights & Spikes are determined after the final averages have been calculated
+        self.highlights = self.get_highlights(settings.highlight_metric, settings.highlight_percentile)
+        # self.spikes = self.get_spikes('avgUniqueUsersPerSecond', settings.spike_percentile) #TODO: Implement spikes
 
         # Remove all other internal variables not suitable for output
         # del self._overallUserChats

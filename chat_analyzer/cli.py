@@ -7,7 +7,7 @@ from .metadata import (
 )
 
 from .analyzer import run, MAX_INTERVAL, MIN_INTERVAL
-from .dataformat import SUPPORTED_PLATFORMS
+from .dataformat import SUPPORTED_PLATFORMS, Sample, TwitchSample, YoutubeSample
 
 def check_interval(interval):
     """
@@ -138,11 +138,24 @@ def main():
     
     # Post Processing (Analyzing) Arguments
     postprocess_group = parser.add_argument_group("Post Processing (Analyzing)")
-    # TODO: Actually connect this to spike percentile detection and properly connect mutex group
-    mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
-    mutex_postprocess_group.add_argument("--spike-percentile", "-sp" , default=93.0, type=check_percentile_float, help="""
-    A number between 0 and 100, representing the percentile of the chat activity to use as the threshold for detecting spikes. 
-    The larger the percentile, the stricter the spike detection. If 'spike-percentile'=93.0, any sample in the 93rd percentile (top 7.0%%) of activity will be considered a spike.""")
+    postprocess_group.add_argument("--highlight-percentile", "-ep", default=93.0, type=check_percentile_float, help="""
+    A number between 0 and 100, representing the cutoff percentile that a sample's attribute must meet to be considered a 'highlight' of the chatlog. 
+    Samples in the top HIGHLIGHT_PERCENTILE%% of the selected highlight metric will be considered high-engagement samples and included within the constructed highlights. 
+    The larger the percentile, the greater the metric requirement before being reported. If 'highlight-percentile'=93.0, only samples in the 93rd percentile (top 7.0%%) of the selected metric will be included in the highlights.
+    """)
+    metric_choices = ["usersPSec","chatsPSec","activityPSec"] # update metric_to_field map when adding new metrics
+    postprocess_group.add_argument("--highlight-metric", "-em", default="users", choices=metric_choices, type=str, help="""
+    The metric to use for engagement analysis when constructing highlights. Samples in the top HIGHLIGHT_PERCENTILE%% of the selected metric will be considered high-engagement samples and included within the constructed highlights. 
+    Each highlight metric choice corresponds to a datapoint for each sample. 
+    \033[1m\'users\'\033[0m compares samples based off of the average number unique users that send a chat per second of the sample.
+    \033[1m\'chat\'\033[0m compares samples based off of the average number of chats per second of the sample (not necessarily sent by unique users). 
+    \033[1m\'activity\'\033[0m compares samples based off of the average number of any type of message that appears in the chat per second of the sample. 
+    """)
+
+    # TODO: spike sensitivity
+    # TODO: spike metric
+
+    # mutex_postprocess_group = postprocess_group.add_mutually_exclusive_group()
      # mutex_postprocess_group.add_argument("--spike-time", default=120, type=check_positive_int, help="Specify the total amount of cumulative spike time (in seconds) that we want output.")
     # TODO: More settings for finding spike. Sensitivity based, or "top-5 based" or...?
 
