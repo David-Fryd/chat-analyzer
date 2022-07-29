@@ -1,19 +1,19 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
-- get_spikes is actually behaving like get highest engagement. Find local spikes/such using differences between individual samples, and rename the current spike logic, args, etc... to "engagement"
+- Local maxima detection (spike detection)
+  - https://datascience.stackexchange.com/questions/27031/how-to-get-spike-values-from-a-value-sequence
+  - https://stackoverflow.com/questions/26632205/finding-a-spike-or-drop-in-a-dataset-programatically
 - **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
 - In addition to regular & integrated processing, add 2 modes:
   - Add option/flag to re-process a local output file for spikes
   - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths) 
 - Update README
   - JSON output documentation
-- --save-chatfile fxnality
 - Better class documentation
 
 ## Medium Priority
-- Add debug early break in process_chatlog in dataformat
-- Find other types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
+- Find other message types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
 - Implement `get_engagement_sections`
 - Find way to prevent private fields (fields preceeded w _ in dataformat) from being serialized and output in the JSON. (For both ChatAnalytics abd Sample)
   - POTENTIAL SOL: Maybe set them = to sets {}, it seems that the constants defined as sets are ignored and automatically not output in the JSON?... But also have historically had set issues in the past... idk (:
