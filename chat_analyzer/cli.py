@@ -144,12 +144,12 @@ def main():
     The larger the percentile, the greater the metric requirement before being reported. If 'highlight-percentile'=93.0, only samples in the 93rd percentile (top 7.0%%) of the selected metric will be included in the highlights.
     """)
     metric_choices = ["usersPSec","chatsPSec","activityPSec"] # update metric_to_field map when adding new metrics
-    postprocess_group.add_argument("--highlight-metric", "-em", default="users", choices=metric_choices, type=str, help="""
+    postprocess_group.add_argument("--highlight-metric", "-em", default=metric_choices[0], choices=metric_choices, type=str, help="""R|
     The metric to use for engagement analysis when constructing highlights. Samples in the top HIGHLIGHT_PERCENTILE%% of the selected metric will be considered high-engagement samples and included within the constructed highlights. 
-    Each highlight metric choice corresponds to a datapoint for each sample. 
-    \033[1m\'users\'\033[0m compares samples based off of the average number unique users that send a chat per second of the sample.
-    \033[1m\'chat\'\033[0m compares samples based off of the average number of chats per second of the sample (not necessarily sent by unique users). 
-    \033[1m\'activity\'\033[0m compares samples based off of the average number of any type of message that appears in the chat per second of the sample. 
+    Each highlight metric choice corresponds to a datapoint for each sample. \n
+    \033[1m\'users\'\033[0m compares samples based off of the average number unique users that send a chat per second of the sample.\n
+    \033[1m\'chat\'\033[0m compares samples based off of the average number of chats per second of the sample (not necessarily sent by unique users).\n 
+    \033[1m\'activity\'\033[0m compares samples based off of the average number of any type of message that appears in the chat per second of the sample.\n 
     """)
 
     # TODO: spike sensitivity
@@ -165,7 +165,7 @@ def main():
     # Output Arguments
     output_group = parser.add_argument_group("Output")
     output_group.add_argument("--description", "-d" , type=str, help="R|A description included in the output file to help distinguish it from other output files.\nex: -d \"Ludwig product announcement, small intervals\"")
-    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to 'output/[MEDIA TITLE].json.' 
+    output_group.add_argument("--output", "-o", type=str, help="""The filepath to write the output to. If not specified, the output is written to '[MEDIA TITLE].json.' 
                                                     If the provided file path does not end in '.json', the '.json' file extension is appended automaticaly to the filepath (disable with --nojson).""")
     output_group.add_argument("--nojson", action="store_true", help="Disable the automatic appending of the '.json' file extension to the provided output filepath.")
     # TODO: Add a console output group (verbose, quiet, progress update, etc...)

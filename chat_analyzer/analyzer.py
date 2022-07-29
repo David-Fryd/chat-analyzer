@@ -161,7 +161,7 @@ def run(**kwargs):
     jsonObj = chatAnalytics.to_JSON()
 
     if(output_filepath==None):
-        output_filepath ='output/'+chatlog.title+'.json'
+        output_filepath =chatlog.title+'.json'
 
     with open(output_filepath, 'w') as f:
         json.dump(json.loads(jsonObj), f, ensure_ascii=False, indent=4)
