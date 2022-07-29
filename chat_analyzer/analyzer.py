@@ -56,7 +56,7 @@ def get_chatlog_downloader(url: str):
     print("Successfully retrieved chat generator:")
     print("\tTitle: %s" % (str(chat.title)))
     print("\tDuration: %s (%s seconds)" % (seconds_to_time(chat.duration), str(chat.duration)))
-    print("""\033[1;31mNOTICE: Downloading chats is the largest rate-limiting factor.
+    print("""\033[1;31mNOTICE: Downloading chats from a url is the largest rate-limiting factor.
              \033[0;31mIf you intend to sample the data differently multiple times, consider using \033[1;33mchatfile\033[0;31m mode, or saving the chat data with \033[1;33m--save-chatfile\033[0;31m.\n\033[0m""")
 
     return chat
