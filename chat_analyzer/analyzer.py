@@ -1,4 +1,5 @@
 import os
+import ntpath
 import json
 import logging
 
@@ -61,7 +62,7 @@ def get_chatlog_downloader(url: str):
 
     return chat
 
-def check_chatlog_supported(chatlog: Chat, url: str):
+def check_chatlog_downloader_supported(chatlog: Chat, url: str):
     """
     Ensures that we are able to properly analyze the downloaded chatlog by
     enforcing the metadata matches expected values. 
@@ -94,6 +95,24 @@ def check_chatlog_supported(chatlog: Chat, url: str):
         logging.critical(f"ERROR: chat-analyzer does not currently support chatlogs from {platform}")
         exit(1)
 
+def get_chatmsgs_from_chatfile(filepath: str):
+    """Given a path to a chatfile (directly from Xenovas downloader or produced by 
+    --save-chatfile-output) flag, extract the chat messages from the file into an array
+    of chat messages.
+
+
+    :param filepath: a path to a chatfile (directly from Xenovas downloader or produced by 
+    --save-chatfile-output) flag
+    :type filepath: str
+    :returns: an array of chat messages
+    :rtype: list[chat_downloader.sites.common.ChatMessage]
+    """
+    with open(filepath, 'r') as f:
+        chat_messages = json.load(f)
+        # dprint(len(chat_messages))
+        # dprint([m['message'] for m in chat_messages])
+    return chat_messages
+
 def output_json_to_file(json_obj, filepath):
     if not os.path.exists(filepath): # code block adopted from Xenova's countinous_write.py
         directory = os.path.dirname(filepath)
@@ -109,11 +128,7 @@ def output_json_to_file(json_obj, filepath):
 
 def run(**kwargs):
     """Runs the chat-analyzer
-    
-    :param url: The URL of the past stream/VOD we want to download and analyze
-    :type url: str
-    :param interval: The size of each sample in seconds (granularity of the analytics)
-    :type interval: int
+
     :returns: The chat analytics data as a dataclass
     :rtype: dataformat.ChatAnalytics (dataformat.YoutubeChatAnalytics or dataformat.TwitchChatAnalytics)
     """
@@ -126,6 +141,11 @@ def run(**kwargs):
             dprint(f"analyzing arg {arg}: {value}")
     
     source = kwargs.get('source') # Is either a url or a filepath
+    # Optional
+    platform = kwargs.get('platform') # Required if mode==chatfile, otherwise == None
+    if(platform):
+        # Immediately re-parse from shorthand into official NETLOC
+        platform = SUPPORTED_PLATFORMS_SHORTHANDS[platform]
     # Mode arguments
     program_mode = kwargs.get('mode') # choices=["url", "chatfile", "reanalyze"]
     save_chatfile_output = kwargs.get('save_chatfile_output')
@@ -142,7 +162,10 @@ def run(**kwargs):
     # Debugging
     msg_break = kwargs.get('break')
 
+
+    # Consumed by the processing/post-processing logic in dataformat.py
     process_settings = ProcessSettings(print_interval=print_interval, msg_break=msg_break, highlight_percentile=highlight_percentile, highlight_metric=highlight_metric, spike_sensitivity=spike_sensitivity)
+
 
     # Check interval argument, we check the url arg's platform in check_chatlog_supported()
     # NOTE: We double check here in addition to in CLI
@@ -156,20 +179,33 @@ def run(**kwargs):
             chat_download_settings['output']= save_chatfile_output
             print(f"Raw chat data file will be saved to {save_chatfile_output}")
         url = source
+        platform = urlparse(url).netloc
         chatlog = get_chatlog_downloader(url)
-        check_chatlog_supported(chatlog, url)
-    else:
+        check_chatlog_downloader_supported(chatlog, url)
+    elif(program_mode=='chatfile'):
+        # Have to create the Chat object manually. 
+        # We just have the chat messages so we have to guess on some fields (Limitation from Xenova's chat-downloader)
+        # NOTE: We could require custom chatfiles with manually imposed fields, but that destroys compatibility w/ native Xenova chat-downloader
+        chat_messages = get_chatmsgs_from_chatfile(source) 
+        chat_msg_iterator = iter(chat_messages)       
+        chat_title = ntpath.basename(source) # We don't have the title of original vid so file name is next best thing
+        chat_duration = chat_messages[-1]['time_in_seconds'] # We don't have duration so we approximate by taking the last message's timestamp
+        chat_status = 'past' # (has to be, since its a chatfile)
+
+        chatlog = Chat(chat=chat_msg_iterator, title=chat_title, duration=chat_duration, status=chat_status)
+        # NOTE: platform required to provided through CLI, so don't need to set it here
+        # NOTE: We assume that its a supported platform because user had to provide a platform via CLI which checks it there
+    elif(program_mode=='reanalyze'):
+        # get platform in here for reanalyze mode
         raise NotImplementedError(f"Mode {program_mode} is not yet supported... oops :(")
-
-
-
-
+    else:
+        raise NotImplementedError(f"Unrecognized program mode: {program_mode}")
 
 
     # Next section: Create the proper type of ChatAnalytics object based on the platform
     chatAnalytics: ChatAnalytics
     duration = chatlog.duration
-    platform = urlparse(url).netloc
+    
 
     if(platform == YOUTUBE_NETLOC):
         chatAnalytics = YoutubeChatAnalytics(duration=duration, interval=interval, description=description, program_version=__version__)
@@ -182,7 +218,7 @@ def run(**kwargs):
         exit(1)
 
     # Now, we can process & analyze the data!
-    chatAnalytics.process_chatlog(chatlog, url, process_settings)
+    chatAnalytics.process_chatlog(chatlog, source, process_settings)
         
     # chatAnalytics now contains all analytical data. We can print/return as ncessary
    
@@ -190,7 +226,7 @@ def run(**kwargs):
 
     if(output_filepath==None): # If user did not specify an output filepath, use this default convention
         output_filepath =chatlog.title+'.json'
-    output_json_to_file(json_obj, output_filepath)
+    output_json_to_file(json_obj, output_filepath)     
     
    
 
