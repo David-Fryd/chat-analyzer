@@ -318,8 +318,8 @@ class ChatAnalytics(ABC):
         [Defined w/ default and modified DURING analysis]
         mediaTitle: str
             The title of the media associated with the chatlog.
-        mediaURL: str
-            The link to the media associated with the chatlog (url that it was origianlly downloaded from).
+        mediaSource: str
+            The link to the media associated with the chatlog (url that it was origianlly downloaded from or filepath of a chatfile).
         samples: List[Sample]
             An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
             Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
@@ -362,7 +362,7 @@ class ChatAnalytics(ABC):
 
     # Defined w/ default and modified DURING analysis
     mediaTitle: str = 'No Media Title'
-    mediaURL: str = 'No Media URL'
+    mediaSource: str = 'No Media Source'
 
     samples: List[Sample] = field(default_factory=list)
 
@@ -581,14 +581,14 @@ class ChatAnalytics(ABC):
 
         print("Post-processing (Analyzing) complete!")
 
-    def process_chatlog(self, chatlog: Chat, url: str, settings: ProcessSettings):
+    def process_chatlog(self, chatlog: Chat, source: str, settings: ProcessSettings):
         """
         Iterates through the whole chatlog and calculates the analytical data (Modifies and stores in a ChatAnalytics object). 
 
         :param chatlog: The chatlog we have downloaded 
         :type chatlog: chat_downloader.sites.common.Chat
-        :param url: The URL of the video we have downloaded the log from
-        :type url: str
+        :param source: The source of the media associated w the chatlog. URL of the media we have downloaded the log from, or a filepath
+        :type source: str
         :param settings: Utility class for passing information from the analyzer to the chatlog processor and post-processor
         :type settings: ProcessSettings
         """
@@ -601,7 +601,7 @@ class ChatAnalytics(ABC):
             print("\033[1m"+PROG_PRINT_TEMPLATE.format("Completion", "Processed Media Time", "# Messages Processed")+"\033[0m")
 
         self.mediaTitle = chatlog.title
-        self.mediaURL = url
+        self.mediaSource = source
         
         # For each message of all types in the chatlog:
         for idx, msg in enumerate(chatlog):
