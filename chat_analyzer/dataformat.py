@@ -9,7 +9,6 @@ from chat_downloader.sites.common import Chat
 from typing import List
 
 from chat_downloader.utils.core import seconds_to_time
-from .util import dprint
 
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
