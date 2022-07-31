@@ -27,8 +27,9 @@ how your chat responds to your performance!
 
 *Currently both YouTube and Twitch VODs are supported.*
 
+#################
 Target Auidence: 
-________________
+#################
 
 Anyone can use this tool on anyone's streams, enabling people beyond the creators themselves to view and use chat analytics data.
 
@@ -198,6 +199,7 @@ the VOD is from, some datapoints are specific to the platform.
         "_currentSample": null,
     }
 
+TODO: Link the docs here:
 TODO: Use the docs within dataformat.py to populate each field's description
 
 ``duration``: "......"

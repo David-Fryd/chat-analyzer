@@ -34,4 +34,5 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../chat_analyzer'))
 
-# To auto-gen docs, run 'sphinx-apidoc -o ./source/apidoc ../chat_analyzer' while in the docs directory
+# apidocs genned thru: 'sphinx-apidoc -o ./source/apidoc ../chat_analyzer' while in the docs directory
+# in order to regen docs, navigate to docs directory and run: 'make clean ; make html'

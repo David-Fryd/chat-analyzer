@@ -36,20 +36,10 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">chat_analyzer package</a><ul>
-<li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer.analyzer">chat_analyzer.analyzer module</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer.cli">chat_analyzer.cli module</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer.dataformat">chat_analyzer.dataformat module</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer.metadata">chat_analyzer.metadata module</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer.util">chat_analyzer.util module</a></li>
-<li><a class="reference internal" href="#module-chat_analyzer">Module contents</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../output.html">Chat Analyzer Output Specifications</a></li>
 </ul>
-</li>
-</ul>
-</div>
+
         </div>
       </div>
     </nav>
@@ -175,7 +165,7 @@ of chat messages.</p>
 <dd class="field-odd"><p>The chat analytics data as a dataclass</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../output.html#chat_analyzer.dataformat.ChatAnalytics" title="chat_analyzer.dataformat.ChatAnalytics">dataformat.ChatAnalytics</a> (<a class="reference internal" href="#chat_analyzer.dataformat.YoutubeChatAnalytics" title="chat_analyzer.dataformat.YoutubeChatAnalytics">dataformat.YoutubeChatAnalytics</a> or <a class="reference internal" href="#chat_analyzer.dataformat.TwitchChatAnalytics" title="chat_analyzer.dataformat.TwitchChatAnalytics">dataformat.TwitchChatAnalytics</a>)</p>
+<dd class="field-even"><p><a class="reference internal" href="../output.html#chat_analyzer.dataformat.ChatAnalytics" title="chat_analyzer.dataformat.ChatAnalytics">dataformat.ChatAnalytics</a> (<a class="reference internal" href="../output.html#chat_analyzer.dataformat.YoutubeChatAnalytics" title="chat_analyzer.dataformat.YoutubeChatAnalytics">dataformat.YoutubeChatAnalytics</a> or <a class="reference internal" href="../output.html#chat_analyzer.dataformat.TwitchChatAnalytics" title="chat_analyzer.dataformat.TwitchChatAnalytics">dataformat.TwitchChatAnalytics</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -241,9 +231,8 @@ specifics into subclasses.</p>
 <p>The object can then be converted to JSON/printed/manipulated as
 desired to format/output the results as necessary.</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><dl>
-<dt>[Defined when class Initialized]</dt><dd><dl class="simple">
+<p><strong>[Defined when class Initialized]</strong>:</p>
+<dl class="simple">
 <dt>duration: float</dt><dd><p>The total duration (in seconds) of the associated video/media. Message times correspond to the video times.</p>
 </dd>
 <dt>interval: int</dt><dd><p>The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
@@ -257,27 +246,23 @@ This is b/c media duration is not necessarily divisible by the interval.
 <dt>program_version: str</dt><dd><p>The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.</p>
 </dd>
 </dl>
-<p>[Automatically Defined on init]
-platform: str</p>
-<blockquote>
-<div><p>Used to store the platform the data came from: ‘www.youtube.com’, ‘www.twitch.tv’, …
-While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output</p>
-</div></blockquote>
-<p>[Automatically re-defined on post-init]
-duration_text: str</p>
-<blockquote>
-<div><p>String representation of the media duration time.</p>
-</div></blockquote>
+<p><strong>[Automatically Defined on init]</strong>:</p>
 <dl class="simple">
+<dt>platform: str</dt><dd><p>Used to store the platform the data came from: ‘www.youtube.com’, ‘www.twitch.tv’, …
+While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output</p>
+</dd>
+</dl>
+<p><strong>[Automatically re-defined on post-init]</strong>:</p>
+<dl class="simple">
+<dt>duration_text: str</dt><dd><p>String representation of the media duration time.</p>
+</dd>
 <dt>interval_text: str</dt><dd><p>String representation of the interval time.</p>
 </dd>
 </dl>
-<p>[Defined w/ default and modified DURING analysis]
-mediaTitle: str</p>
-<blockquote>
-<div><p>The title of the media associated with the chatlog.</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified DURING analysis]</strong>:</p>
 <dl class="simple">
+<dt>mediaTitle: str</dt><dd><p>The title of the media associated with the chatlog.</p>
+</dd>
 <dt>mediaSource: str</dt><dd><p>The link to the media associated with the chatlog (url that it was origianlly downloaded from or filepath of a chatfile).</p>
 </dd>
 <dt>samples: List[Sample]</dt><dd><p>An array of sequential samples, each corresponding to data about a section of chat of ‘interval’ seconds long.
@@ -291,12 +276,10 @@ NOTE: Difficult to discern bots from humans other than just creating a known lis
 because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.</p>
 </dd>
 </dl>
-<p>[Defined w/ default and modified AFTER analysis]
-totalUniqueUsers: int</p>
-<blockquote>
-<div><p>The total number of unique users that sent a chat message (human users that sent at least one traditional chat)</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified AFTER analysis]</strong>:</p>
 <dl class="simple">
+<dt>totalUniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message (human users that sent at least one traditional chat)</p>
+</dd>
 <dt>overallAvgActivityPerSecond: float</dt><dd><p>The average activity per second across the whole chatlog. (totalActivity/totalDuration)</p>
 </dd>
 <dt>overallAvgChatMessagesPerSecond: float</dt><dd><p>The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)</p>
@@ -311,10 +294,6 @@ totalUniqueUsers: int</p>
 </dd>
 <dt>spikes: List[Spike]</dt><dd><p>Not yet implemented TODO
 A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike’s type field.</p>
-</dd>
-</dl>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py method">
@@ -379,7 +358,7 @@ ensuring accurate results when determining periods of high engagement.</p>
 <dd class="field-even"><p>a list of highlights referencing samples that met the percentile cutoff requirements for the provided metric</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[<a class="reference internal" href="#chat_analyzer.dataformat.Highlight" title="chat_analyzer.dataformat.Highlight">Highlight</a>]</p>
+<dd class="field-odd"><p>List[<a class="reference internal" href="../output.html#chat_analyzer.dataformat.Highlight" title="chat_analyzer.dataformat.Highlight">Highlight</a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -397,7 +376,7 @@ We detect a spike if the high activity level is maintained for at least SPIKE_SU
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.ChatAnalytics.highlights">
-<span class="sig-name descname"><span class="pre">highlights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#chat_analyzer.dataformat.Highlight" title="chat_analyzer.dataformat.Highlight"><span class="pre">Highlight</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chat_analyzer.dataformat.ChatAnalytics.highlights" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">highlights</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../output.html#chat_analyzer.dataformat.Highlight" title="chat_analyzer.dataformat.Highlight"><span class="pre">Highlight</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chat_analyzer.dataformat.ChatAnalytics.highlights" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -487,7 +466,7 @@ messages is not usually divisible by this. We therefore have to slightly change 
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.ChatAnalytics.samples">
-<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><span class="pre">Sample</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chat_analyzer.dataformat.ChatAnalytics.samples" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../output.html#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><span class="pre">Sample</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#chat_analyzer.dataformat.ChatAnalytics.samples" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -524,15 +503,12 @@ messages is not usually divisible by this. We therefore have to slightly change 
 <p>Highlights reference a contiguous period of time where the provided metric remains above the percentile threshold.</p>
 <p>—</p>
 <dl class="simple">
-<dt>Attributes:</dt><dd><dl class="simple">
 <dt>type: str</dt><dd><p>The engagement metric. i.e. “avgActivityPerSecond”, “avgChatMessagesPerSecond”, “avgUniqueUsersPerSecond”, etc.
 NOTE: It is stored as its converted value (the name of the actual field), NOT the metric str the user provided in the CLI.</p>
 </dd>
 <dt>peak: float</dt><dd><p>The maximum value of the engagement metric throughout the whole Highlight (among the samples in the Highlight).</p>
 </dd>
 <dt>avg: float</dt><dd><p>The average value of the engagement metric throughout the whole Highlight (among the samples in the Highlight).</p>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -557,18 +533,18 @@ NOTE: It is stored as its converted value (the name of the actual field), NOT th
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chat_analyzer.dataformat.</span></span><span class="sig-name descname"><span class="pre">ProcessSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">print_interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg_break</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_percentile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">highlight_metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spike_sensitivity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chat_analyzer.dataformat.ProcessSettings" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Utility class for passing information from the analyzer to the chatlog processor and post-processor</p>
-<p>[Processing (Sampling) Arguments]
-:param print_progress_interval: After ever ‘progress_interval’ messages, print a progress message. If &lt;=0, progress printing is disabled
-:type print_progress_interval: int
-:param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
-:type msg_break: int</p>
-<p>[Post-processing (Analyzing) Arguments]
-:param highlight_percentile: The cutoff percentile that samples must meet to be considered a highlight
-:type highlight_percentile: float
-:param highlight_metric: The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
-:type highlight_metric: str
-:param spike_sensitivity: How sensitive the spike detector is at picking up spikes. Higher sensitivity means more spikes are detected.
-:type spike_sensitivity: float</p>
+<dl class="simple">
+<dt>print_interval: int </dt><dd><p>After ever ‘progress_interval’ messages, print a progress message. If &lt;=0, progress printing is disabled</p>
+</dd>
+<dt>msg_break: int</dt><dd><p>(Mainly for Debug) Stop processing messages after BREAK number of messages have been processed.</p>
+</dd>
+<dt>highlight_percentile: float </dt><dd><p>The cutoff percentile that samples must meet to be considered a highlight</p>
+</dd>
+<dt>highlight_metric: str</dt><dd><p>The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.</p>
+</dd>
+<dt>spike_sensitivity: float </dt><dd><p>How sensitive the spike detector is at picking up spikes. Higher sensitivity means more spikes are detected.</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.ProcessSettings.highlight_metric">
 <span class="sig-name descname"><span class="pre">highlight_metric</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#chat_analyzer.dataformat.ProcessSettings.highlight_metric" title="Permalink to this definition"></a></dt>
@@ -603,35 +579,28 @@ NOTE: It is stored as its converted value (the name of the actual field), NOT th
 <p>Class that contains data of a specific time interval of the chat.
 Messages will be included in a sample if they are contained within [startTime, endTime)</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[Defined when class Initialized]
-startTime: float</p>
-<blockquote>
-<div><p>The start time (inclusive) (in seconds) corresponding to a sample.</p>
-</div></blockquote>
+<p><strong>[Defined when class Initialized]</strong>:</p>
 <dl class="simple">
+<dt>startTime: float</dt><dd><p>The start time (inclusive) (in seconds) corresponding to a sample.</p>
+</dd>
 <dt>endTime: float</dt><dd><p>The end time (exclusive) (in seconds) corresponding to a sample.</p>
 </dd>
 </dl>
-<p>[Automatically Defined on init]
-startTime_text: str</p>
-<blockquote>
-<div><p>The start time represented in text format (i.e. hh:mm:ss)</p>
-</div></blockquote>
+<p><strong>[Automatically Defined on init]</strong>:</p>
 <dl class="simple">
+<dt>startTime_text: str</dt><dd><p>The start time represented in text format (i.e. hh:mm:ss)</p>
+</dd>
 <dt>endTime_text: str</dt><dd><p>The end time represented in text format (i.e. hh:mm:ss)</p>
 </dd>
 <dt>sampleDuration: float</dt><dd><p>The duration (in seconds) of the sample (end-start)
 NOTE: Should be == to the selected interval in all except the last sample if the total duration of the chat is not divisible by the interval</p>
 </dd>
 </dl>
-<p>[Defined w/ default and modified DURING analysis of sample]
-activity: int</p>
-<blockquote>
-<div><p>The total number of messages/things (of any type!) that appeared in chat within the start/endTime of this sample.
-Includes messages,notifications,subscriptions, superchats, … <em>anything</em> that appeared in chat</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified DURING analysis of sample]</strong>:</p>
 <dl class="simple">
+<dt>activity: int</dt><dd><p>The total number of messages/things (of any type!) that appeared in chat within the start/endTime of this sample.
+Includes messages,notifications,subscriptions, superchats, … <em>anything</em> that appeared in chat</p>
+</dd>
 <dt>chatMessages: int</dt><dd><p>The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
 NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
 because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.</p>
@@ -639,19 +608,15 @@ because not all sites (YT/Twitch) provide information on whether chat was sent b
 <dt>firstTimeChatters: int</dt><dd><p>The total number of users who sent their first message of the whole stream during this sample interval</p>
 </dd>
 </dl>
-<p>[Defined w/ default and modified AFTER analysis of sample]
-uniqueUsers: int</p>
-<blockquote>
-<div><p>The total number of unique users that sent a chat message (len(self._userChats))</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified AFTER analysis of sample]</strong>:</p>
 <dl class="simple">
+<dt>uniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message (len(self._userChats))</p>
+</dd>
 <dt>avgActivityPerSecond: float</dt><dd><p>The average activity per second across this sample interval. (activity/sampleDuration)</p>
 </dd>
 <dt>avgChatMessagesPerSecond: float</dt><dd><p>The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)</p>
 </dd>
 <dt>avgUniqueUsersPerSecond: float</dt><dd><p>The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)</p>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -730,31 +695,24 @@ we call sample_post_process() to process the cumulative data points (so we don�
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains generic information about a noteable section of the chatlog</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[Defined when class Initialized]
-startTime: float</p>
-<blockquote>
-<div><p>The start time (inclusive) (in seconds) corresponding to a section.</p>
-</div></blockquote>
+<p><strong>[Defined when class Initialized]</strong>:</p>
 <dl class="simple">
+<dt>startTime: float</dt><dd><p>The start time (inclusive) (in seconds) corresponding to a section.</p>
+</dd>
 <dt>endTime: float</dt><dd><p>The end time (exclusive) (in seconds) corresponding to a section.</p>
 </dd>
 <dt>description: str (optional)</dt><dd><p>A description of the section (if any).</p>
 </dd>
 </dl>
-<p>[Automatically re-defined on post-init]
-duration: float</p>
-<blockquote>
-<div><p>The duration (in seconds) of the section (end-start)</p>
-</div></blockquote>
+<p><strong>[Automatically re-defined on post-init]</strong>:</p>
 <dl class="simple">
+<dt>duration: float</dt><dd><p>The duration (in seconds) of the section (end-start)</p>
+</dd>
 <dt>duration_text: str</dt><dd><p>The duration represented in text format (i.e. hh:mm:ss)</p>
 </dd>
 <dt>startTime_text: str</dt><dd><p>The start time represented in text format (i.e. hh:mm:ss)</p>
 </dd>
 <dt>endTime_text: str</dt><dd><p>The end time represented in text format (i.e. hh:mm:ss)</p>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -799,6 +757,7 @@ duration: float</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chat_analyzer.dataformat.</span></span><span class="sig-name descname"><span class="pre">Spike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startTime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endTime</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chat_analyzer.dataformat.Spike" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#chat_analyzer.dataformat.Section" title="chat_analyzer.dataformat.Section"><code class="xref py py-class docutils literal notranslate"><span class="pre">Section</span></code></a></p>
 <p>Contains information about an activity spike in the chatlog</p>
+<p>TODO: Implement</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.Spike.description">
 <span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#chat_analyzer.dataformat.Spike.description" title="Permalink to this definition"></a></dt>
@@ -825,19 +784,14 @@ and data specific to Twitch chats.</p>
 <p>NOTE: Most twitch-specific attributes don’t make a lot of sense to continously report a per-second value,
 so we don’t!</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[See ChatAnalytics class for common fields]
-[Defined w/ default and modified DURING analysis]
-totalSubscriptions: int</p>
-<blockquote>
-<div><p>The total number of subscriptions that appeared in the chat (which people purchased themselves).</p>
-</div></blockquote>
+<p>(See ChatAnalytics class for common fields)</p>
+<p><strong>[Defined w/ default and modified DURING analysis]</strong>:</p>
 <dl class="simple">
+<dt>totalSubscriptions: int</dt><dd><p>The total number of subscriptions that appeared in the chat (which people purchased themselves).</p>
+</dd>
 <dt>totalGiftSubscriptions: int</dt><dd><p>The total number of gift subscriptions that appeared in the chat.</p>
 </dd>
 <dt>totalUpgradeSubscriptions: int</dt><dd><p>The total number of upgraded subscriptions that appeared in the chat.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py method">
@@ -890,21 +844,16 @@ we call chatlog_post_process() to process the cumulative data points (so we don�
 <dl class="py class">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.TwitchSample">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chat_analyzer.dataformat.</span></span><span class="sig-name descname"><span class="pre">TwitchSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startTime:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endTime:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleDuration:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime_text:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endTime_text:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chatMessages:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstTimeChatters:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniqueUsers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgActivityPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgChatMessagesPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgUniqueUsersPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_userChats:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subscriptions:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">giftSubscriptions:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upgradeSubscriptions:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chat_analyzer.dataformat.TwitchSample" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sample</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../output.html#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sample</span></code></a></p>
 <p>Class that contains data specific to Twitch of a specific time interval of the chat.</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[Defined w/ default and modified DURING analysis of sample]
-subscriptions: int</p>
-<blockquote>
-<div><p>The total number of subscriptions (that people purhcased themselves) that appeared in chat within the start/endTime of this sample.</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified DURING analysis of sample]</strong>:</p>
 <dl class="simple">
+<dt>subscriptions: int</dt><dd><p>The total number of subscriptions (that people purhcased themselves) that appeared in chat within the start/endTime of this sample.</p>
+</dd>
 <dt>giftSubscriptions: int</dt><dd><p>The total number of gift subscriptions that appeared in chat within the start/endTime of this sample.</p>
 </dd>
 <dt>upgradeSubscriptions: int</dt><dd><p>The total number of upgraded subscriptions that appeared in chat within the start/endTime of this sample.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -933,18 +882,13 @@ and data specific to YouTube chats.</p>
 <p>NOTE: Most youtube-specific attributes don’t make a lot of sense to continously report a per-second value,
 so we don’t!</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[See ChatAnalytics class for common fields and descriptions]
-[Defined w/ default and modified DURING analysis]
-totalSuperchats: int</p>
-<blockquote>
-<div><p>The total number of superchats (regular/ticker) that appeared in the chat.
-NOTE: A creator doesn’t necessarily care what form a superchat takes, so we just combine regular and ticker superchats</p>
-</div></blockquote>
+<p>(See ChatAnalytics class for common fields and descriptions)</p>
+<p><strong>[Defined w/ default and modified DURING analysis]</strong>:</p>
 <dl class="simple">
-<dt>totalMemberships: int</dt><dd><p>The total number of memberships that appeared in the chat.</p>
+<dt>totalSuperchats: int</dt><dd><p>The total number of superchats (regular/ticker) that appeared in the chat.
+NOTE: A creator doesn’t necessarily care what form a superchat takes, so we just combine regular and ticker superchats</p>
 </dd>
-</dl>
+<dt>totalMemberships: int</dt><dd><p>The total number of memberships that appeared in the chat.</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -978,20 +922,15 @@ NOTE: A creator doesn’t necessarily care what form a superchat takes, so we ju
 <dl class="py class">
 <dt class="sig sig-object py" id="chat_analyzer.dataformat.YoutubeSample">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chat_analyzer.dataformat.</span></span><span class="sig-name descname"><span class="pre">YoutubeSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">startTime:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endTime:</span> <span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampleDuration:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startTime_text:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endTime_text:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chatMessages:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firstTimeChatters:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uniqueUsers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgActivityPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgChatMessagesPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avgUniqueUsersPerSecond:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_userChats:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">superchats:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memberships:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chat_analyzer.dataformat.YoutubeSample" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sample</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../output.html#chat_analyzer.dataformat.Sample" title="chat_analyzer.dataformat.Sample"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sample</span></code></a></p>
 <p>Class that contains data specific to Youtube of a specific time interval of the chat.</p>
 <p>—</p>
-<dl>
-<dt>Attributes:</dt><dd><p>[Defined w/ default and modified DURING analysis of sample]
-superchats: int</p>
-<blockquote>
-<div><p>The total number of superchats (regular/ticker) that appeared in chat within the start/endTime of this sample.
-NOTE: A creator doesn’t necessarily care what form a superchat takes, so we just combine regular and ticker superchats</p>
-</div></blockquote>
+<p><strong>[Defined w/ default and modified DURING analysis of sample]</strong>:</p>
 <dl class="simple">
-<dt>memberships: int</dt><dd><p>The total number of memberships that appeared in chat within the start/endTime of this sample.</p>
+<dt>superchats: int</dt><dd><p>The total number of superchats (regular/ticker) that appeared in chat within the start/endTime of this sample.
+NOTE: A creator doesn’t necessarily care what form a superchat takes, so we just combine regular and ticker superchats</p>
 </dd>
-</dl>
+<dt>memberships: int</dt><dd><p>The total number of memberships that appeared in chat within the start/endTime of this sample.</p>
 </dd>
 </dl>
 <dl class="py attribute">

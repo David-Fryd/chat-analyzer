@@ -3,18 +3,93 @@ Chat Analyzer Output Specifications
 
 All of the analytical data is output in a single .json file. Certain datapoints exist regardless of the platform the VOD is from, some datapoints are specific to the platform.
 
-**Common fields among ALL platfroms**: 
-______________________________________
+**Common fields**: 
+########################################
 
-.. TODO: Can we somehow hook up the autodocs to this?
+Chat Analytics Data
+----------------------------------------
+
+The Chat Analytics object is directly transformed into JSON data.
 
 .. autoclass:: chat_analyzer.dataformat.ChatAnalytics
     :members:
-    :undoc-members:
+    :show-inheritance:
+
+Sample Data
+----------------------------------------
+
+The main JSON data contains a ``sample`` field comprised of a list of Sample objects.
+
+.. autoclass:: chat_analyzer.dataformat.Sample
+    :members:
+    :show-inheritance:
+
+Highlight Data
+----------------------------------------
+
+The main JSON data contains a ``highlights`` field comprised of a lsit of Highlight objects.
+Currently, there are no platform-specific fields corresponding to Highlights (i.e. highlight
+objects look the same for all platforms).
+
+.. autoclass:: chat_analyzer.dataformat.Highlight
+    :members:
     :show-inheritance:
 
 
+
+
+
+**Twitch-specific fields**: 
+########################################
+
+Chat Analytics Data (Twitch)
+----------------------------------------
+
+.. autoclass:: chat_analyzer.dataformat.TwitchChatAnalytics
+    :members:
+    :show-inheritance:
+
+Sample Data (Twitch)
+----------------------------------------
+
+.. autoclass:: chat_analyzer.dataformat.TwitchSample
+    :members:
+    :show-inheritance:
+
+
+
+**YouTube-specific fields**: 
+########################################
+
+Chat Analytics Data (YouTube)
+----------------------------------------
+
+.. autoclass:: chat_analyzer.dataformat.YoutubeChatAnalytics
+    :members:
+    :show-inheritance:
+
+Sample Data (YouTube)
+----------------------------------------
+
+.. autoclass:: chat_analyzer.dataformat.YouTube
+    :members:
+    :show-inheritance:
+
+.. .. automodule:: chat_analyzer.dataformat
+..     :members:
+..     :show-inheritance:
+    
+
+    .. :undoc-members:
+
+
 Example JSON output:
+########################################
+
+An output JSON file might look something like...
+(*Note, only generic fields are shown. Platform-specific fields would be included in
+their respective sections, the main analytics data in the main body of the JSON, and the
+sample data within each sample.*)
 
 .. code-block::
 

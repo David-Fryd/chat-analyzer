@@ -37,19 +37,16 @@ class ProcessSettings():
     """
     Utility class for passing information from the analyzer to the chatlog processor and post-processor
     
-    [Processing (Sampling) Arguments]
-    :param print_progress_interval: After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
-    :type print_progress_interval: int
-    :param msg_break: (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
-    :type msg_break: int
-
-    [Post-processing (Analyzing) Arguments]
-    :param highlight_percentile: The cutoff percentile that samples must meet to be considered a highlight
-    :type highlight_percentile: float
-    :param highlight_metric: The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
-    :type highlight_metric: str
-    :param spike_sensitivity: How sensitive the spike detector is at picking up spikes. Higher sensitivity means more spikes are detected.
-    :type spike_sensitivity: float
+    print_interval: int 
+        After ever 'progress_interval' messages, print a progress message. If <=0, progress printing is disabled
+    msg_break: int
+        (Mainly for Debug) Stop processing messages after BREAK number of messages have been processed. 
+    highlight_percentile: float 
+        The cutoff percentile that samples must meet to be considered a highlight
+    highlight_metric: str
+        The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
+    spike_sensitivity: float 
+        How sensitive the spike detector is at picking up spikes. Higher sensitivity means more spikes are detected.
 
     """
     # Processing (Sampling) Arguments
@@ -67,45 +64,51 @@ class Sample():
     """
     Class that contains data of a specific time interval of the chat.
     Messages will be included in a sample if they are contained within [startTime, endTime)
-    
+
     ---
 
-    Attributes:
-        [Defined when class Initialized]
-        startTime: float
-            The start time (inclusive) (in seconds) corresponding to a sample.
-        endTime: float
-            The end time (exclusive) (in seconds) corresponding to a sample.
-        
-        [Automatically Defined on init]
-        startTime_text: str
-            The start time represented in text format (i.e. hh:mm:ss)
-        endTime_text: str
-            The end time represented in text format (i.e. hh:mm:ss)
-        sampleDuration: float
-            The duration (in seconds) of the sample (end-start)
-            NOTE: Should be == to the selected interval in all except the last sample if the total duration of the chat is not divisible by the interval
+    **[Defined when class Initialized]**:
 
-        [Defined w/ default and modified DURING analysis of sample]
-        activity: int
-            The total number of messages/things (of any type!) that appeared in chat within the start/endTime of this sample.
-            Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
-        chatMessages: int
-            The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
-            NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
-            because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
-        firstTimeChatters: int
-            The total number of users who sent their first message of the whole stream during this sample interval
+    startTime: float
+        The start time (inclusive) (in seconds) corresponding to a sample.
+    endTime: float
+        The end time (exclusive) (in seconds) corresponding to a sample.
+    
 
-        [Defined w/ default and modified AFTER analysis of sample]
-        uniqueUsers: int
-            The total number of unique users that sent a chat message (len(self._userChats))
-        avgActivityPerSecond: float
-            The average activity per second across this sample interval. (activity/sampleDuration)
-        avgChatMessagesPerSecond: float
-            The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)
-        avgUniqueUsersPerSecond: float
-            The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)
+    **[Automatically Defined on init]**:
+
+    startTime_text: str
+        The start time represented in text format (i.e. hh:mm:ss)
+    endTime_text: str
+        The end time represented in text format (i.e. hh:mm:ss)
+    sampleDuration: float
+        The duration (in seconds) of the sample (end-start)
+        NOTE: Should be == to the selected interval in all except the last sample if the total duration of the chat is not divisible by the interval
+
+
+    **[Defined w/ default and modified DURING analysis of sample]**:
+
+    activity: int
+        The total number of messages/things (of any type!) that appeared in chat within the start/endTime of this sample.
+        Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
+    chatMessages: int
+        The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
+        NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
+        because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
+    firstTimeChatters: int
+        The total number of users who sent their first message of the whole stream during this sample interval
+
+
+    **[Defined w/ default and modified AFTER analysis of sample]**:
+    
+    uniqueUsers: int
+        The total number of unique users that sent a chat message (len(self._userChats))
+    avgActivityPerSecond: float
+        The average activity per second across this sample interval. (activity/sampleDuration)
+    avgChatMessagesPerSecond: float
+        The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)
+    avgUniqueUsersPerSecond: float
+        The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)
 
     """
 
@@ -162,14 +165,14 @@ class TwitchSample(Sample):
     
     ---
 
-    Attributes:
-        [Defined w/ default and modified DURING analysis of sample]
-        subscriptions: int
-            The total number of subscriptions (that people purhcased themselves) that appeared in chat within the start/endTime of this sample.
-        giftSubscriptions: int
-            The total number of gift subscriptions that appeared in chat within the start/endTime of this sample.
-        upgradeSubscriptions: int
-            The total number of upgraded subscriptions that appeared in chat within the start/endTime of this sample.
+    **[Defined w/ default and modified DURING analysis of sample]**:
+
+    subscriptions: int
+        The total number of subscriptions (that people purhcased themselves) that appeared in chat within the start/endTime of this sample.
+    giftSubscriptions: int
+        The total number of gift subscriptions that appeared in chat within the start/endTime of this sample.
+    upgradeSubscriptions: int
+        The total number of upgraded subscriptions that appeared in chat within the start/endTime of this sample.
     """
     #Defined w/ default and modified DURING analysis of sample
     subscriptions: int = 0
@@ -182,13 +185,13 @@ class YoutubeSample(Sample):
     
     ---
 
-    Attributes:
-        [Defined w/ default and modified DURING analysis of sample]
-        superchats: int
-            The total number of superchats (regular/ticker) that appeared in chat within the start/endTime of this sample.
-            NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
-        memberships: int
-            The total number of memberships that appeared in chat within the start/endTime of this sample.
+    **[Defined w/ default and modified DURING analysis of sample]**:
+
+    superchats: int
+        The total number of superchats (regular/ticker) that appeared in chat within the start/endTime of this sample.
+        NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
+    memberships: int
+        The total number of memberships that appeared in chat within the start/endTime of this sample.
     """
     # Defined w/ default and modified DURING analysis of sample
     superchats: int = 0
@@ -202,24 +205,25 @@ class Section():
     
     ---
 
-    Attributes:
-        [Defined when class Initialized]
-        startTime: float
-            The start time (inclusive) (in seconds) corresponding to a section.
-        endTime: float
-            The end time (exclusive) (in seconds) corresponding to a section.
-        description: str (optional)
-            A description of the section (if any).
+    **[Defined when class Initialized]**:
 
-        [Automatically re-defined on post-init]
-        duration: float
-            The duration (in seconds) of the section (end-start)
-        duration_text: str
-            The duration represented in text format (i.e. hh:mm:ss)
-        startTime_text: str
-            The start time represented in text format (i.e. hh:mm:ss)
-        endTime_text: str
-            The end time represented in text format (i.e. hh:mm:ss)
+    startTime: float
+        The start time (inclusive) (in seconds) corresponding to a section.
+    endTime: float
+        The end time (exclusive) (in seconds) corresponding to a section.
+    description: str (optional)
+        A description of the section (if any).
+
+    **[Automatically re-defined on post-init]**:
+
+    duration: float
+        The duration (in seconds) of the section (end-start)
+    duration_text: str
+        The duration represented in text format (i.e. hh:mm:ss)
+    startTime_text: str
+        The start time represented in text format (i.e. hh:mm:ss)
+    endTime_text: str
+        The end time represented in text format (i.e. hh:mm:ss)
 
     """
     # Defined when class Initialized
@@ -245,14 +249,13 @@ class Highlight(Section):
     
     ---
 
-    Attributes:
-        type: str
-            The engagement metric. i.e. "avgActivityPerSecond", "avgChatMessagesPerSecond", "avgUniqueUsersPerSecond", etc.
-            NOTE: It is stored as its converted value (the name of the actual field), NOT the metric str the user provided in the CLI.
-        peak: float
-            The maximum value of the engagement metric throughout the whole Highlight (among the samples in the Highlight). 
-        avg: float
-            The average value of the engagement metric throughout the whole Highlight (among the samples in the Highlight).
+    type: str
+        The engagement metric. i.e. "avgActivityPerSecond", "avgChatMessagesPerSecond", "avgUniqueUsersPerSecond", etc.
+        NOTE: It is stored as its converted value (the name of the actual field), NOT the metric str the user provided in the CLI.
+    peak: float
+        The maximum value of the engagement metric throughout the whole Highlight (among the samples in the Highlight). 
+    avg: float
+        The average value of the engagement metric throughout the whole Highlight (among the samples in the Highlight).
     
     """
     type: str
@@ -263,6 +266,8 @@ class Spike(Section):
     """
     Contains information about an activity spike in the chatlog
     
+    TODO: Implement
+
     ---
     ...
     """
@@ -289,66 +294,73 @@ class ChatAnalytics(ABC):
 
     ---
 
-    Attributes:
-       [Defined when class Initialized]
-        duration: float
-            The total duration (in seconds) of the associated video/media. Message times correspond to the video times.
-        interval: int
-            The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
-            granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
-            *(With the exception of the last sample, which may be shorter than the interval.)* 
-            This is b/c media duration is not necessarily divisible by the interval.
-            #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
-        description: str
-            A description included to help distinguish it from other analytical data.
-        program_version: str
-            The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.
+    **[Defined when class Initialized]**:
 
-        [Automatically Defined on init]
-        platform: str
-            Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
-            While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
+    duration: float
+        The total duration (in seconds) of the associated video/media. Message times correspond to the video times.
+    interval: int
+        The time interval (in seconds) at which to compress datapoints into samples. i.e. Duration of the samples. The smaller the interval, the more 
+        granular the analytics are. At interval=5, each sample contains 5 seconds of cumulative data.
+        *(With the exception of the last sample, which may be shorter than the interval.)* 
+        This is b/c media duration is not necessarily divisible by the interval.
+        #(samples in raw_data) is about (video duration/interval) (+1 if necessary to encompass remaining non-divisible data at end of data).
+    description: str
+        A description included to help distinguish it from other analytical data.
+    program_version: str
+        The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.
 
-        [Automatically re-defined on post-init]
-        duration_text: str
-            String representation of the media duration time.
-        interval_text: str
-            String representation of the interval time.
 
-        [Defined w/ default and modified DURING analysis]
-        mediaTitle: str
-            The title of the media associated with the chatlog.
-        mediaSource: str
-            The link to the media associated with the chatlog (url that it was origianlly downloaded from or filepath of a chatfile).
-        samples: List[Sample]
-            An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
-            Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
-        totalActivity: int
-            The total number of messages/things (of any type!) that appeared in chat. (Sum of intervalActivity from all samples) 
-            Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
-        totalChatMessages: int
-            The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
-            NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
-            because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
+    **[Automatically Defined on init]**:
 
-        [Defined w/ default and modified AFTER analysis]
-        totalUniqueUsers: int
-            The total number of unique users that sent a chat message (human users that sent at least one traditional chat)
-        overallAvgActivityPerSecond: float
-            The average activity per second across the whole chatlog. (totalActivity/totalDuration)
-        overallAvgChatMessagesPerSecond: float
-            The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
-        overallAvgUniqueUsersPerSecond: float
-            The average number of unique users chatting per second.
-        highlights: List[Highlight] 
-            A list of the high engagement sections of the chatlog.
-        highlights_duration: float
-            The cumulative duration of the highlights (in seconds)
-        highlights_duration_text: str
-            The cumulative duration of the highlights represented in text format (i.e. hh:mm:ss)
-        spikes: List[Spike]
-            Not yet implemented TODO
-            A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
+    platform: str
+        Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
+        While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
+
+
+    **[Automatically re-defined on post-init]**:
+
+    duration_text: str
+        String representation of the media duration time.
+    interval_text: str
+        String representation of the interval time.
+
+    **[Defined w/ default and modified DURING analysis]**:
+
+    mediaTitle: str
+        The title of the media associated with the chatlog.
+    mediaSource: str
+        The link to the media associated with the chatlog (url that it was origianlly downloaded from or filepath of a chatfile).
+    samples: List[Sample]
+        An array of sequential samples, each corresponding to data about a section of chat of 'interval' seconds long.
+        Each sample has specific data corresponding to a time interval of the vid. See the 'Sample' class
+    totalActivity: int
+        The total number of messages/things (of any type!) that appeared in chat. (Sum of intervalActivity from all samples) 
+        Includes messages,notifications,subscriptions, superchats, . . . *anything* that appeared in chat
+    totalChatMessages: int
+        The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
+        NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
+        because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
+
+
+    **[Defined w/ default and modified AFTER analysis]**:
+    
+    totalUniqueUsers: int
+        The total number of unique users that sent a chat message (human users that sent at least one traditional chat)
+    overallAvgActivityPerSecond: float
+        The average activity per second across the whole chatlog. (totalActivity/totalDuration)
+    overallAvgChatMessagesPerSecond: float
+        The average number of chat messages per second across the whole chatlog. (totalChatMessages/totalDuration)
+    overallAvgUniqueUsersPerSecond: float
+        The average number of unique users chatting per second.
+    highlights: List[Highlight] 
+        A list of the high engagement sections of the chatlog.
+    highlights_duration: float
+        The cumulative duration of the highlights (in seconds)
+    highlights_duration_text: str
+        The cumulative duration of the highlights represented in text format (i.e. hh:mm:ss)
+    spikes: List[Spike]
+        Not yet implemented TODO
+        A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
     """
     # Defined when class Initialized
     duration: float
@@ -661,14 +673,16 @@ class YoutubeChatAnalytics(ChatAnalytics):
 
     ---
 
-    Attributes:
-        [See ChatAnalytics class for common fields and descriptions]
-        [Defined w/ default and modified DURING analysis]
-        totalSuperchats: int
-            The total number of superchats (regular/ticker) that appeared in the chat.
-            NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
-        totalMemberships: int
-            The total number of memberships that appeared in the chat.
+
+    (See ChatAnalytics class for common fields and descriptions)
+
+    **[Defined w/ default and modified DURING analysis]**:
+
+    totalSuperchats: int
+        The total number of superchats (regular/ticker) that appeared in the chat.
+        NOTE: A creator doesn't necessarily care what form a superchat takes, so we just combine regular and ticker superchats
+    totalMemberships: int
+        The total number of memberships that appeared in the chat.
     
     """
     # Defined here on subclass init
@@ -716,15 +730,16 @@ class TwitchChatAnalytics(ChatAnalytics):
 
     ---
 
-    Attributes:
-        [See ChatAnalytics class for common fields]
-        [Defined w/ default and modified DURING analysis]
-        totalSubscriptions: int
-            The total number of subscriptions that appeared in the chat (which people purchased themselves).
-        totalGiftSubscriptions: int
-            The total number of gift subscriptions that appeared in the chat.
-        totalUpgradeSubscriptions: int
-            The total number of upgraded subscriptions that appeared in the chat.
+    (See ChatAnalytics class for common fields)
+
+    **[Defined w/ default and modified DURING analysis]**:
+    
+    totalSubscriptions: int
+        The total number of subscriptions that appeared in the chat (which people purchased themselves).
+    totalGiftSubscriptions: int
+        The total number of gift subscriptions that appeared in the chat.
+    totalUpgradeSubscriptions: int
+        The total number of upgraded subscriptions that appeared in the chat.
 
     """
     # Defined here on subclass init

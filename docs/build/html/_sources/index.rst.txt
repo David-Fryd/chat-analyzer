@@ -3,18 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Chat Analyzer's documentation!
-=========================================
+.. Welcome to Chat Analyzer's documentation!
+.. =========================================
+
+
+.. include:: ../../README.rst
+
+***************
+Documentation Overview:
+***************
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    output
+   chat_analyzer
 
-Indices and tables
-==================
+    .. :caption: Contents:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   .. modules
+
+
+
+.. Indices and tables
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
