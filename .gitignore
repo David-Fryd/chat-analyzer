@@ -2,6 +2,7 @@
 
 chat_analyzer.egg-info/
 
+# Local/Demo output and other assorted files
 do-not-package/
 
 localtestJSON/
@@ -9,9 +10,3 @@ localtestJSON/
 # TODO: Ensure we don't break anything by ignoring .vscode/
 .vscode/
 __pycache__/
-chat_analyzer/__pycache__/
-
-# Local/Demo output
-
-
-chat-downloader-master/
