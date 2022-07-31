@@ -5,3 +5,4 @@ sphinxcontrib-programoutput
 
 # Program related
 chat-analyzer
+chat-downloader
