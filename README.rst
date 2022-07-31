@@ -81,6 +81,9 @@ Usage
 
 
 TODO: Discuss modes
+url:...
+chatfile: JSON from Xenova's chat-downloader to JSON analytic data to be used for visualization (or -sc)
+reanalyze:...
 
 Command line
 ------------
