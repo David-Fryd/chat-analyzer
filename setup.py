@@ -79,6 +79,7 @@ setup(
     entry_points={
         'console_scripts': [
             'chat_analyzer=chat_analyzer.cli:main',
+            'chat-analyzer=chat_analyzer.cli:main',
         ],
     },
 
