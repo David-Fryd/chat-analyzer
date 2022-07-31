@@ -5,6 +5,10 @@ chat_analyzer.egg-info/
 build/
 dist/
 
+# Docs has a build folder, do don't wanna ignore that!
+!docs/build/
+
+
 # Local/Demo output and other assorted files
 do-not-package/
 localtestJSON/
