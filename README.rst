@@ -5,7 +5,8 @@ Chat Analyzer
 .. image:: https://badge.fury.io/py/chat-analyzer.svg
     :target: https://badge.fury.io/py/chat-analyzer
     :alt: PyPI version
-    .. https://badge.fury.io/for/py/chat-analyzer
+
+.. https://badge.fury.io/for/py/chat-analyzer
 
 .. image:: https://img.shields.io/pypi/status/chat-analyzer.svg
     :target: https://pypi.python.org/pypi/chat-analyzer/
