@@ -5,11 +5,11 @@ import logging
 import sys
 
 sys.path.append("..") # chat_downloader in sibling directory, this is so we can find it
-from chat_downloader import ChatDownloader
+from .chat_downloader import ChatDownloader
 from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 from .util import dprint
 from urllib.parse import urlparse
-from chat_downloader.sites.common import Chat
+from .chat_downloader.sites.common import Chat
 
 from .metadata import (
     __version__
