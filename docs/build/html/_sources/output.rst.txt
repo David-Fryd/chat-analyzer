@@ -1,4 +1,4 @@
-Chat Analyzer Output Specifications
+Output Specifications
 ===================================
 
 All of the analytical data is output in a single .json file. Certain datapoints exist regardless of the platform the VOD is from, some datapoints are specific to the platform.

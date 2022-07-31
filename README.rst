@@ -12,6 +12,9 @@ Chat Analyzer
     :target: https://pypi.python.org/pypi/chat-analyzer/
     :alt: PyPI status
    
+.. image:: https://readthedocs.org/projects/chat-analyzer/badge/?version=latest
+    :target: https://chat-analyzer.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 `Chat Analyzer`_ is a tool used to process and analyze chat data 
 from past live streams, providing summarized information about chat activity over the stream's lifetime. 
@@ -104,11 +107,16 @@ Alternatively, the tool can be installed with ``git``:
 Usage
 #####
 
+This section is next on the to-do list!
 
-TODO: Discuss modes
-url:...
-chatfile: JSON from Xenova's chat-downloader to JSON analytic data to be used for visualization (or -sc)
-reanalyze:...
+A deeper dive into the usage can be found on the `Getting Started <https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html>`_ page.
+
+.. code:: console
+
+    TODO: Discuss modes:
+    url:...
+    chatfile: JSON from Xenova\'s chat-downloader to JSON analytic data to be used for visualization (or -sc)
+    reanalyze:...
 
 Command line
 ------------
@@ -126,7 +134,7 @@ Command line
                         source
 
 
-
+More complete documentation can be found on the `Command Line Usage <https://chat-analyzer.readthedocs.io/en/latest/cli.html>`_ page.
 
 
 ######
@@ -139,106 +147,7 @@ Simply follow the instructions and upload the output json file to the visualizer
 All of the analytical data is output in a single ``.json`` file. Certain datapoints exist regardless of the platform
 the VOD is from, some datapoints are specific to the platform.
 
-**Common fields among ALL platfroms**: 
-
-.. code-block::
-
-    {
-        "duration": 7386.016,
-        "interval": 5,
-        "description": "description ",
-        "program_version": "1.0.0b5",
-        "platform": "www.....com",
-        "duration_text": "2:03:06",
-        "interval_text": "0:05",
-        "mediaTitle": "The title of the VOD",
-        "mediaSource": "https://www...",
-        "samples": [
-            {
-            "startTime": 0,
-            "endTime": 5,
-            "sampleDuration": 5,
-            "startTime_text": "0:00",
-            "endTime_text": "0:05",
-            "activity": 10,
-            "chatMessages": 9,
-            "firstTimeChatters": 9,
-            "uniqueUsers": 9,
-            "avgActivityPerSecond": 2.0,
-            "avgChatMessagesPerSecond": 1.8,
-            "avgUniqueUsersPerSecond": 1.8,
-            "_userChats": {},
-            },
-            ...
-        ],
-        "totalActivity": 42547,
-        "totalChatMessages": 42034,
-        "totalUniqueUsers": 12533,
-        "overallAvgActivityPerSecond": 5.760480345561126,
-        "overallAvgChatMessagesPerSecond": 5.691024768968819,
-        "overallAvgUniqueUsersPerSecond": 5.66955345060893,
-        "highlights": [
-            {
-            "startTime": 4405,
-            "endTime": 4420,
-            "description": "avgUniqueUsersPerSecond sustained at or above [8.6]",
-            "type": "avgUniqueUsersPerSecond",
-            "peak": 11.2,
-            "avg": 9.866666666666665,
-            "duration": 15,
-            "duration_text": "0:15",
-            "startTime_text": "1:13:25",
-            "endTime_text": "1:13:40"
-            },
-            ...
-        ],
-        "highlights_duration": 540,
-        "highlights_duration_text": "9:00",
-        "spikes": [],
-        "_overallUserChats": {},
-        "_currentSample": null,
-    }
-
-TODO: Link the docs here:
-
-
-**Twitch-specific fields**:
-
-Within the main object:
-
-.. code-block::
-
-    ...,
-    "totalSubscriptions": 478,
-    "totalGiftSubscriptions": 213,
-    "totalUpgradeSubscriptions": 5
-
-Within each sample object:
-
-.. code-block::
-
-    ...,
-    "subscriptions": 1,
-    "giftSubscriptions": 0,
-    "upgradeSubscriptions": 0
-
-**YouTube-specific fields**:
-
-Within the main object:
-
-.. code-block::
-
-    ...,
-    "totalSuperchats": 253,
-    "totalMemberships": 246
-
-Within each sample object:
-
-.. code-block::
-
-    ...,
-    "superchats": 0,
-    "memberships": 0
+More complete documentation can be found on the `Output Specifications <https://chat-analyzer.readthedocs.io/en/latest/output.html>`_ page.
 
 
 

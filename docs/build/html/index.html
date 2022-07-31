@@ -39,7 +39,7 @@
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Chat Analyzer Output Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Specifications</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 </ul>
 
@@ -71,6 +71,7 @@
 <h1>Chat Analyzer<a class="headerlink" href="#chat-analyzer" title="Permalink to this headline"></a></h1>
 <a class="reference external image-reference" href="https://badge.fury.io/py/chat-analyzer"><img alt="PyPI version" src="https://badge.fury.io/py/chat-analyzer.svg" /></a>
 <a class="reference external image-reference" href="https://pypi.python.org/pypi/chat-analyzer/"><img alt="PyPI status" src="https://img.shields.io/pypi/status/chat-analyzer.svg" /></a>
+<a class="reference external image-reference" href="https://chat-analyzer.readthedocs.io/en/latest/?badge=latest"><img alt="Documentation Status" src="https://readthedocs.org/projects/chat-analyzer/badge/?version=latest" /></a>
 <p><a class="reference external" href="https://github.com/David-Fryd/chat-analyzer">Chat Analyzer</a> is a tool used to process and analyze chat data
 from past live streams, providing summarized information about chat activity over the stream’s lifetime.
 The information currently reported primarily revolves around the activity per second for various metrics,
@@ -131,10 +132,14 @@ What type of content/strategies can you use to make your stream more engaging?</
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
-<p>TODO: Discuss modes
-url:…
-chatfile: JSON from Xenova’s chat-downloader to JSON analytic data to be used for visualization (or -sc)
-reanalyze:…</p>
+<p>This section is next on the to-do list!</p>
+<p>A deeper dive into the usage can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html">Getting Started</a> page.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TODO: Discuss modes:</span>
+<span class="go">url:...</span>
+<span class="go">chatfile: JSON from Xenova\&#39;s chat-downloader to JSON analytic data to be used for visualization (or -sc)</span>
+<span class="go">reanalyze:...</span>
+</pre></div>
+</div>
 <section id="command-line">
 <h3>Command line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: chat_analyzer [-h] [--version] [--platform {youtube,twitch}]</span>
@@ -148,6 +153,7 @@ reanalyze:…</p>
 <span class="go">                    source</span>
 </pre></div>
 </div>
+<p>More complete documentation can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/cli.html">Command Line Usage</a> page.</p>
 </section>
 </section>
 <section id="output">
@@ -156,93 +162,7 @@ reanalyze:…</p>
 Simply follow the instructions and upload the output json file to the visualizer.</p>
 <p>All of the analytical data is output in a single <code class="docutils literal notranslate"><span class="pre">.json</span></code> file. Certain datapoints exist regardless of the platform
 the VOD is from, some datapoints are specific to the platform.</p>
-<p><strong>Common fields among ALL platfroms</strong>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mf">7386.016</span><span class="p">,</span>
-    <span class="s2">&quot;interval&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;description &quot;</span><span class="p">,</span>
-    <span class="s2">&quot;program_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0b5&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;platform&quot;</span><span class="p">:</span> <span class="s2">&quot;www.....com&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;duration_text&quot;</span><span class="p">:</span> <span class="s2">&quot;2:03:06&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;interval_text&quot;</span><span class="p">:</span> <span class="s2">&quot;0:05&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;mediaTitle&quot;</span><span class="p">:</span> <span class="s2">&quot;The title of the VOD&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;mediaSource&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www...&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;samples&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-        <span class="s2">&quot;startTime&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s2">&quot;endTime&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s2">&quot;sampleDuration&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-        <span class="s2">&quot;startTime_text&quot;</span><span class="p">:</span> <span class="s2">&quot;0:00&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;endTime_text&quot;</span><span class="p">:</span> <span class="s2">&quot;0:05&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;activity&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
-        <span class="s2">&quot;chatMessages&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
-        <span class="s2">&quot;firstTimeChatters&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
-        <span class="s2">&quot;uniqueUsers&quot;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
-        <span class="s2">&quot;avgActivityPerSecond&quot;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">,</span>
-        <span class="s2">&quot;avgChatMessagesPerSecond&quot;</span><span class="p">:</span> <span class="mf">1.8</span><span class="p">,</span>
-        <span class="s2">&quot;avgUniqueUsersPerSecond&quot;</span><span class="p">:</span> <span class="mf">1.8</span><span class="p">,</span>
-        <span class="s2">&quot;_userChats&quot;</span><span class="p">:</span> <span class="p">{},</span>
-        <span class="p">},</span>
-        <span class="o">...</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;totalActivity&quot;</span><span class="p">:</span> <span class="mi">42547</span><span class="p">,</span>
-    <span class="s2">&quot;totalChatMessages&quot;</span><span class="p">:</span> <span class="mi">42034</span><span class="p">,</span>
-    <span class="s2">&quot;totalUniqueUsers&quot;</span><span class="p">:</span> <span class="mi">12533</span><span class="p">,</span>
-    <span class="s2">&quot;overallAvgActivityPerSecond&quot;</span><span class="p">:</span> <span class="mf">5.760480345561126</span><span class="p">,</span>
-    <span class="s2">&quot;overallAvgChatMessagesPerSecond&quot;</span><span class="p">:</span> <span class="mf">5.691024768968819</span><span class="p">,</span>
-    <span class="s2">&quot;overallAvgUniqueUsersPerSecond&quot;</span><span class="p">:</span> <span class="mf">5.66955345060893</span><span class="p">,</span>
-    <span class="s2">&quot;highlights&quot;</span><span class="p">:</span> <span class="p">[</span>
-        <span class="p">{</span>
-        <span class="s2">&quot;startTime&quot;</span><span class="p">:</span> <span class="mi">4405</span><span class="p">,</span>
-        <span class="s2">&quot;endTime&quot;</span><span class="p">:</span> <span class="mi">4420</span><span class="p">,</span>
-        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;avgUniqueUsersPerSecond sustained at or above [8.6]&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;avgUniqueUsersPerSecond&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;peak&quot;</span><span class="p">:</span> <span class="mf">11.2</span><span class="p">,</span>
-        <span class="s2">&quot;avg&quot;</span><span class="p">:</span> <span class="mf">9.866666666666665</span><span class="p">,</span>
-        <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
-        <span class="s2">&quot;duration_text&quot;</span><span class="p">:</span> <span class="s2">&quot;0:15&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;startTime_text&quot;</span><span class="p">:</span> <span class="s2">&quot;1:13:25&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;endTime_text&quot;</span><span class="p">:</span> <span class="s2">&quot;1:13:40&quot;</span>
-        <span class="p">},</span>
-        <span class="o">...</span>
-    <span class="p">],</span>
-    <span class="s2">&quot;highlights_duration&quot;</span><span class="p">:</span> <span class="mi">540</span><span class="p">,</span>
-    <span class="s2">&quot;highlights_duration_text&quot;</span><span class="p">:</span> <span class="s2">&quot;9:00&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;spikes&quot;</span><span class="p">:</span> <span class="p">[],</span>
-    <span class="s2">&quot;_overallUserChats&quot;</span><span class="p">:</span> <span class="p">{},</span>
-    <span class="s2">&quot;_currentSample&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p>TODO: Link the docs here:</p>
-<p><strong>Twitch-specific fields</strong>:</p>
-<p>Within the main object:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span><span class="p">,</span>
-<span class="s2">&quot;totalSubscriptions&quot;</span><span class="p">:</span> <span class="mi">478</span><span class="p">,</span>
-<span class="s2">&quot;totalGiftSubscriptions&quot;</span><span class="p">:</span> <span class="mi">213</span><span class="p">,</span>
-<span class="s2">&quot;totalUpgradeSubscriptions&quot;</span><span class="p">:</span> <span class="mi">5</span>
-</pre></div>
-</div>
-<p>Within each sample object:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span><span class="p">,</span>
-<span class="s2">&quot;subscriptions&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-<span class="s2">&quot;giftSubscriptions&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-<span class="s2">&quot;upgradeSubscriptions&quot;</span><span class="p">:</span> <span class="mi">0</span>
-</pre></div>
-</div>
-<p><strong>YouTube-specific fields</strong>:</p>
-<p>Within the main object:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span><span class="p">,</span>
-<span class="s2">&quot;totalSuperchats&quot;</span><span class="p">:</span> <span class="mi">253</span><span class="p">,</span>
-<span class="s2">&quot;totalMemberships&quot;</span><span class="p">:</span> <span class="mi">246</span>
-</pre></div>
-</div>
-<p>Within each sample object:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">...</span><span class="p">,</span>
-<span class="s2">&quot;superchats&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-<span class="s2">&quot;memberships&quot;</span><span class="p">:</span> <span class="mi">0</span>
-</pre></div>
-</div>
+<p>More complete documentation can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/output.html">Output Specifications</a> page.</p>
 </section>
 <section id="special-thanks">
 <h2>Special Thanks<a class="headerlink" href="#special-thanks" title="Permalink to this headline"></a></h2>
@@ -264,7 +184,7 @@ invalueable reference for the packaging/distribution process. If you are willing
 <li class="toctree-l2"><a class="reference internal" href="cli.html#examples">Examples:</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="output.html">Chat Analyzer Output Specifications</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Output Specifications</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="output.html#common-fields"><strong>Common fields</strong>:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="output.html#twitch-specific-fields"><strong>Twitch-specific fields</strong>:</a></li>
 <li class="toctree-l2"><a class="reference internal" href="output.html#youtube-specific-fields"><strong>YouTube-specific fields</strong>:</a></li>

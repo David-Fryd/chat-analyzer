@@ -10,6 +10,8 @@ A full list of command line arguments can be obtained by running the help comman
 
    $ chat_analyzer -h
 
+
+
 The output of which is as follows:
 
 .. program-output:: cd .. ; python3 -m chat_analyzer -h
