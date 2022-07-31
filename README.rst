@@ -65,15 +65,28 @@ Anyone can use this tool on anyone's streams, enabling people beyond the creator
 Installation
 ############
 
-todo...
+This tool is distributed on PyPI_ and can be installed with ``pip``:
 
-Some console code: 
+.. _PyPI: https://pypi.org/project/chat-downloader/
 
 .. code:: console
 
-    beep 123
-    ...
+    pip install chat-analyzer
 
+To update to the latest version, run: 
+
+.. code:: console
+
+    pip install chat-analyzer --upgrade
+
+
+Alternatively, the tool can be installed with ``git``:
+
+.. code:: console
+
+    git clone https://github.com/David-Fryd/chat-analyzer.git
+    cd chat-analyzer
+    python setup.py install
 
 #####
 Usage
@@ -225,7 +238,8 @@ Special Thanks
 This project wouldn't exist without `Xenova and their chat-downloader`_! 
 All of the platform-standardization and downloading logic that they worked on for their downloader made the analyzer
 infinitely easier to write. In order to avoid compatability issues, this software comes packaged with a frozen version
-of the downloader src, and all credit goes to Xenova for the contents in the ``chat_downloader`` directory. 
-If you are willing, go on over to their repo and show them some support as well :)
+of the downloader src, and all credit goes to Xenova for the contents in the ``chat_downloader`` directory. Since this
+was also my first ever python project made for distribution, their organizational structure and style was
+invalueable reference for the packaging/distribution process. If you are willing, go on over to their repo and show them some support as well :)
 
 .. _Xenova and their chat-downloader: https://github.com/xenova/chat-downloader
