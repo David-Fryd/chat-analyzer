@@ -91,10 +91,9 @@ setup(
     packages=find_packages(include=['chat_analyzer', 'chat_analyzer.*']),
     install_requires=requirements,
     python_requires='>=3',
-    # TODO wtf is this? do we need to include the stuff from the chat_downloader as well?
-    # package_data={
-    #     'chat_downloader': ['formatting/*.json']
-    # },
+    package_data={
+        'chat_analyzer': ['chat_downloader/formatting/*.json']
+    },
     entry_points={
         'console_scripts': [
             'chat_analyzer=chat_analyzer.cli:main',
