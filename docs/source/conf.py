@@ -32,8 +32,15 @@ html_static_path = ['_static']
 # # Autodoc config
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../chat_analyzer'))
-sys.path.insert(0, os.path.abspath('../../chat_downloader'))
+# sys.path.insert(0, os.path.abspath('../../chat_analyzer'))
+sys.path.insert(0, os.path.abspath('../..'))
+# Having the below line fixes the CLI page (sphinx program-output issue- but causes:
+# 
+# autodoc: failed to import class 'dataformat.ChatAnalytics' from module 'chat_analyzer'; the following exception was raised:
+# attempted relative import with no known parent package ...
+# 
+# )
+# sys.path.insert(0, os.path.abspath('../../chat_downloader'))
 
 # apidocs genned thru: 'sphinx-apidoc -o ./source/apidoc ../chat_analyzer' while in the docs directory
 # in order to regen docs, navigate to docs directory and run: 'make clean ; make html'
