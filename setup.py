@@ -5,6 +5,7 @@
 
 from setuptools import setup, find_packages
 
+
 # Get metadata without importing the package
 with open('chat_analyzer/metadata.py') as metadata_file:
     exec(metadata_file.read())
@@ -25,6 +26,25 @@ requirements = [ # TODO: Check if this is correct
     'docstring-parser',
     'colorlog',
     'websocket-client'
+]
+
+development_requirements = [
+    [
+        # Building/packaging
+        'flake8',
+        'twine',
+        'wheel',
+        'tox',
+
+        # Testing and coverage
+        'pytest',
+        'coverage',
+
+        # Documentation
+        'sphinx',
+        'sphinx-rtd-theme',
+        'sphinxcontrib-programoutput'
+    ]
 ]
 
 setup(
@@ -81,6 +101,11 @@ setup(
             'chat_analyzer=chat_analyzer.cli:main',
             'chat-analyzer=chat_analyzer.cli:main',
         ],
+    },
+
+    extras_require={
+        # pip install -e ".[dev]" installs dev dependencies
+        'dev': development_requirements,
     },
 
     # TODO: Reference Xenova's setup for the chat_downloader to see if theres anything worth adding later

@@ -14,7 +14,7 @@ release = '1.0.1b1'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.programoutput']
 
 templates_path = ['_templates']
 exclude_patterns = []
