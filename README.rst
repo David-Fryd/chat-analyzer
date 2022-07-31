@@ -81,6 +81,9 @@ Usage
 
 
 TODO: Discuss modes
+url:...
+chatfile: JSON from Xenova's chat-downloader to JSON analytic data to be used for visualization (or -sc)
+reanalyze:...
 
 Command line
 ------------
@@ -221,6 +224,8 @@ Special Thanks
 
 This project wouldn't exist without `Xenova and their chat-downloader`_! 
 All of the platform-standardization and downloading logic that they worked on for their downloader made the analyzer
-infinitely easier to write. If you are willing, go on over to their repo and show them some support as well :)
+infinitely easier to write. In order to avoid compatability issues, this software comes packaged with a frozen version
+of the downloader src, and all credit goes to Xenova for the contents in the ``chat_downloader`` directory. 
+If you are willing, go on over to their repo and show them some support as well :)
 
 .. _Xenova and their chat-downloader: https://github.com/xenova/chat-downloader
