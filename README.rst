@@ -2,6 +2,17 @@
 Chat Analyzer
 ***************
 
+.. image:: https://badge.fury.io/py/chat-analyzer.svg
+    :target: https://badge.fury.io/py/chat-analyzer
+    :alt: PyPI version
+
+.. https://badge.fury.io/for/py/chat-analyzer
+
+.. image:: https://img.shields.io/pypi/status/chat-analyzer.svg
+    :target: https://pypi.python.org/pypi/chat-analyzer/
+    :alt: PyPI status
+   
+
 `Chat Analyzer`_ is a tool used to process and analyze chat data 
 from past live streams, providing summarized information about chat activity over the stream's lifetime. 
 The information currently reported primarily revolves around the activity per second for various metrics,
@@ -16,8 +27,9 @@ how your chat responds to your performance!
 
 *Currently both YouTube and Twitch VODs are supported.*
 
+#################
 Target Auidence: 
-________________
+#################
 
 Anyone can use this tool on anyone's streams, enabling people beyond the creators themselves to view and use chat analytics data.
 
@@ -187,9 +199,8 @@ the VOD is from, some datapoints are specific to the platform.
         "_currentSample": null,
     }
 
-TODO: Use the docs within dataformat.py to populate each field's description
+TODO: Link the docs here:
 
-``duration``: "......"
 
 **Twitch-specific fields**:
 

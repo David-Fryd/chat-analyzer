@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command Line Usage &mdash; Chat Analyzer 1.0.1b1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Chat Analyzer Output Specifications" href="output.html" />
+    <link rel="prev" title="Getting Started…" href="gettingstarted.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Chat Analyzer
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started…</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command Line Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="output.html">Chat Analyzer Output Specifications</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Chat Analyzer</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Command Line Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/cli.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line-usage">
+<h1>Command Line Usage<a class="headerlink" href="#command-line-usage" title="Permalink to this headline"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline"></a></h2>
+<p>A full list of command line arguments can be obtained by running the help command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>chat_analyzer -h
+</pre></div>
+</div>
+<p>The output of which is as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: chat_analyzer [-h] [--version] [--platform {youtube,twitch}]
+                     [--mode {url,chatfile,reanalyze}]
+                     [--save-chatfile-output SAVE_CHATFILE_OUTPUT]
+                     [--interval INTERVAL] [--print-interval PRINT_INTERVAL]
+                     [--highlight-percentile HIGHLIGHT_PERCENTILE]
+                     [--highlight-metric {usersPSec,chatsPSec,activityPSec}]
+                     [--description DESCRIPTION] [--output OUTPUT] [--nojson]
+                     [--debug] [--break BREAK]
+                     source
+
+A tool used to process and analyze chat data from past live streams, providing
+summarized information about chat activity over the stream&#39;s lifetime.
+
+Required Arguments:
+  source                
+                        Raw chat data to process and analyze, or processed
+			sample data to re-analyze.
+                        
+                        In mode=[1m&#39;url&#39;[0m, (default) source is a url to a
+			past stream/VOD.
+                        We currently only support links from: www.youtube.com,
+			www.twitch.tv. The link must
+                        be to the original stream/VOD with that attached chat
+			replay.
+                        
+                        In mode=[1m&#39;chatfile&#39;[0m, source is a filepath to a
+			.json containing [3mraw chat data[0m,
+                        produced by Xenonva&#39;s chat-downloader, or by this
+			program&#39;s `--save-chatfile-output` flag. NOTE: the
+			--platform argument is required
+                        when using this mode.
+                        
+                        In mode=[1m&#39;reanalyze&#39;[0m, source is a filepath to a
+			.json file previously produced by this program
+			which contains [3mexisting sample data to
+			reanalyze[0m.
+                        (Highlights and spikes are regenerated, the existing
+			samples are not affected).
+
+Optional Arguments:
+  -h, --help            show this help message and exit
+  --version             show program&#39;s version number and exit
+  --platform {youtube,twitch}
+                        When reading from a chatfile, specify the platform the
+                        chat was downloaded from. By default, Xenova&#39;s chat
+                        downloader does not store this information with the
+                        chat data so it must be manually specified. If the
+                        incorrect platform is entered, site-specific data will
+                        be innacurate but the program will still run and
+                        analyze common attributes. (default: None)
+
+Program Behavior (Mode):
+  --mode {url,chatfile,reanalyze}, -m {url,chatfile,reanalyze}
+                        The program can be run in three modes:
+                        
+                        [3mNOTE: All modes result in chat analytics output as
+			a .json file.[0m
+                        
+                        [1m&#39;url&#39;[0m mode (default) downloads raw chat data
+			from an appropriate source, processes the raw chat
+			data into samples, and then analyzes the samples.
+                        
+                        [1m&#39;chatfile&#39;[0m mode reads raw chat data from a
+			.json file, processes the raw chat data into
+			samples, and then analyzes the samples.
+                        (We accept raw chat files produced by Xenonva&#39;s chat-
+			downloader, or by this program through &#39;--save-
+			chatfile-output&#39;).
+                        
+                        [1m&#39;reanalyze&#39;[0m mode reads existing sample data
+			from a .json file produced by this program in a
+			previous run, and recalculates ONLY the post-
+			processed data based on the existing samples.
+                        (Highlights and spikes are regenerated, the existing
+			samples are not affected).
+                        
+                        (default: url)
+  --save-chatfile-output SAVE_CHATFILE_OUTPUT, -sc SAVE_CHATFILE_OUTPUT
+                        Filepath of the raw chat data to save. If downloading
+                        chat data from a URL, save the raw chat data to the
+                        provided filepath in addition to processing it, so
+                        that the raw data can be [3mfully[0m reprocessed and
+                        analyzed again quickly (using mode=&#39;chatfile&#39;). NOTE:
+                        Chatfiles are *much* larger in comparison to the
+                        analytics file. NOTE: json file extension is enforced
+                        because it affects the content that the chat
+                        downloader writes to the file. (default: None)
+
+Processing (Sampling):
+  --interval INTERVAL, -i INTERVAL
+                        The time interval (in seconds) at which to compress
+                        datapoints into samples. i.e. Duration of the samples.
+                        The smaller the interval, the more granular the
+                        analytics are. At interval=5, each sample contains 5
+                        seconds of cumulative data. *(With the exception of
+                        the last sample, which may be shorter than the
+                        interval).* (default: 5)
+  --print-interval PRINT_INTERVAL
+                        Number of messages between progress updates to the
+                        console. If &lt;= 0, progress is not printed. (default:
+                        100)
+
+Post Processing (Analyzing):
+  --highlight-percentile HIGHLIGHT_PERCENTILE, -ep HIGHLIGHT_PERCENTILE
+                        A number between 0 and 100, representing the cutoff
+                        percentile that a sample&#39;s attribute must meet to be
+                        considered a &#39;highlight&#39; of the chatlog. Samples in
+                        the top HIGHLIGHT_PERCENTILE% of the selected
+                        highlight metric will be considered high-engagement
+                        samples and included within the constructed
+                        highlights. The larger the percentile, the greater the
+                        metric requirement before being reported. If
+                        &#39;highlight-percentile&#39;=93.0, only samples in the 93rd
+                        percentile (top 7.0%) of the selected metric will be
+                        included in the highlights. (default: 93.0)
+  --highlight-metric {usersPSec,chatsPSec,activityPSec}, -em {usersPSec,chatsPSec,activityPSec}
+                        The metric to use for engagement analysis when
+			constructing highlights. Samples in the top
+			HIGHLIGHT_PERCENTILE% of the selected metric will
+			be considered high-engagement samples and included
+			within the constructed highlights.
+                        Each highlight metric choice corresponds to a
+			datapoint for each sample.
+                        
+                        [1m&#39;usersPSec&#39;[0m compares samples based off of the
+			average number unique users that send a chat per
+			second of the sample.
+                        
+                        [1m&#39;chatsPSec&#39;[0m compares samples based off of the
+			average number of chats per second of the sample
+			(not necessarily sent by unique users).
+                        
+                        [1m&#39;activityPSec&#39;[0m compares samples based off of
+			the average number of any type of message that
+			appears in the chat per second of the sample.
+                        
+                        (default: usersPSec)
+
+Output:
+  --description DESCRIPTION, -d DESCRIPTION
+                        A description included in the output file to help
+			distinguish it from other output files.
+                        ex: -d &quot;Ludwig product announcement, small intervals&quot;
+			(default: None)
+  --output OUTPUT, -o OUTPUT
+                        The filepath to write the output to. If not specified,
+                        the output is written to &#39;[MEDIA TITLE].json.&#39; If the
+                        provided file path does not end in &#39;.json&#39;, the
+                        &#39;.json&#39; file extension is appended automaticaly to the
+                        filepath (disable with --nojson). (default: None)
+  --nojson              Disable the automatic appending of the &#39;.json&#39; file
+                        extension to the provided output filepath. (default:
+                        False)
+
+Debugging:
+  --debug, -db          Enable debug mode (debug info is printed) (default:
+                        False)
+  --break BREAK, -b BREAK
+                        Stop processing messages after BREAK number of
+                        messages have been processed. No effect if val &lt; 0
+                        (default: -1)
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples:<a class="headerlink" href="#examples" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gettingstarted.html" class="btn btn-neutral float-left" title="Getting Started…" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Chat Analyzer Output Specifications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, David Fryd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

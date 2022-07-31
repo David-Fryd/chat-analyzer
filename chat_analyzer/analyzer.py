@@ -78,6 +78,7 @@ def check_chatlog_downloader_supported(chatlog: Chat, url: str):
         - The video/stream happened in the past (not currently live or scheduled)
         - The chat is downloaded from a supported platform that we have a proper
         way of parsing.
+        
     """
 
     if(chatlog.status !='past'):
