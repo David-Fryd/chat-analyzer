@@ -200,9 +200,7 @@ the VOD is from, some datapoints are specific to the platform.
     }
 
 TODO: Link the docs here:
-TODO: Use the docs within dataformat.py to populate each field's description
 
-``duration``: "......"
 
 **Twitch-specific fields**:
 

@@ -6,6 +6,7 @@
 .. Welcome to Chat Analyzer's documentation!
 .. =========================================
 
+.. REGEN DOCS by navigating to docs/ directory and running: 'make clean ; make html'
 
 .. include:: ../../README.rst
 
@@ -14,10 +15,14 @@ Documentation Overview:
 ***************
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   output
-   chat_analyzer
+    cli
+    output
+    changelog
+
+
+..    chat_analyzer
 
     .. :caption: Contents:
 
