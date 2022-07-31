@@ -1,10 +1,12 @@
 .DS_Store
 
+# Packaging related files
 chat_analyzer.egg-info/
+build/
+dist/
 
 # Local/Demo output and other assorted files
 do-not-package/
-
 localtestJSON/
 
 # TODO: Ensure we don't break anything by ignoring .vscode/
