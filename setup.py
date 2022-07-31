@@ -87,7 +87,8 @@ setup(
     project_urls={
         'Website': metadata['__website__'],
         'Source': metadata['__url__'],
-        # TODO Add Documentation, Funding/Say thanks
+        'Documentation': metadata['__documentation__'],
+        # TODO Funding/Say thanks
     },
     packages=find_packages(include=['chat_analyzer', 'chat_analyzer.*']),
     install_requires=requirements,

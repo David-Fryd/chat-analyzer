@@ -2,8 +2,9 @@ import os
 import ntpath
 import json
 import logging
+import sys
 
-
+sys.path.append("..") # chat_downloader in sibling directory, this is so we can find it
 from chat_downloader import ChatDownloader
 from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
 from .util import dprint
