@@ -1,16 +1,16 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
+- Update README
+  - Connect the PyPi release tags to the README
+  - Connect docs once they are autogenned and completed
+- Autogenerate documentation w/ sphinx
+  - https://pythonhosted.org/an_example_pypi_project/sphinx.html
 - Local maxima detection (spike detection)
   - https://datascience.stackexchange.com/questions/27031/how-to-get-spike-values-from-a-value-sequence
   - https://stackoverflow.com/questions/26632205/finding-a-spike-or-drop-in-a-dataset-programatically
-- **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
-- In addition to regular & integrated processing, add 2 modes:
-  - Add option/flag to re-process a local output file for spikes
-  - Add option to specificy input chat-downloaded file (helpful for analysis of diff sample lengths) 
-- Update README
-  - JSON output documentation
 - Better class documentation
+- **_POSTPONED_**: Standardize logging/printing of info/output/error messages. Look at print() and logging. calls.
 
 ## Medium Priority
 - Find other message types we currently don't handle and figure out how to do so. i.e. `sponsorships_gift_redemption_announcement`, `raid`, etc...
