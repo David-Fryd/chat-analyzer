@@ -10,7 +10,7 @@ with open('chat_analyzer/metadata.py') as metadata_file:
     exec(metadata_file.read())
     metadata = locals()
 
-with open('README.md') as readme_file:
+with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 requirements = [ # TODO: Check if this is correct
@@ -32,7 +32,7 @@ setup(
     version = metadata['__version__'],
     description=metadata['__summary__'],
     long_description=readme,
-    long_description_content_type='text/markdown', # TODO: Update README into x-rst cuz it looks nicer?
+    long_description_content_type='text/x-rst',
     url=metadata['__url__'],
     author=metadata['__author__'],
     author_email=metadata['__email__'],
@@ -79,6 +79,7 @@ setup(
     entry_points={
         'console_scripts': [
             'chat_analyzer=chat_analyzer.cli:main',
+            'chat-analyzer=chat_analyzer.cli:main',
         ],
     },
 

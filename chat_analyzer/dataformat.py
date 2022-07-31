@@ -342,6 +342,10 @@ class ChatAnalytics(ABC):
             The average number of unique users chatting per second.
         highlights: List[Highlight] 
             A list of the high engagement sections of the chatlog.
+        highlights_duration: float
+            The cumulative duration of the highlights (in seconds)
+        highlights_duration_text: str
+            The cumulative duration of the highlights represented in text format (i.e. hh:mm:ss)
         spikes: List[Spike]
             Not yet implemented TODO
             A list of the calculated spikes in the chatlog. May contain spikes of different types, identifiable by the spike's type field.
@@ -374,7 +378,9 @@ class ChatAnalytics(ABC):
     overallAvgActivityPerSecond: float = 0
     overallAvgChatMessagesPerSecond: float = 0
     overallAvgUniqueUsersPerSecond: float = 0
-    highlights: List[Highlight] = field(default_factory=list) 
+    highlights: List[Highlight] = field(default_factory=list)
+    highlights_duration: float = 0 
+    highlights_duration_text: str = ''
     spikes: List[Spike] = field(default_factory=list) # TODO: Not implemented yet
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -530,6 +536,7 @@ class ChatAnalytics(ABC):
                         type=field_to_use, 
                         description=f"{field_to_use} sustained at or above {percentile_value_cutoff}")
                     highlights.append(highlight)
+                    self.highlights_duration += highlight.duration
                     # Reset calculation vals for the next highlight
                     _firstSample = None
                     _lastSample = None
@@ -567,10 +574,12 @@ class ChatAnalytics(ABC):
         self.overallAvgUniqueUsersPerSecond =  sum(s.avgUniqueUsersPerSecond for s in self.samples)/len(self.samples) 
 
         # Process and remove the final sample from the currentSample field
-        self._currentSample.sample_post_process()
+        if(self._currentSample): # Won't exist if we read in the obj from a file with it missing already
+            self._currentSample.sample_post_process()
 
         # Highlights & Spikes are determined after the final averages have been calculated
         self.highlights = self.get_highlights(settings.highlight_metric, settings.highlight_percentile)
+        self.highlights_duration_text = seconds_to_time(self.highlights_duration)
         # self.spikes = self.get_spikes('avgUniqueUsersPerSecond', settings.spike_percentile) #TODO: Implement spikes
 
         # Remove all other internal variables not suitable for output

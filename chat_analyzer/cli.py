@@ -100,13 +100,15 @@ def main():
         Raw chat data to process and analyze, or processed sample data to re-analyze.
 
         In mode=\033[1m'url'\033[0m, (default) source is a url to a past stream/VOD. 
-        We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
+        We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}. The link must
+        be to the original stream/VOD with that attached chat replay. 
 
         In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
         produced by Xenonva's chat-downloader, or by this program's `--save-chatfile-output` flag. NOTE: the --platform argument is required
         when using this mode.
 
-        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.""")
+        In mode=\033[1m'reanalyze'\033[0m, source is a filepath to a .json file previously produced by this program which contains \033[3mexisting sample data to reanalyze\033[0m.
+        (Highlights and spikes are regenerated, the existing samples are not affected).""")
 
     parser.add_argument("--platform", type=str, choices=dict.keys(SUPPORTED_PLATFORMS_SHORTHANDS), help="""
     When reading from a chatfile, specify the platform the chat was downloaded from. 
@@ -126,7 +128,8 @@ def main():
         \033[1m\'chatfile\'\033[0m mode reads raw chat data from a .json file, processes the raw chat data into samples, and then analyzes the samples.
         (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile-output').
 
-        \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. The existing samples are not affected.
+        \033[1m\'reanalyze\'\033[0m mode reads existing sample data from a .json file produced by this program in a previous run, and recalculates ONLY the post-processed data based on the existing samples. 
+        (Highlights and spikes are regenerated, the existing samples are not affected).
         \n""")
     # TODO: Do we restirct use with mode=chatfile, or just admit that it creates a duplicate/slightly different file?
     # TODO: Can't use with reanalyze mode because we don't have access to the chat data, so maybe we just enforce that its a url-only command
@@ -155,7 +158,7 @@ def main():
     The larger the percentile, the greater the metric requirement before being reported. If 'highlight-percentile'=93.0, only samples in the 93rd percentile (top 7.0%%) of the selected metric will be included in the highlights.
     """)
     metric_choices = ["usersPSec","chatsPSec","activityPSec"] # update metric_to_field map when adding new metrics
-    postprocess_group.add_argument("--highlight-metric", "-em", default=metric_choices[0], choices=metric_choices, type=str, help=f"""R|
+    postprocess_group.add_argument("--highlight-metric", "-em", default=metric_choices[0], choices=metric_choices, type=str, help=f"""R|\
     The metric to use for engagement analysis when constructing highlights. Samples in the top HIGHLIGHT_PERCENTILE%% of the selected metric will be considered high-engagement samples and included within the constructed highlights. 
     Each highlight metric choice corresponds to a datapoint for each sample. \n
     \033[1m\'{metric_choices[0]}\'\033[0m compares samples based off of the average number unique users that send a chat per second of the sample.\n
@@ -189,8 +192,6 @@ def main():
     kwargs = args.__dict__
 
     # Argument dependency-checks:
-    if(kwargs['mode'] == 'reanalyze'):
-        parser.error(f"Only 'url' and 'chatfile' modes are supported in version {__version__}")
     if(kwargs['mode'] == 'chatfile' and kwargs['platform']== None):
         parser.error('When reading from a chatfile, you must specify the platform the chatfile is from with --platform argument.')
         # TODO: Add description of this to the chatfile desc and add the actual platform arg itself
@@ -202,7 +203,8 @@ def main():
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
-    # TODO: Interval should not be allowed with mode = reanalyze
+    # TODO: Interval should not be allowed with mode = reanalyze (clarify again what reanalyze is for)
+    # TODO: Low percentiles result in no highlights... why?
 
     run(**kwargs)
 
@@ -231,3 +233,7 @@ def main():
 
 
 # chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 10
+
+
+# chat_analyzer 'https://www.twitch.tv/videos/1289325547' -o output/analyze/markiplier_peen.json -sc output/raw/markiplier_peen_chat.json
+# chat_analyzer output/analyze/markiplier_peen.json -m reanalyze -o output/analyze/markiplier_peen_reanalyzed.json
