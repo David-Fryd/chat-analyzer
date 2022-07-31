@@ -33,3 +33,5 @@ html_static_path = ['_static']
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../chat_analyzer'))
+
+# To auto-gen docs, run 'sphinx-apidoc -o ./source/apidoc ../chat_analyzer' while in the docs directory
