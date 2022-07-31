@@ -100,7 +100,8 @@ def main():
         Raw chat data to process and analyze, or processed sample data to re-analyze.
 
         In mode=\033[1m'url'\033[0m, (default) source is a url to a past stream/VOD. 
-        We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}.
+        We currently only support links from: {', '.join(SUPPORTED_PLATFORMS)}. The link must
+        be to the original stream/VOD with that attached chat replay. 
 
         In mode=\033[1m'chatfile'\033[0m, source is a filepath to a .json containing \033[3mraw chat data\033[0m, 
         produced by Xenonva's chat-downloader, or by this program's `--save-chatfile-output` flag. NOTE: the --platform argument is required
@@ -202,7 +203,8 @@ def main():
     if(kwargs['output']):
         if(not kwargs['output'].endswith('.json') and not kwargs['nojson']):
             kwargs['output'] += '.json'
-    # TODO: Interval should not be allowed with mode = reanalyze
+    # TODO: Interval should not be allowed with mode = reanalyze (clarify again what reanalyze is for)
+    # TODO: Low percentiles result in no highlights... why?
 
     run(**kwargs)
 
@@ -231,3 +233,7 @@ def main():
 
 
 # chat_analyzer 'https://www.twitch.tv/videos/1522574868' --print-interval 100 -i 10
+
+
+# chat_analyzer 'https://www.twitch.tv/videos/1289325547' -o output/analyze/markiplier_peen.json -sc output/raw/markiplier_peen_chat.json
+# chat_analyzer output/analyze/markiplier_peen.json -m reanalyze -o output/analyze/markiplier_peen_reanalyzed.json
