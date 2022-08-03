@@ -13,8 +13,9 @@ from .chat_downloader.utils.core import seconds_to_time
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
 YOUTUBE_NETLOC = 'www.youtube.com'
+YOUTUBE_SHORT_NETLOC = 'youtu.be'
 TWITCH_NETLOC = 'www.twitch.tv'
-SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
+SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC, YOUTUBE_SHORT_NETLOC]
 SUPPORTED_PLATFORMS_SHORTHANDS = {
     # Useful for CLI choices when specifying the source of the chatfile
     "youtube" : YOUTUBE_NETLOC,
@@ -308,12 +309,8 @@ class ChatAnalytics(ABC):
         A description included to help distinguish it from other analytical data.
     program_version: str
         The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.
-
-
-    **[Automatically Defined on init]**:
-
     platform: str
-        Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
+        Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', 'youtu.be'...
         While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
 
 
@@ -367,9 +364,6 @@ class ChatAnalytics(ABC):
     interval: int
     description: str
     program_version: str
-
-    # Automatically Defined on subclass init
-    # Because platform has default in the child class, must come after non-defaults above
     platform: str
 
     # Automatically re-defined on post-init
@@ -426,7 +420,7 @@ class ChatAnalytics(ABC):
         # New sample end time will not extend past the length of the video
         new_sample_end_time = min(new_sample_start_time + self.interval, self.duration)
 
-        if(self.platform==YOUTUBE_NETLOC):
+        if(self.platform==YOUTUBE_NETLOC or self.platform==YOUTUBE_SHORT_NETLOC):
             self._currentSample = YoutubeSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
         elif(self.platform==TWITCH_NETLOC):
             self._currentSample = TwitchSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
@@ -685,8 +679,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
         The total number of memberships that appeared in the chat.
     
     """
-    # Defined here on subclass init
-    platform: str = YOUTUBE_NETLOC
 
     # Defined w/ default and modified DURING analysis
     totalSuperchats: int = 0
@@ -742,8 +734,6 @@ class TwitchChatAnalytics(ChatAnalytics):
         The total number of upgraded subscriptions that appeared in the chat.
 
     """
-    # Defined here on subclass init
-    platform: str = TWITCH_NETLOC
     
     # Defined w/ default and modified DURING analysis
     totalSubscriptions: int = 0

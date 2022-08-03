@@ -248,10 +248,10 @@ def run(**kwargs):
         chatAnalytics.chatlog_post_process(process_settings)
     else:
         # We aren't reanalyzing a file, create the chatAnalytics object and process normally
-        if(platform == YOUTUBE_NETLOC):
-            chatAnalytics = YoutubeChatAnalytics(duration=chatlog.duration, interval=interval, description=description, program_version=__version__)
+        if(platform == YOUTUBE_NETLOC or platform == YOUTUBE_SHORT_NETLOC):
+            chatAnalytics = YoutubeChatAnalytics(duration=chatlog.duration, platform=platform, interval=interval, description=description, program_version=__version__)
         elif(platform == TWITCH_NETLOC):
-            chatAnalytics = TwitchChatAnalytics(duration=chatlog.duration, interval=interval, description=description, program_version=__version__)
+            chatAnalytics = TwitchChatAnalytics(duration=chatlog.duration, platform=platform, interval=interval, description=description, program_version=__version__)
         else:
             logging.critical(
                 "ERROR: No corresponding ChatAnalytics object.\n\
