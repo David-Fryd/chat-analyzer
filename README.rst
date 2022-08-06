@@ -1,6 +1,8 @@
-***************
+.. ***************
+#################
 Chat Analyzer
-***************
+#################
+.. ***************
 
 .. image:: https://badge.fury.io/py/chat-analyzer.svg
     :target: https://badge.fury.io/py/chat-analyzer
@@ -109,16 +111,8 @@ Alternatively, the tool can be installed with ``git``:
 Usage
 #####
 
-This section is next on the to-do list!
+Basic to intermediate/advanced usage can be found on the `Getting Started <https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html>`_ page of the documentation.
 
-A deeper dive into the usage can be found on the `Getting Started <https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html>`_ page.
-
-.. code:: console
-
-    TODO: Discuss modes:
-    url:...
-    chatfile: JSON from Xenova\'s chat-downloader to JSON analytic data to be used for visualization (or -sc)
-    reanalyze:...
 
 Command line
 ------------
