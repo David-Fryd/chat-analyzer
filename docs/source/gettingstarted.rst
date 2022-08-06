@@ -7,7 +7,7 @@ and overall best practices when using the software.
 
 
 
-Usage modes & Source
+Usage Modes & Source
 ---------------------
 
 In its simplest form, this software outputs information about a chatlog associated with a livestream.
