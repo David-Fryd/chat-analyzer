@@ -79,8 +79,9 @@ with future plans to incorporate semantic analysis into the program. (<em>See th
 <p>Paired with the visualizer hosted on <a class="reference external" href="https://chatanalyze.com/">chatanalyze.com</a>, easily understand and interpret
 how your chat responds to your performance!</p>
 <p><em>Currently both YouTube and Twitch VODs are supported.</em></p>
-<section id="target-auidence">
-<h2>Target Auidence:<a class="headerlink" href="#target-auidence" title="Permalink to this headline"></a></h2>
+</section>
+<section id="target-audience">
+<h1>Target Audience:<a class="headerlink" href="#target-audience" title="Permalink to this headline"></a></h1>
 <p>Anyone can use this tool on anyone’s streams, enabling people beyond the creators themselves to view and use chat analytics data.</p>
 <ul class="simple">
 <li><p>Editors</p>
@@ -103,8 +104,6 @@ your chat go wild? What strategies/types of content are more effective than othe
 they decide to support you and your stream?</p></li>
 </ul>
 </li>
-</ul>
-<ul class="simple">
 <li><p>Small/Upcoming streamers</p>
 <ul>
 <li><p>Immitation is the best form of flattery. Pick a popular streamer and see what parts of their stream generate the most engagement!
@@ -114,8 +113,8 @@ What type of content/strategies can you use to make your stream more engaging?</
 </ul>
 </section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<p>This tool is distributed on <a class="reference external" href="https://pypi.org/project/chat-downloader/">PyPI</a> and can be installed with <code class="docutils literal notranslate"><span class="pre">pip</span></code>:</p>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<p>This tool is distributed on <a class="reference external" href="https://pypi.org/project/chat-downloader/">PyPI</a> and can be installed with <a class="reference external" href="https://pip.pypa.io/en/stable/">pip</a>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install chat-analyzer</span>
 </pre></div>
 </div>
@@ -131,17 +130,10 @@ What type of content/strategies can you use to make your stream more engaging?</
 </div>
 </section>
 <section id="usage">
-<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h2>
-<p>This section is next on the to-do list!</p>
-<p>A deeper dive into the usage can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html">Getting Started</a> page.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">TODO: Discuss modes:</span>
-<span class="go">url:...</span>
-<span class="go">chatfile: JSON from Xenova\&#39;s chat-downloader to JSON analytic data to be used for visualization (or -sc)</span>
-<span class="go">reanalyze:...</span>
-</pre></div>
-</div>
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
+<p>Basic to intermediate/advanced usage can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html">Getting Started</a> page of the documentation.</p>
 <section id="command-line">
-<h3>Command line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h3>
+<h2>Command line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h2>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: chat_analyzer [-h] [--version] [--platform {youtube,twitch}]</span>
 <span class="go">                    [--mode {url,chatfile,reanalyze}]</span>
 <span class="go">                    [--save-chatfile-output SAVE_CHATFILE_OUTPUT]</span>
@@ -157,7 +149,7 @@ What type of content/strategies can you use to make your stream more engaging?</
 </section>
 </section>
 <section id="output">
-<h2>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h2>
+<h1>Output<a class="headerlink" href="#output" title="Permalink to this headline"></a></h1>
 <p>For non-developers, I highly recommend you use the visualizer on <a class="reference external" href="https://chatanalyze.com/">chatanalyze.com</a> to view the output of the program.
 Simply follow the instructions and upload the output json file to the visualizer.</p>
 <p>All of the analytical data is output in a single <code class="docutils literal notranslate"><span class="pre">.json</span></code> file. Certain datapoints exist regardless of the platform
@@ -165,23 +157,22 @@ the VOD is from, some datapoints are specific to the platform.</p>
 <p>More complete documentation can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/output.html">Output Specifications</a> page.</p>
 </section>
 <section id="special-thanks">
-<h2>Special Thanks<a class="headerlink" href="#special-thanks" title="Permalink to this headline"></a></h2>
+<h1>Special Thanks<a class="headerlink" href="#special-thanks" title="Permalink to this headline"></a></h1>
 <p>This project wouldn’t exist without <a class="reference external" href="https://github.com/xenova/chat-downloader">Xenova and their chat-downloader</a>!
 All of the platform-standardization and downloading logic that they worked on for their downloader made the analyzer
 infinitely easier to write. In order to avoid compatability issues, this software comes packaged with a frozen version
 of the downloader src, and all credit goes to Xenova for the contents in the <code class="docutils literal notranslate"><span class="pre">chat_downloader</span></code> directory. Since this
 was also my first ever python project made for distribution, their organizational structure and style was
-invalueable reference for the packaging/distribution process. If you are willing, go on over to their repo and show them some support as well :)</p>
-</section>
-</section>
-<section id="documentation-overview">
-<h1>Documentation Overview:<a class="headerlink" href="#documentation-overview" title="Permalink to this headline"></a></h1>
+invaluable reference for the packaging/distribution process. If you are willing, go on over to their repo and show them some support as well :)</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gettingstarted.html#usage-modes-source">Usage modes &amp; Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gettingstarted.html#examples">Examples</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="cli.html#overview">Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="cli.html#examples">Examples:</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output Specifications</a><ul>
@@ -192,6 +183,7 @@ invalueable reference for the packaging/distribution process. If you are willing
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="changelog.html#b1-8-3-2022"><code class="docutils literal notranslate"><span class="pre">'1.0.5b1'</span></code> (8/3/2022)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog.html#v1-0-1b1-7-31-2022"><code class="docutils literal notranslate"><span class="pre">v1.0.1b1</span></code> (7/31/2022)</a></li>
 </ul>
 </li>
