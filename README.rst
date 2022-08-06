@@ -31,7 +31,7 @@ how your chat responds to your performance!
 *Currently both YouTube and Twitch VODs are supported.*
 
 #################
-Target Auidence: 
+Target Audience: 
 #################
 
 Anyone can use this tool on anyone's streams, enabling people beyond the creators themselves to view and use chat analytics data.
@@ -54,6 +54,12 @@ Anyone can use this tool on anyone's streams, enabling people beyond the creator
   - See the exact moments people decide to subscribe/become members- what type of content moves people so much that
     they decide to support you and your stream?
 
+- Small/Upcoming streamers
+  
+  - Immitation is the best form of flattery. Pick a popular streamer and see what parts of their stream generate the most engagement!
+    What type of content/strategies can you use to make your stream more engaging?
+
+.. For streamer/creator section:
 ..   - helping you understand what you say/do that makes
 ..     people
   
@@ -65,11 +71,6 @@ Anyone can use this tool on anyone's streams, enabling people beyond the creator
 ..   - Take burden off editors. Because your editors will have access to the chat analytics data, there is less
 ..     of a need to manually mark sections of your own video... of course its a backup but still less work...?
 
-- Small/Upcoming streamers
-  
-  - Immitation is the best form of flattery. Pick a popular streamer and see what parts of their stream generate the most engagement!
-    What type of content/strategies can you use to make your stream more engaging?
-
 .. - Developers
   
 ..   - Making an app comparing streamers based on chat activity? 
@@ -80,9 +81,10 @@ Anyone can use this tool on anyone's streams, enabling people beyond the creator
 Installation
 ############
 
-This tool is distributed on PyPI_ and can be installed with ``pip``:
+This tool is distributed on PyPI_ and can be installed with pip_:
 
 .. _PyPI: https://pypi.org/project/chat-downloader/
+.. _pip: https://pip.pypa.io/en/stable/
 
 .. code:: console
 
@@ -160,6 +162,6 @@ All of the platform-standardization and downloading logic that they worked on fo
 infinitely easier to write. In order to avoid compatability issues, this software comes packaged with a frozen version
 of the downloader src, and all credit goes to Xenova for the contents in the ``chat_downloader`` directory. Since this
 was also my first ever python project made for distribution, their organizational structure and style was
-invalueable reference for the packaging/distribution process. If you are willing, go on over to their repo and show them some support as well :)
+invaluable reference for the packaging/distribution process. If you are willing, go on over to their repo and show them some support as well :)
 
 .. _Xenova and their chat-downloader: https://github.com/xenova/chat-downloader
