@@ -1,7 +1,9 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
+- Add highlight percentile reporting
 - Forsee bug in unique users per second - too naive. For long sample sizes, approaches calculating total unique users, not the avg unique users per second. Need to calculate it better.
+- Top .... chatters
 - Update README
   - Connect the PyPi release tags to the README
   - Connect docs once they are autogenned and completed
