@@ -88,7 +88,7 @@ Example JSON output:
 
 An output JSON file might look something like...
 (*Note, only generic fields are shown. Platform-specific fields would be included in
-their respective sections, the main analytics data in the main body of the JSON, and the
+their respective sections: the main analytics data in the main body of the JSON, and the
 sample data within each sample.*)
 
 .. code-block::
