@@ -103,13 +103,13 @@ class Sample():
     **[Defined w/ default and modified AFTER analysis of sample]**:
     
     uniqueUsers: int
-        The total number of unique users that sent a chat message (len(self._userChats))
+        The total number of unique users that sent a chat message across this sample interval (len(self._userChats))
     avgActivityPerSecond: float
         The average activity per second across this sample interval. (activity/sampleDuration)
     avgChatMessagesPerSecond: float
         The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)
     avgUniqueUsersPerSecond: float
-        The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)
+        The average number of unique users that sent a chat across this sample interval. (uniqueUsers/sampleDuration)
 
     """
 
