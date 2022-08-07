@@ -123,7 +123,7 @@ def main():
 
         \033[3mNOTE: All modes result in chat analytics output as a .json file.\033[0m
 
-        \033[1m\'url\'\033[0m mode (default) downloads raw chat data from an appropriate source, processes the raw chat data into samples, and then analyzes the samples.
+        \033[1m\'url\'\033[0m mode (default) downloads raw chat data from an appropriate source url, processes the raw chat data into samples, and then analyzes the samples.
 
         \033[1m\'chatfile\'\033[0m mode reads raw chat data from a .json file, processes the raw chat data into samples, and then analyzes the samples.
         (We accept raw chat files produced by Xenonva's chat-downloader, or by this program through '--save-chatfile-output').
