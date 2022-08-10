@@ -39,7 +39,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#usage-modes-source">Usage modes &amp; Source</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-usage">Basic Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-installation">Step 1 - Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-pick-a-past-stream">Step 2 - Pick a Past Stream</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-run-the-chat-analyzer">Step 3 - Run the Chat Analyzer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-visualize-the-chat-data">Step 4 - Visualize the Chat Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-modes-source">Usage Modes &amp; Source</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#url">url</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#chatfile">chatfile</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reanalyze">reanalyze</a></li>
@@ -82,17 +89,138 @@
 <p>Welcome to the getting started guide for Chat Analyzer! In this guide,
 we’ll cover the basics of how to use the software, some intermediate and advanced uses,
 and overall best practices when using the software.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This guide, the software itself, and the website visualization are still in the beta phase of development and not yet complete.
+Because Twitch Rivals started recently, I decided to make the software availiable because I believe it will
+be useful to some people even in its current state. If there are any questions/concerns, feel free to contact me at <a class="reference external" href="mailto:info&#37;&#52;&#48;chatanalyze&#46;com">info<span>&#64;</span>chatanalyze<span>&#46;</span>com</a>, or
+shoot me a DM on discord <code class="docutils literal notranslate"><span class="pre">NaCl-y#1117</span></code>.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Even though this guide is not yet complete, the available arguments/flags are fully documented by running the <code class="docutils literal notranslate"><span class="pre">-help</span></code> flag,
+and can also be found on the <a class="reference internal" href="cli.html"><span class="doc">Command Line Interface Specification page</span></a>.</p>
+</div>
+<section id="basic-usage">
+<h2>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline"></a></h2>
+<p>In this section, we’ll cover the basic steps necessary to use the Chat Analyzer software.</p>
+<section id="step-1-installation">
+<h3>Step 1 - Installation<a class="headerlink" href="#step-1-installation" title="Permalink to this headline"></a></h3>
+<p>If you haven’t already installed the software, you can easily install the software one of two ways:</p>
+<p>This tool is distributed on <a class="reference external" href="https://pypi.org/project/chat-downloader/">PyPI</a> and can be installed with <a class="reference external" href="https://pip.pypa.io/en/stable/">pip</a>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install chat-analyzer</span>
+</pre></div>
+</div>
+<p>To update to the latest version, run:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install chat-analyzer --upgrade</span>
+</pre></div>
+</div>
+<p>Alternatively, the tool can be installed with <code class="docutils literal notranslate"><span class="pre">git</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://github.com/David-Fryd/chat-analyzer.git</span>
+<span class="go">cd chat-analyzer</span>
+<span class="go">python setup.py install</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-pick-a-past-stream">
+<h3>Step 2 - Pick a Past Stream<a class="headerlink" href="#step-2-pick-a-past-stream" title="Permalink to this headline"></a></h3>
+<p>By default, we will be downloading the chatlog data to analyze from a past stream’s url.
+Currently we support Twitch and YouTube streams/VODs. For a Twitch stream, simply copy the <code class="docutils literal notranslate"><span class="pre">twitch.tv...</span></code> link
+to use with the analyzer. For a YouTube stream, it is best to use the “share” button underneath
+the video player to get the <code class="docutils literal notranslate"><span class="pre">youtu.be</span></code> link, but the analyzer itself will still work with a
+standard YouTube link.</p>
+<p>For example, a youtube/twitch link might look like:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>https://youtu.be/d6JXhg1GBKs
+https://www.twitch.tv/videos/1552248469
+</pre></div>
+</div>
+<p>For help picking the right type of link, you can reference the rules &amp; criteria under the <a class="reference internal" href="#url">url</a> section.</p>
+</section>
+<section id="step-3-run-the-chat-analyzer">
+<h3>Step 3 - Run the Chat Analyzer<a class="headerlink" href="#step-3-run-the-chat-analyzer" title="Permalink to this headline"></a></h3>
+<p>Now that we have the link, all we have to do is run the analyzer and give it the link as an input. Open up a terminal/command prompt and run the following command:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>chat_analyzer <span class="s1">&#39;&lt;link&gt;&#39;</span>
+</pre></div>
+</div>
+<p>The program will produce an output file in the directory that the program was run in (the current directory). The output file/filepath can also be assigned
+using the <code class="docutils literal notranslate"><span class="pre">-o</span></code> flag:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>chat_analyzer <span class="s1">&#39;&lt;link&gt;&#39;</span> -o <span class="s1">&#39;&lt;output_filepath&gt;&#39;</span>
+</pre></div>
+</div>
+<p>After starting the program, the chatlog download will initiate and you should see output that looks something like this:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Getting chatlog using Xenonvas chat-downloader <span class="o">(</span>https://github.com/xenova/chat-downloader<span class="o">)</span>...
+Successfully retrieved chat generator:
+    Title: &lt;video_title&gt;
+    Duration: ... <span class="o">(</span>... seconds<span class="o">)</span>
+NOTICE: Downloading chats from a url is the largest rate-limiting factor.
+            If you intend to sample the data differently multiple times, consider using chatfile mode, or saving the chat data with --save-chatfile.
+
+Processing <span class="o">(</span>Sampling<span class="o">)</span> chat data...
+  Completion   <span class="p">|</span>   Processed Media Time    <span class="p">|</span>   Messages Processed
+    <span class="o">(</span>...%<span class="o">)</span>     <span class="p">|</span>         ... / ...         <span class="p">|</span>         ...
+</pre></div>
+</div>
+<p>As messages are downloaded, you will see constant updates indicating the progress of the download.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The downloading of chat data is the slowest part of the entire process. Twitch/YouTube limits the rate at which chat data can be downloaded. If you want to resample
+the chat multiple times, look into using <a class="reference internal" href="#chatfile">chatfile</a> mode</p>
+</div>
+<p>After the download has finished, you should see the following report:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Downloaded <span class="p">&amp;</span> Processed ... messages.
+Post-processing <span class="o">(</span>Analyzing<span class="o">)</span>...
+Post-processing <span class="o">(</span>Analyzing<span class="o">)</span> complete!
+Successfully wrote chat analytics to <span class="sb">`</span>&lt;output_filepath&gt;<span class="sb">`</span>
+</pre></div>
+</div>
+<p>The analyzed output file can now be found at <code class="docutils literal notranslate"><span class="pre">&lt;output_filepath&gt;</span></code>!</p>
+</section>
+<section id="step-4-visualize-the-chat-data">
+<h3>Step 4 - Visualize the Chat Data<a class="headerlink" href="#step-4-visualize-the-chat-data" title="Permalink to this headline"></a></h3>
+<p>Now that we have generated the output file, we will use the visualizer found at <a class="reference external" href="https://chatanalyze.com/visualize">chatanalyze.com/visualize</a> to nicely
+visualize the analytical data. Once on the page, all you have to do is select the output file and the visualization data will
+automatically appear on screen.</p>
+<p>The two core features currently availiable are the <strong>graph</strong> representation of chat activity, and the <strong>highlights</strong> table. The graph
+provides a quick visual reference to the chat activity at any given point throughout the whole stream. The highlights table provides a useful way
+of examining the highest-activity portions of the video, and quickly jumping to those sections of the stream using the “Jump To” functionality.</p>
+</section>
+</section>
 <section id="usage-modes-source">
-<h2>Usage modes &amp; Source<a class="headerlink" href="#usage-modes-source" title="Permalink to this headline"></a></h2>
+<h2>Usage Modes &amp; Source<a class="headerlink" href="#usage-modes-source" title="Permalink to this headline"></a></h2>
 <p>In its simplest form, this software outputs information about a chatlog associated with a livestream.
 Regardless of the mode that is used, the output file format is the same (More details under <a class="reference internal" href="output.html"><span class="doc">Output Specification</span></a>).</p>
+<p>The three modes that can be used all refer to the type of input the program receieves.</p>
 <section id="url">
 <h3>url<a class="headerlink" href="#url" title="Permalink to this headline"></a></h3>
-<p>The default mode, <code class="docutils literal notranslate"><span class="pre">url</span></code> mode …</p>
+<p>The default mode, <code class="docutils literal notranslate"><span class="pre">url</span></code> accepts a link from a supported streaming site,
+downloads the raw chat data, processes the raw chat data into samples, and analyzes the samples.</p>
+<p>Streaming services like Twitch &amp; YouTube limit the rate at which we can download chat messages,
+The slowest part of the analytics process is downloading the chats themselves.</p>
+<p>The link provided <strong>must</strong>:</p>
+<ul class="simple">
+<li><p>Be a link to a past (finished) livestream.</p></li>
+<li><p>Come from a supported streaming site.</p></li>
+<li><p>Be the original video with the chatlog/replay. (It can’t be a reposted video.)</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you want to analyze a YouTube stream, it is recommended
+you provide the <code class="docutils literal notranslate"><span class="pre">youtu.be</span></code> link generated through the “share”
+feature of the video.</p>
+<a class="reference internal image-reference" href="_images/YoutubeShare.png"><img alt="Youtube Share Button found beneath YouTube videos" class="align-center" src="_images/YoutubeShare.png" style="width: 100px;" /></a>
+<p>While the standard YouTube video link will work to download the chat and produce the data,
+the <code class="docutils literal notranslate"><span class="pre">youtu.be</span></code> short link works better with the visualizer at <a class="reference external" href="https://chatanalyze.com/">chatanalyze.com</a>,
+enabling “Jump to” functionality (quickly jumping to highlighted points in the video).</p>
+</div>
 </section>
 <section id="chatfile">
 <h3>chatfile<a class="headerlink" href="#chatfile" title="Permalink to this headline"></a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">chatfile</span></code> mode …</p>
+<p>Note that … for visualization….</p>
+<p>If you want to re-enable, you can go into the JSON file and manually replace/paste the link to the URL
+in the mediaSource field, which will re-enable functionality …</p>
+<p>internally we use xenovas makign comaptability easy…</p>
+<p>the chatfile mode can be activated using the <code class="docutils literal notranslate"><span class="pre">--mode</span> <span class="pre">chatfile</span></code> command line argument.</p>
 </section>
 <section id="reanalyze">
 <h3>reanalyze<a class="headerlink" href="#reanalyze" title="Permalink to this headline"></a></h3>

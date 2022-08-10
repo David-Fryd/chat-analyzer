@@ -609,13 +609,13 @@ because not all sites (YT/Twitch) provide information on whether chat was sent b
 </dl>
 <p><strong>[Defined w/ default and modified AFTER analysis of sample]</strong>:</p>
 <dl class="simple">
-<dt>uniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message (len(self._userChats))</p>
+<dt>uniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message across this sample interval (len(self._userChats))</p>
 </dd>
 <dt>avgActivityPerSecond: float</dt><dd><p>The average activity per second across this sample interval. (activity/sampleDuration)</p>
 </dd>
 <dt>avgChatMessagesPerSecond: float</dt><dd><p>The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)</p>
 </dd>
-<dt>avgUniqueUsersPerSecond: float</dt><dd><p>The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)</p>
+<dt>avgUniqueUsersPerSecond: float</dt><dd><p>The average number of unique users that sent a chat across this sample interval. (uniqueUsers/sampleDuration)</p>
 </dd>
 </dl>
 <dl class="py attribute">

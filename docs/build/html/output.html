@@ -310,13 +310,13 @@ because not all sites (YT/Twitch) provide information on whether chat was sent b
 </dl>
 <p><strong>[Defined w/ default and modified AFTER analysis of sample]</strong>:</p>
 <dl class="simple">
-<dt>uniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message (len(self._userChats))</p>
+<dt>uniqueUsers: int</dt><dd><p>The total number of unique users that sent a chat message across this sample interval (len(self._userChats))</p>
 </dd>
 <dt>avgActivityPerSecond: float</dt><dd><p>The average activity per second across this sample interval. (activity/sampleDuration)</p>
 </dd>
 <dt>avgChatMessagesPerSecond: float</dt><dd><p>The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)</p>
 </dd>
-<dt>avgUniqueUsersPerSecond: float</dt><dd><p>The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)</p>
+<dt>avgUniqueUsersPerSecond: float</dt><dd><p>The average number of unique users that sent a chat across this sample interval. (uniqueUsers/sampleDuration)</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -486,7 +486,7 @@ NOTE: A creator doesn’t necessarily care what form a superchat takes, so we ju
 <h2>Example JSON output:<a class="headerlink" href="#example-json-output" title="Permalink to this headline"></a></h2>
 <p>An output JSON file might look something like…
 (<em>Note, only generic fields are shown. Platform-specific fields would be included in
-their respective sections, the main analytics data in the main body of the JSON, and the
+their respective sections: the main analytics data in the main body of the JSON, and the
 sample data within each sample.</em>)</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;duration&quot;</span><span class="p">:</span> <span class="mf">7386.016</span><span class="p">,</span>
