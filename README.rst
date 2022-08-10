@@ -25,12 +25,16 @@ with future plans to incorporate semantic analysis into the program. (*See the* 
 
 .. _Chat Analyzer: https://github.com/David-Fryd/chat-analyzer
 
+.. image:: ./ExampleChart.png
+
 Paired with the visualizer hosted on `chatanalyze.com`_, easily understand and interpret
 how your chat responds to your performance!
 
 .. _chatanalyze.com: https://chatanalyze.com/
 
 *Currently both YouTube and Twitch VODs are supported.*
+
+
 
 #################
 Target Audience: 
