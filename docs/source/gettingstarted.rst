@@ -14,7 +14,7 @@ and overall best practices when using the software.
 
 .. note:: 
     
-    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``-help`` flag,
+    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``--help`` flag,
     and can also be found on the :doc:`Command Line Interface Specification page </cli>`.
 
 Basic Usage
@@ -193,7 +193,7 @@ chatfile
 .. warning:: 
     
     This section has not yet been written. 
-    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``-help`` flag,
+    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``--help`` flag,
     and can also be found on the :doc:`Command Line Interface Specification page </cli>`.
 
 .. Note that ... for visualization....
@@ -214,7 +214,7 @@ reanalyze
 .. warning:: 
     
     This section has not yet been written. 
-    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``-help`` flag,
+    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``--help`` flag,
     and can also be found on the :doc:`Command Line Interface Specification page </cli>`.
 
 .. .. code:: console
