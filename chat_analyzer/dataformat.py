@@ -337,7 +337,10 @@ class ChatAnalytics(ABC):
         The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
         NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
         because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
-
+    highlight_percentile: float 
+        The cutoff percentile that samples must meet to be considered a highlight
+    highlight_metric: str
+        The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
 
     **[Defined w/ default and modified AFTER analysis]**:
     
@@ -387,6 +390,8 @@ class ChatAnalytics(ABC):
     highlights: List[Highlight] = field(default_factory=list)
     highlights_duration: float = 0 
     highlights_duration_text: str = ''
+    highlight_percentile: float = 0
+    highlight_metric: str = ''
     spikes: List[Spike] = field(default_factory=list) # TODO: Not implemented yet
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -568,6 +573,9 @@ class ChatAnalytics(ABC):
         print("Post-processing (Analyzing)...")
 
         self.totalUniqueUsers = len(self._overallUserChats)
+
+        self.highlight_percentile = settings.highlight_percentile
+        self.highlight_metric = settings.highlight_metric
 
         # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
         # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility

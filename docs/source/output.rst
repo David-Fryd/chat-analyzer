@@ -144,6 +144,8 @@ sample data within each sample.*)
         ],
         "highlights_duration": 540,
         "highlights_duration_text": "9:00",
+        "highlight_percentile": 93.0,
+        "highlight_metric": "usersPSec",
         "spikes": [],
         "_overallUserChats": {},
         "_currentSample": null,
