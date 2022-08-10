@@ -121,18 +121,18 @@ After the download has finished, you should see the following report:
 
 The analyzed output file can now be found at ``<output_filepath>``!
 
-Step 4 - Visualize the Chat Data
+Final Step - Visualize the Chat Data
 **********************************
 
 Now that we have generated the output file, we will use the visualizer found at `chatanalyze.com/visualize`_ to nicely
-visualize the analytical data. Once on the page, all you have to do is select the output file and the visualization data will
+visualize the analytical data. Once on the page, all you have to do is select the output file on the page and the visualization data will
 automatically appear on screen. 
 
 .. _chatanalyze.com/visualize: https://chatanalyze.com/visualize
 
 The two core features currently availiable are the **graph** representation of chat activity, and the **highlights** table. The graph
 provides a quick visual reference to the chat activity at any given point throughout the whole stream. The highlights table provides a useful way
-of examining the highest-activity portions of the video, and quickly jumping to those sections of the stream using the "Jump To" functionality.
+to examine the highest-activity portions of the video, and to quickly jump to those sections of the stream using the "Jump To" functionality.
 
 
 Usage Modes & Source
@@ -190,22 +190,32 @@ chatfile
 
 ``chatfile`` mode ...
 
-Note that ... for visualization....
+.. warning:: 
+    
+    This section has not yet been written. 
+    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``-help`` flag,
+    and can also be found on the :doc:`Command Line Interface Specification page </cli>`.
 
-If you want to re-enable, you can go into the JSON file and manually replace/paste the link to the URL 
-in the mediaSource field, which will re-enable functionality ...
+.. Note that ... for visualization....
+
+.. If you want to re-enable, you can go into the JSON file and manually replace/paste the link to the URL 
+.. in the mediaSource field, which will re-enable functionality ...
 
 
-internally we use xenovas makign comaptability easy...
+.. internally we use xenovas makign comaptability easy...
 
-the chatfile mode can be activated using the ``--mode chatfile`` command line argument.
+.. the chatfile mode can be activated using the ``--mode chatfile`` command line argument.
 
 reanalyze
 **********
 
 ``reanalyze`` mode ...
 
-
+.. warning:: 
+    
+    This section has not yet been written. 
+    Even though this guide is not yet complete, the available arguments/flags are fully documented by running the ``-help`` flag,
+    and can also be found on the :doc:`Command Line Interface Specification page </cli>`.
 
 .. .. code:: console
 
@@ -216,10 +226,10 @@ reanalyze
 
 
 
-Examples
---------
+.. Examples
+.. --------
 
-TODO: add...
+.. TODO: add...
 
 .. This will eventually describe a standard user flow, when to reanalyze, when to url, when its good to save chatfile, etc...
 
