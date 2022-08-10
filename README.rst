@@ -27,6 +27,9 @@ with future plans to incorporate semantic analysis into the program. (*See the* 
 .. image:: https://github.com/David-Fryd/chat-analyzer/raw/main/ExampleChart.png
     :alt: Example of a visualization chart
 
+.. image:: https://github.com/David-Fryd/chat-analyzer/raw/main/ExampleHighlights_new.png
+  :alt: Example of a visualization chart
+
 Paired with the visualizer hosted on `chatanalyze.com`_, easily understand and interpret
 how your chat responds to your performance!
 
