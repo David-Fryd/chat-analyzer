@@ -8,6 +8,10 @@ Releases
 
 **LATEST RELEASE:**
 
+``1.0.6b1`` (8/9/2022)
+_________________________________
+- ``highlight_percentile`` and ``highlight_metric`` now included in output.
+
 ``1.0.5b1`` (8/3/2022)
 _________________________________
 - Added support for `youtu.be` links (youtube shortlinks generated from "share" button on YT)
