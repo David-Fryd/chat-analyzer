@@ -1,8 +1,6 @@
-.. ***************
 #################
 Chat Analyzer
 #################
-.. ***************
 
 .. image:: https://badge.fury.io/py/chat-analyzer.svg
     :target: https://badge.fury.io/py/chat-analyzer
