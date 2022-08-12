@@ -19,9 +19,13 @@ Chat Analyzer
 `Chat Analyzer`_ is a tool used to process and analyze chat data 
 from past live streams, providing summarized information about chat activity over the stream's lifetime. 
 The information currently reported primarily revolves around the activity per second for various metrics,
-with future plans to incorporate semantic analysis into the program. (*See the* `Output`_ *section for output specification*)
+with future plans to incorporate semantic analysis into the program (happy chats? sad? excited, wholesome, etc...). 
 
 .. _Chat Analyzer: https://github.com/David-Fryd/chat-analyzer
+
+`Here's a video covering the start-to-end usage of the software`_
+
+.. _Here's a video covering the start-to-end usage of the software: https://www.youtube.com/watch?v=GmzRLhK_PJ0
 
 .. .. image:: ./ExampleChart.png
 .. image:: https://github.com/David-Fryd/chat-analyzer/raw/main/ExampleChart.png
@@ -99,11 +103,7 @@ This tool is distributed on PyPI_ and can be installed with pip_:
 
     pip install chat-analyzer
 
-To update to the latest version, run: 
-
-.. code:: console
-
-    pip install chat-analyzer --upgrade
+To update to the latest version, add the phrase ``--upgrade`` to the end of the above command. 
 
 
 Alternatively, the tool can be installed with ``git``:
@@ -120,6 +120,11 @@ Usage
 
 Basic to intermediate/advanced usage can be found on the `Getting Started <https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html>`_ page of the documentation.
 
+A simple command might look like:
+
+.. code:: console
+
+  chat_analyzer 'https://www.twitch.tv/videos/{VIDEO_ID}' -o
 
 Command line
 ------------

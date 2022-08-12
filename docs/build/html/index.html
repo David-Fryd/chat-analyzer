@@ -75,8 +75,9 @@
 <p><a class="reference external" href="https://github.com/David-Fryd/chat-analyzer">Chat Analyzer</a> is a tool used to process and analyze chat data
 from past live streams, providing summarized information about chat activity over the stream’s lifetime.
 The information currently reported primarily revolves around the activity per second for various metrics,
-with future plans to incorporate semantic analysis into the program. (<em>See the</em> <a class="reference internal" href="#output">Output</a> <em>section for output specification</em>)</p>
+with future plans to incorporate semantic analysis into the program (happy chats? sad? excited, wholesome, etc…).</p>
 <img alt="Example of a visualization chart" src="https://github.com/David-Fryd/chat-analyzer/raw/main/ExampleChart.png" />
+<img alt="Example of a visualization chart" src="https://github.com/David-Fryd/chat-analyzer/raw/main/ExampleHighlights_new.png" />
 <p>Paired with the visualizer hosted on <a class="reference external" href="https://chatanalyze.com/">chatanalyze.com</a>, easily understand and interpret
 how your chat responds to your performance!</p>
 <p><em>Currently both YouTube and Twitch VODs are supported.</em></p>
@@ -119,10 +120,7 @@ What type of content/strategies can you use to make your stream more engaging?</
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install chat-analyzer</span>
 </pre></div>
 </div>
-<p>To update to the latest version, run:</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip install chat-analyzer --upgrade</span>
-</pre></div>
-</div>
+<p>To update to the latest version, add the <code class="docutils literal notranslate"><span class="pre">--upgrade</span></code> flag to the command: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">chat-analyzer</span> <span class="pre">--upgrade</span></code></p>
 <p>Alternatively, the tool can be installed with <code class="docutils literal notranslate"><span class="pre">git</span></code>:</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone https://github.com/David-Fryd/chat-analyzer.git</span>
 <span class="go">cd chat-analyzer</span>
@@ -133,6 +131,10 @@ What type of content/strategies can you use to make your stream more engaging?</
 <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
 <p>Basic to intermediate/advanced usage can be found on the <a class="reference external" href="https://chat-analyzer.readthedocs.io/en/latest/gettingstarted.html">Getting Started</a> page of the documentation.</p>
+<p>A simple command might look like:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">chat_analyzer &#39;https://www.twitch.tv/videos/{VIDEO_ID}&#39; -o</span>
+</pre></div>
+</div>
 <section id="command-line">
 <h2>Command line<a class="headerlink" href="#command-line" title="Permalink to this headline"></a></h2>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: chat_analyzer [-h] [--version] [--platform {youtube,twitch}]</span>
