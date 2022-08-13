@@ -1,8 +1,9 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
-- Add highlight percentile reporting
+
 - Forsee bug in unique users per second - too naive. For long sample sizes, approaches calculating total unique users, not the avg unique users per second. Need to calculate it better.
+- Emote -> Emotion map, assign highlights a "mood" to help identify the type of highlight.
 - Top .... chatters
 - Local maxima detection (spike detection)
   - https://datascience.stackexchange.com/questions/27031/how-to-get-spike-values-from-a-value-sequence
