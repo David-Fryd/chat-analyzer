@@ -51,7 +51,7 @@ Anyone can use this tool on anyone's streams, enabling people beyond the creator
 
 - Editors 
     
-  - Need to edit down an 18 hour stream into a 20 minute youtube video? Quickly find
+  - Making a clips channel? Need to edit down an 18 hour stream into a 20 minute youtube video? Quickly find
     parts of the stream where chat went crazy and look there first! Chat activity is 
     generally a great proxy for how exciting/engaging the stream is at any moment in time. Not only
     will you more quickly find the most interesting sections of the stream, but you'll
