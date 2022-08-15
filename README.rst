@@ -161,13 +161,13 @@ More complete documentation can be found on the `Output Specifications <https://
 Known issues
 #############
 
-- Reported Users Per Second is actually Users Per Sample.
+- Reported Users Per Second (UPSec/avgUniqueUsersPerSecond) is actually Users Per Sample (UPSample).
   
-  - UPSec is not as simple as dividing Users per Sample by Sample length:
-  - As Sample Size -> Video duration, UPS -> Total unique users.
+  - UPSec is not as simple as dividing unique users per sample by sample length
+  - As sample size -> video duration, UPSample -> Total unique users.
   - For now it is a fine approximation for small sample durations, 
     but in the future should be remedied either by improving UPSec calc algorithm
-    or simply reported UPSample instead.
+    or simply by reporting UPSample instead.
 
 
 
