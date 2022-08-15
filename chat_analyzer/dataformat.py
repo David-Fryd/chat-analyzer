@@ -13,8 +13,9 @@ from .chat_downloader.utils.core import seconds_to_time
 # The platforms we currently support downloading from.
 # Each has a corresponding ChatAnalytics/Sample extension with site-specific behavior
 YOUTUBE_NETLOC = 'www.youtube.com'
+YOUTUBE_SHORT_NETLOC = 'youtu.be'
 TWITCH_NETLOC = 'www.twitch.tv'
-SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC]
+SUPPORTED_PLATFORMS = [YOUTUBE_NETLOC, TWITCH_NETLOC, YOUTUBE_SHORT_NETLOC]
 SUPPORTED_PLATFORMS_SHORTHANDS = {
     # Useful for CLI choices when specifying the source of the chatfile
     "youtube" : YOUTUBE_NETLOC,
@@ -102,13 +103,13 @@ class Sample():
     **[Defined w/ default and modified AFTER analysis of sample]**:
     
     uniqueUsers: int
-        The total number of unique users that sent a chat message (len(self._userChats))
+        The total number of unique users that sent a chat message across this sample interval (len(self._userChats))
     avgActivityPerSecond: float
         The average activity per second across this sample interval. (activity/sampleDuration)
     avgChatMessagesPerSecond: float
         The average number of chat messages per second across this sample interval. (totalChatMessages/sampleDuration)
     avgUniqueUsersPerSecond: float
-        The average number of unique users that sent a chad across this sample interval. (uniqueUsers/sampleDuration)
+        The average number of unique users that sent a chat across this sample interval. (uniqueUsers/sampleDuration)
 
     """
 
@@ -308,12 +309,8 @@ class ChatAnalytics(ABC):
         A description included to help distinguish it from other analytical data.
     program_version: str
         The version of the chat analytics program that was used to generate the data. Helps identify outdated/version-specific data formats.
-
-
-    **[Automatically Defined on init]**:
-
     platform: str
-        Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', ...
+        Used to store the platform the data came from: 'www.youtube.com', 'www.twitch.tv', 'youtu.be'...
         While it technically can be determined by the type of subclass, this makes for easier conversion to JSON/output
 
 
@@ -340,7 +337,10 @@ class ChatAnalytics(ABC):
         The total number of chats sent by human (non-system) users (what is traditionally thought of as a chat)
         NOTE: Difficult to discern bots from humans other than just creating a known list of popular bots and blacklisting, 
         because not all sites (YT/Twitch) provide information on whether chat was sent by a registered bot or not.
-
+    highlight_percentile: float 
+        The cutoff percentile that samples must meet to be considered a highlight
+    highlight_metric: str
+        The metric to use for engagement analysis to build highlights. NOTE: must be converted into actual Sample field name before use.
 
     **[Defined w/ default and modified AFTER analysis]**:
     
@@ -367,9 +367,6 @@ class ChatAnalytics(ABC):
     interval: int
     description: str
     program_version: str
-
-    # Automatically Defined on subclass init
-    # Because platform has default in the child class, must come after non-defaults above
     platform: str
 
     # Automatically re-defined on post-init
@@ -393,6 +390,8 @@ class ChatAnalytics(ABC):
     highlights: List[Highlight] = field(default_factory=list)
     highlights_duration: float = 0 
     highlights_duration_text: str = ''
+    highlight_percentile: float = 0
+    highlight_metric: str = ''
     spikes: List[Spike] = field(default_factory=list) # TODO: Not implemented yet
 
     # Internal Fields used for calculation but are #NOTE: NOT EXPORTED during json dump (deleted @ post_process)
@@ -426,7 +425,7 @@ class ChatAnalytics(ABC):
         # New sample end time will not extend past the length of the video
         new_sample_end_time = min(new_sample_start_time + self.interval, self.duration)
 
-        if(self.platform==YOUTUBE_NETLOC):
+        if(self.platform==YOUTUBE_NETLOC or self.platform==YOUTUBE_SHORT_NETLOC):
             self._currentSample = YoutubeSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
         elif(self.platform==TWITCH_NETLOC):
             self._currentSample = TwitchSample(startTime=new_sample_start_time, endTime=new_sample_end_time)
@@ -575,6 +574,9 @@ class ChatAnalytics(ABC):
 
         self.totalUniqueUsers = len(self._overallUserChats)
 
+        self.highlight_percentile = settings.highlight_percentile
+        self.highlight_metric = settings.highlight_metric
+
         # NOTE: We calculate actualDuration because if the analyzer is stopped before processing all samples, the duration of the samples does not correspond to the media length
         # This is an unusual case, generally only important when testing, but also keeps in mind future extensibility
         actualDuration = (len(self.samples)-1)*self.interval
@@ -685,8 +687,6 @@ class YoutubeChatAnalytics(ChatAnalytics):
         The total number of memberships that appeared in the chat.
     
     """
-    # Defined here on subclass init
-    platform: str = YOUTUBE_NETLOC
 
     # Defined w/ default and modified DURING analysis
     totalSuperchats: int = 0
@@ -742,8 +742,6 @@ class TwitchChatAnalytics(ChatAnalytics):
         The total number of upgraded subscriptions that appeared in the chat.
 
     """
-    # Defined here on subclass init
-    platform: str = TWITCH_NETLOC
     
     # Defined w/ default and modified DURING analysis
     totalSubscriptions: int = 0

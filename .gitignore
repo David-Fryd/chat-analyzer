@@ -4,6 +4,7 @@
 chat_analyzer.egg-info/
 build/
 dist/
+dist_old/
 
 # Docs has a build folder, do don't wanna ignore that!
 !docs/build/

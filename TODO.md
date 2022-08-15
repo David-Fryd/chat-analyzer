@@ -1,11 +1,10 @@
 # Chat Analyzer TODO
 
 ## High Priority (Next release)
-- Update README
-  - Connect the PyPi release tags to the README
-  - Connect docs once they are autogenned and completed
-- Autogenerate documentation w/ sphinx
-  - https://pythonhosted.org/an_example_pypi_project/sphinx.html
+
+- Forsee bug in unique users per second - too naive. For long sample sizes, approaches calculating total unique users, not the avg unique users per second. Need to calculate it better.
+- Emote -> Emotion map, assign highlights a "mood" to help identify the type of highlight. (Each emote (and maybe certain keywords) have an entry in an emote map,  OMEGALUL->Funny, etc... | This is a naive approach to semantic analysis (no AI involvement, purely algorithmic))
+- Top .... chatters
 - Local maxima detection (spike detection)
   - https://datascience.stackexchange.com/questions/27031/how-to-get-spike-values-from-a-value-sequence
   - https://stackoverflow.com/questions/26632205/finding-a-spike-or-drop-in-a-dataset-programatically
@@ -31,7 +30,7 @@
 - Spike have a way to determine percentile that equals x mins of videos
 
 ## Low Priority
-- Improve spike descriptions fields in `get_spikes` when they are created
+- Improve highlight descriptions fields in `get_highlights` when they are created
 - Control message types that we analyze/download based on CLI. (Edit chat_download_settings before passing to the chat downloader)
 - Prune redundant fields from `dataformat` classes, for example: `duration` and `duration_text` fields from `Highlight` when we ensure naive front-end graphing solution
 - Spike percentile field

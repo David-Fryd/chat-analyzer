@@ -18,5 +18,4 @@ The output of which is as follows:
     :shell:
 
 
-Examples:
----------
+See :doc:`Getting Started </gettingstarted>` for examples and detailed use-cases.
