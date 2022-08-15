@@ -157,6 +157,18 @@ the VOD is from, some datapoints are specific to the platform.
 
 More complete documentation can be found on the `Output Specifications <https://chat-analyzer.readthedocs.io/en/latest/output.html>`_ page.
 
+#############
+Known issues
+#############
+
+- Reported Users Per Second is actually Users Per Sample.
+  
+  - UPSec is not as simple as dividing Users per Sample by Sample length:
+  - As Sample Size -> Video duration, UPS -> Total unique users.
+  - For now it is a fine approximation for small sample durations, 
+    but in the future should be remedied either by improving UPSec calc algorithm
+    or simply reported UPSample instead.
+
 
 
 ##############
