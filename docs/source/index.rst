@@ -20,6 +20,7 @@ Documentation Overview:
     gettingstarted
     cli
     output
+    contributing_page
     changelog
 
 
