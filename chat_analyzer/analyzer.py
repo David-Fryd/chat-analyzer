@@ -7,7 +7,7 @@ import sys
 sys.path.append("..") # chat_downloader in sibling directory, this is so we can find it
 from .chat_downloader.chat_downloader import ChatDownloader
 from .dataformat import * # YoutubeChatAnalytics, TwitchChatAnalytics
-from .util import dprint
+from .util import dprint, remove_non_alpha_numeric
 from urllib.parse import urlparse
 from .chat_downloader.sites.common import Chat
 
@@ -265,7 +265,7 @@ def run(**kwargs):
     json_obj = chatAnalytics.to_JSON()
 
     if(output_filepath==None): # If user did not specify an output filepath, use this default convention
-        output_filepath =chatAnalytics.mediaTitle+'.json'
+        output_filepath = remove_non_alpha_numeric(chatAnalytics.mediaTitle)+'.json'
     output_json_to_file(json_obj, output_filepath)     
     
    
