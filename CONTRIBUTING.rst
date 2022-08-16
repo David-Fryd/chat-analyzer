@@ -56,7 +56,7 @@ Add a feature, fix a bug, or write documentation
        git commit -m 'message'
        git push origin <branch_name>
 
-   If the change you are making is large or have slightly different components, consider chunking the changes into separate commits. For example:
+   If the change you are making is large or has slightly different components, consider chunking the changes into separate commits. For example:
 
    .. code:: console
 
