@@ -8,7 +8,7 @@ and overall best practices when using the software.
 .. warning:: 
 
     This guide, the software itself, and the website visualization are still in the beta phase of development and not yet complete.
-    Because Twitch Rivals started recently, I decided to make the software availiable because I believe it will
+    Because Twitch Rivals started recently, I decided to make the software available because I believe it will
     be useful to some people even in its current state. If there are any questions/concerns, feel free to contact me at info@chatanalyze.com, or
     shoot me a DM on discord ``NaCl-y#1117``.
 
@@ -130,7 +130,7 @@ automatically appear on screen.
 
 .. _chatanalyze.com/visualize: https://chatanalyze.com/visualize
 
-The two core features currently availiable are the **graph** representation of chat activity, and the **highlights** table. The graph
+The two core features currently available are the **graph** representation of chat activity, and the **highlights** table. The graph
 provides a quick visual reference to the chat activity at any given point throughout the whole stream. The highlights table provides a useful way
 to examine the highest-activity portions of the video, and to quickly jump to those sections of the stream using the "Jump To" functionality.
 

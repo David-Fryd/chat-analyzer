@@ -98,24 +98,24 @@ Required Arguments:
                         Raw chat data to process and analyze, or processed
 			sample data to re-analyze.
                         
-                        In mode=[1m&#39;url&#39;[0m, (default) source is a url to a
+                        In mode=&#39;url&#39;, (default) source is a url to a
 			past stream/VOD.
                         We currently only support links from: www.youtube.com,
-			www.twitch.tv. The link must
+			www.twitch.tv, youtu.be. The link must
                         be to the original stream/VOD with that attached chat
 			replay.
                         
-                        In mode=[1m&#39;chatfile&#39;[0m, source is a filepath to a
-			.json containing [3mraw chat data[0m,
+                        In mode=&#39;chatfile&#39;, source is a filepath to a
+			.json containing raw chat data,
                         produced by Xenonva&#39;s chat-downloader, or by this
 			program&#39;s `--save-chatfile-output` flag. NOTE: the
 			--platform argument is required
                         when using this mode.
                         
-                        In mode=[1m&#39;reanalyze&#39;[0m, source is a filepath to a
+                        In mode=&#39;reanalyze&#39;, source is a filepath to a
 			.json file previously produced by this program
-			which contains [3mexisting sample data to
-			reanalyze[0m.
+			which contains existing sample data to
+			reanalyze.
                         (Highlights and spikes are regenerated, the existing
 			samples are not affected).
 
@@ -135,21 +135,22 @@ Program Behavior (Mode):
   --mode {url,chatfile,reanalyze}, -m {url,chatfile,reanalyze}
                         The program can be run in three modes:
                         
-                        [3mNOTE: All modes result in chat analytics output as
-			a .json file.[0m
+                        NOTE: All modes result in chat analytics output as
+			a .json file.
                         
-                        [1m&#39;url&#39;[0m mode (default) downloads raw chat data
-			from an appropriate source, processes the raw chat
-			data into samples, and then analyzes the samples.
+                        &#39;url&#39; mode (default) downloads raw chat data
+			from an appropriate source url, processes the raw
+			chat data into samples, and then analyzes the
+			samples.
                         
-                        [1m&#39;chatfile&#39;[0m mode reads raw chat data from a
+                        &#39;chatfile&#39; mode reads raw chat data from a
 			.json file, processes the raw chat data into
 			samples, and then analyzes the samples.
                         (We accept raw chat files produced by Xenonva&#39;s chat-
 			downloader, or by this program through &#39;--save-
 			chatfile-output&#39;).
                         
-                        [1m&#39;reanalyze&#39;[0m mode reads existing sample data
+                        &#39;reanalyze&#39; mode reads existing sample data
 			from a .json file produced by this program in a
 			previous run, and recalculates ONLY the post-
 			processed data based on the existing samples.
@@ -161,7 +162,7 @@ Program Behavior (Mode):
                         Filepath of the raw chat data to save. If downloading
                         chat data from a URL, save the raw chat data to the
                         provided filepath in addition to processing it, so
-                        that the raw data can be [3mfully[0m reprocessed and
+                        that the raw data can be fully reprocessed and
                         analyzed again quickly (using mode=&#39;chatfile&#39;). NOTE:
                         Chatfiles are *much* larger in comparison to the
                         analytics file. NOTE: json file extension is enforced
@@ -204,15 +205,15 @@ Post Processing (Analyzing):
                         Each highlight metric choice corresponds to a
 			datapoint for each sample.
                         
-                        [1m&#39;usersPSec&#39;[0m compares samples based off of the
+                        &#39;usersPSec&#39; compares samples based off of the
 			average number unique users that send a chat per
 			second of the sample.
                         
-                        [1m&#39;chatsPSec&#39;[0m compares samples based off of the
+                        &#39;chatsPSec&#39; compares samples based off of the
 			average number of chats per second of the sample
 			(not necessarily sent by unique users).
                         
-                        [1m&#39;activityPSec&#39;[0m compares samples based off of
+                        &#39;activityPSec&#39; compares samples based off of
 			the average number of any type of message that
 			appears in the chat per second of the sample.
                         
