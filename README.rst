@@ -96,7 +96,7 @@ Installation
 
 This tool is distributed on PyPI_ and can be installed with pip_:
 
-.. _PyPI: https://pypi.org/project/chat-downloader/
+.. _PyPI: https://pypi.org/project/chat-analyzer/
 .. _pip: https://pip.pypa.io/en/stable/
 
 .. code:: console
