@@ -1,6 +1,6 @@
-########################
-Contributing Guidelines
-########################
+#####################
+Contributing Guide
+#####################
 
 Thank you so much for considering contributing to the project! Below you'll find the basic steps required to contribute to the project,
 from setup to pull request.

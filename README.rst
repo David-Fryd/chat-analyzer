@@ -169,7 +169,13 @@ Known issues
     but in the future should be remedied either by improving UPSec calc algorithm
     or simply by reporting UPSample instead.
 
+#############
+Contributing
+#############
 
+If you would like to help improve the tool, you'll find more information on contributing in the `Contributing Guide`_.
+
+.. _`Contributing Guide`: https://chat-analyzer.readthedocs.io/en/latest/contributing_guide.html
 
 ##############
 Special Thanks
